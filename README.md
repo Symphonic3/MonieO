@@ -1,0 +1,2 @@
+# MonieO
+An experimental cryptocurrency
