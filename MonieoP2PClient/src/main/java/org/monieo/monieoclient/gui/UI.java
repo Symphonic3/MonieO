@@ -23,6 +23,10 @@ public class UI {
 	public UI() {
 	}
 
+	
+	 /**
+	  * @wbp.parser.entryPoint
+	  */
 	public void initialize() {
 		frame = new JFrame();
 		try {
