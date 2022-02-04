@@ -4,6 +4,7 @@ import java.beans.JavaBean;
 import java.io.File;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
@@ -24,12 +25,10 @@ import org.monieo.monieoclient.gui.UI;
 
 public class Monieo {
 	
-	public static UI ui;
 	public static double version;
+	public UI ui;
 	
 	public static void main(String[] args) {
-
-		generateKeyPair();
 		
 		final Properties properties = new Properties();
 		try {
@@ -113,9 +112,18 @@ public class Monieo {
 
 		}
 		*/
+		
+		new Monieo();
+
+	}
+	
+	public Monieo() {
+		
+		//moieno
+		
 		ui = new UI();
 		ui.initialize();
-
+		
 	}
 	
 	public static void generateKeyPair () {
@@ -128,4 +136,12 @@ public class Monieo {
 			e.printStackTrace();
 		}
 	}
+	
+	public BigInteger getCurrentHashMinValue() {
+		
+		//TODO this
+		return BigInteger.ONE;
+		
+	}
+	
 }
