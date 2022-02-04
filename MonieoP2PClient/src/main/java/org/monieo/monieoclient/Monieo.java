@@ -1,10 +1,14 @@
 package org.monieo.monieoclient;
 
+import java.beans.JavaBean;
 import java.io.File;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
+import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 
 import javax.swing.JOptionPane;
 
@@ -25,6 +29,8 @@ public class Monieo {
 	
 	public static void main(String[] args) {
 
+		generateKeyPair();
+		
 		final Properties properties = new Properties();
 		try {
 			properties.load(Monieo.class.getClassLoader().getResourceAsStream("project.properties"));
@@ -37,7 +43,7 @@ public class Monieo {
 		System.out.println("");
 		System.out.println("If there are any issues with running the application, all errors will be logged in this window.");
 		System.out.println("Please paste the full log of this window when submitting a bug report.");
-
+		
 		/*String url = "https://api.github.com/repos/Symphonic3/MonieO/releases/latest";
 
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
@@ -111,5 +117,15 @@ public class Monieo {
 		ui.initialize();
 
 	}
-
+	
+	public static void generateKeyPair () {
+		try {
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("EC");
+			gen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
+			KeyPair pair = gen.generateKeyPair();
+			System.out.println(pair.getPublic());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
