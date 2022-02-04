@@ -40,7 +40,7 @@ public class UI {
 		JToggleButton TgBtnTOGGLEMINING = new JToggleButton("Off");
 		TgBtnTOGGLEMINING.setBounds(672, 417, 76, 23);
 		TgBtnTOGGLEMINING.addActionListener(new ActionListener() {
-			
+			//push
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
