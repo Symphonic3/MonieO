@@ -43,7 +43,7 @@ public class UI {
 		frame.getContentPane().setLayout(null);
 		
 		JToggleButton tglbtnNewToggleButton = new JToggleButton("Off");
-		tglbtnNewToggleButton.setBounds(638, 11, 75, 23);
+		tglbtnNewToggleButton.setBounds(673, 422, 75, 23);
 		tglbtnNewToggleButton.addActionListener(new ActionListener() {
 			
 			@Override
@@ -61,7 +61,7 @@ public class UI {
 		frame.getContentPane().add(panel);
 		
 		JPanel panel_1 = new JPanel();
-		panel_1.setBounds(208, 0, 550, 352);
+		panel_1.setBounds(208, 0, 550, 400);
 		frame.getContentPane().add(panel_1);
 		
 		d it)");
