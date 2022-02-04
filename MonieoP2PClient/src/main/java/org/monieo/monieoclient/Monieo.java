@@ -38,7 +38,7 @@ public class Monieo {
 		System.out.println("If there are any issues with running the application, all errors will be logged in this window.");
 		System.out.println("Please paste the full log of this window when submitting a bug report.");
 
-		String url = "https://api.github.com/repos/Symphonic3/MonieO/releases/latest";
+		/*String url = "https://api.github.com/repos/Symphonic3/MonieO/releases/latest";
 
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(url);
@@ -106,7 +106,7 @@ public class Monieo {
 			System.exit(0);
 
 		}
-		
+		*/
 		ui = new UI();
 		ui.initialize();
 
