@@ -40,7 +40,7 @@ public class Monieo {
 
 		/*String url = "https://api.github.com/repos/Symphonic3/MonieO/releases/latest";
 
-		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+		CloseableHttpClient httpClient = HttpClientBuilder.create().build(); ogogog
 		HttpGet request = new HttpGet(url);
 		request.addHeader("content-type", "application/json");
 		HttpResponse result = null;
