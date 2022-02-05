@@ -33,8 +33,6 @@ public class BlockHeader {
 		try {
 
 			String[] data = s.split(" ");
-			if (data.length != 7) return null;
-			if (!Monieo.assertSupportedProtocol(data)) return null;
 			
 			//note that returning a blockheader without throwing error does not mean the blockheader is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!

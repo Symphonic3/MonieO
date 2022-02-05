@@ -1,6 +1,9 @@
 package org.monieo.monieoclient.wallet;
 
+import java.nio.charset.Charset;
 import java.security.KeyPair;
+import java.security.Signature;
+import java.util.Base64;
 
 import org.monieo.monieoclient.Monieo;
 
@@ -22,11 +25,25 @@ public class Wallet {
     	
     }
     
-    protected String sign(String msg) {
+    public String sign(String msg) {
     	
-    	//TODO this
-    	return null;
-    	
+    	try {
+    		
+        	Signature privateSignature = Signature.getInstance("SHA256withRSA");
+            privateSignature.initSign(keyPair.getPrivate());
+            privateSignature.update(msg.getBytes("UTF8"));
+
+            byte[] signature = privateSignature.sign();
+
+            return Base64.getEncoder().encodeToString(signature);
+    		
+    	} catch (Exception e) {
+    		
+    		e.printStackTrace();
+    		return null;
+    		
+    	}
+
     }
     
     public KeyPair getKeyPair() {

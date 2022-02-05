@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Vector;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
@@ -19,6 +20,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.monieo.monieoclient.gui.UI;
+import org.monieo.monieoclient.networking.AbstractNode;
 import org.monieo.monieoclient.wallet.Wallet;
 
 public class Monieo {
@@ -30,6 +32,9 @@ public class Monieo {
 	
 	public static int MAX_OUTGOING_CONNECTIONS = 10;
 	public static int MAX_INCOMING_CONNECTIONS = 10;
+	
+	public static int CONFIRMATIONS = 5; 
+	public static int CONFIRMATIONS_DISCARD_BLOCK = 30;
 	
 	public static Monieo INSTANCE;
 	
@@ -134,6 +139,8 @@ public class Monieo {
 	
 	public List<Wallet> myWallets = new ArrayList<Wallet>();
 	
+	public Vector<Socket> unhandledSockets = new Vector<unhandledSockets>;
+	
 	public Monieo() {
 		
 		INSTANCE = this;
@@ -178,6 +185,8 @@ public class Monieo {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		
+		walletsFolder = new File(workingFolder.getPath() + "/wallets");
 		
 		walletsFolder.mkdir();
 		
@@ -257,9 +266,44 @@ public class Monieo {
 		
 	}
 	
-	public void deleteWallet(Wallet wallet) {
+	public boolean deleteWallet(Wallet wallet) {
 		
-		//TODO this
+		File f = new File(walletsFolder.getPath() + "/" + wallet.nickname);
+		
+		if (f.exists() && f.isDirectory()) {
+			
+			deleteRecursively(f);
+			return true;
+			
+		}
+		
+		return false;
+		
+	}
+	
+	public static void deleteRecursively(File path) { //tool to delete a file tree
+		
+		if(path.exists()) {
+			
+			File files[] = path.listFiles();
+			
+			for(int i=0; i<files.length; i++) {
+				
+				if(files[i].isDirectory()) {
+					
+					deleteRecursively(files[i]);
+					
+				} else {
+					
+					files[i].delete();
+					
+				}
+			}
+			
+		}
+	    
+		path.delete();
+	    return;
 		
 	}
 	
@@ -321,6 +365,16 @@ public class Monieo {
     	return null;
     	
     }
+    
+	public static boolean verifySignature(String plainText, String signature, PublicKey publicKey) throws Exception {
+	    Signature publicSignature = Signature.getInstance("SHA256withRSA");
+	    publicSignature.initVerify(publicKey);
+	    publicSignature.update(plainText.getBytes("UTF8"));
+
+	    byte[] signatureBytes = Base64.getDecoder().decode(signature);
+
+	    return publicSignature.verify(signatureBytes);
+	}
     
     public static String readFileData(File f) {
     	

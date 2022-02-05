@@ -5,7 +5,7 @@ import java.math.BigInteger;
 
 import org.monieo.monieoclient.Monieo;
 
-public class TransactionData {
+public class TransactionData extends MonieoDataObject{
 	
 	public final WalletAdress from;
 	public final WalletAdress to;
@@ -14,8 +14,8 @@ public class TransactionData {
 	public final long timestamp;
 	public final BigInteger nonce;
 	
-	public TransactionData(WalletAdress from, WalletAdress to, BigDecimal amount, BigDecimal fee, long timestamp, BigInteger nonce) {
-		
+	public TransactionData(String magicn, String ver, WalletAdress from, WalletAdress to, BigDecimal amount, BigDecimal fee, long timestamp, BigInteger nonce) {
+		super(magicn, ver);
 		this.from = from;
 		this.to = to;
 		this.amount = amount;
@@ -27,7 +27,7 @@ public class TransactionData {
 	
 	public String serialize() {
 
-		return String.join(" ", Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, from.adress, to.adress, amount.toPlainString(), fee.toPlainString(), String.valueOf(timestamp), String.valueOf(nonce));
+		return String.join(" ", magicn, ver, from.adress, to.adress, amount.toPlainString(), fee.toPlainString(), String.valueOf(timestamp), String.valueOf(nonce));
 		
 	}
 	
@@ -36,13 +36,12 @@ public class TransactionData {
 		try {
 
 			String[] data = s.split(" ");
-			if (data.length != 10) return null;
-			if (!Monieo.assertSupportedProtocol(data)) return null;
 			
 			//note that returning a transactiondata without throwing error does not mean the transactiondata is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new TransactionData(new WalletAdress(data[2]),
+			return new TransactionData(data[0], data[1], 
+					new WalletAdress(data[2]),
 					new WalletAdress(data[3]),
 					new BigDecimal(data[4]),
 					new BigDecimal(data[5]),
@@ -56,6 +55,12 @@ public class TransactionData {
 			
 		}
 		
+	}
+
+	@Override
+	boolean testValidity() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

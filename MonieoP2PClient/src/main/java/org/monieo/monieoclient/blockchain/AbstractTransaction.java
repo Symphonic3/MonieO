@@ -1,9 +1,14 @@
 package org.monieo.monieoclient.blockchain;
 
-public interface AbstractTransaction {
+import java.math.BigDecimal;
 
-	public boolean isValid();
-	public int confirmations();
-	public WalletAdress getDestination();
+public abstract class AbstractTransaction extends MonieoDataObject{
+
+	public AbstractTransaction(String m, String v) {
+		super(m, v);
+	}
+
+	public abstract WalletAdress getDestination();
+	public abstract BigDecimal getAmount();
 	
 }

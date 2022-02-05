@@ -3,9 +3,9 @@ package org.monieo.monieoclient.blockchain;
 public class Block {
 	
 	public final BlockHeader header;
-	public final Transaction[] transactions;
+	public final AbstractTransaction[] transactions;
 	
-	public Block(BlockHeader header, Transaction... transactions) {
+	public Block(BlockHeader header, AbstractTransaction... transactions) {
 		
 		this.header = header;
 		this.transactions = transactions;
@@ -33,11 +33,12 @@ public class Block {
 		try {
 
 			String[] data = s.split("\n");
-			if (data.length < 2) return null;
 			
-			Transaction[] transactions = new Transaction[data.length-1];
+			AbstractTransaction[] transactions = new AbstractTransaction[data.length-1];
 			
-			for (int i = 0; i < transactions.length; i++) {
+			transactions[0] = CoinbaseTransaction.deserialize(data[1]);
+			
+			for (int i = 1; i < transactions.length; i++) {
 				
 				transactions[i] = Transaction.deserialize(data[i+1]);
 				

@@ -4,14 +4,14 @@ import java.math.BigDecimal;
 
 import org.monieo.monieoclient.Monieo;
 
-public class Transaction implements AbstractTransaction {
+public class Transaction extends AbstractTransaction {
 	
 	public final TransactionData d;
 	public final String pubkey;
 	public final String signature;
 	 
 	public Transaction(TransactionData d, String pubkey, String signature) {
-		 
+		 super(d.magicn, d.ver);
 		 this.d = d;
 		 this.pubkey = pubkey;
 		 this.signature = signature;
@@ -23,8 +23,6 @@ public class Transaction implements AbstractTransaction {
 		try {
 
 			String[] data = s.split(" ");
-			if (data.length != 10) return null;
-			if (!Monieo.assertSupportedProtocol(data)) return null;
 			
 			//note that returning a transaction without throwing error does not mean the transaction is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
@@ -45,28 +43,25 @@ public class Transaction implements AbstractTransaction {
 		return String.join(" ", d.serialize(), pubkey, signature);
 		
 	}
-
-	@Override
-	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public int confirmations() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
+	
 	@Override
 	public WalletAdress getDestination() {
-		// TODO Auto-generated method stub
-		return null;
+		return d.to;
 	}
 	
 	public WalletAdress getSource() {
+		return d.from;
+	}
+
+	@Override
+	public BigDecimal getAmount() {
+		return d.amount;
+	}
+
+	@Override
+	boolean testValidity() {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 	
 }
