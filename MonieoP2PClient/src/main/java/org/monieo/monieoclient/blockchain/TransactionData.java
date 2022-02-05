@@ -27,7 +27,7 @@ public class TransactionData {
 	
 	public String serialize() {
 
-		return String.join(" ", from.adress, to.adress, amount.toPlainString(), fee.toPlainString(), String.valueOf(timestamp), String.valueOf(nonce));
+		return String.join(" ", Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, from.adress, to.adress, amount.toPlainString(), fee.toPlainString(), String.valueOf(timestamp), String.valueOf(nonce));
 		
 	}
 	

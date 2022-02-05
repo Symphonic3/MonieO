@@ -24,7 +24,7 @@ public class BlockHeader {
 
 	public String serialize() {
 
-		return String.join(" ", preHash, merkleRoot, String.valueOf(timestamp), nonce.toString(), String.valueOf(amntTransactions));
+		return String.join(" ", Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, preHash, merkleRoot, String.valueOf(timestamp), nonce.toString(), String.valueOf(amntTransactions));
 		
 	}
 
