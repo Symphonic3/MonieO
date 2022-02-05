@@ -1,9 +1,16 @@
 package org.monieo.monieoclient;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 
@@ -11,8 +18,14 @@ import org.monieo.monieoclient.gui.UI;
 
 public class Monieo {
 	
-	public static double version;
-	public UI ui;
+	public static final int PORT = 21093;
+	public static final String MAGIC_NUMBERS = "MEOPROTOCOL1";
+	public static double VERSION;
+	
+	public static int MAX_OUTGOING_CONNECTIONS = 10;
+	public static int MAX_INCOMING_CONNECTIONS = 10;
+	
+	public static Monieo INSTANCE;
 	
 	public static void main(String[] args) {
 		
@@ -23,7 +36,9 @@ public class Monieo {
 			e.printStackTrace();
 		}
 
-		System.out.println("Version: " + properties.getProperty("version"));
+		VERSION = Double.valueOf(properties.getProperty("version"));
+		
+		System.out.println("Version: " + VERSION);
 		System.out.println("Please look towards the GUI application.");
 		System.out.println("");
 		System.out.println("If there are any issues with running the application, all errors will be logged in this window.");
@@ -58,7 +73,6 @@ public class Monieo {
 		}
 		
 		double releaseLatest = Double.valueOf(response.getString("tag_name"));
-		version = Double.valueOf(properties.getProperty("version"));
 
 		if (releaseLatest > version) {
 
@@ -103,12 +117,78 @@ public class Monieo {
 
 	}
 	
+	UI ui;
+	
+	File workingFolder;
+	File nodesFile;
+	
+	List<Socket> connections = new ArrayList<Socket>();
+	List<String> knownNodes = new ArrayList<String>();
+	
 	public Monieo() {
 		
-		//moieno
+		INSTANCE = this;
 		
 		ui = new UI();
 		ui.initialize();
+		
+		String workingDirectory;
+		String OS = (System.getProperty("os.name")).toUpperCase();
+
+		if (OS.contains("WIN"))
+		{
+		    workingDirectory = System.getenv("AppData");
+		}
+		else
+		{
+		    workingDirectory = System.getProperty("user.home");
+		    workingDirectory += "/Library/Application Support";
+		}
+		
+		workingDirectory += "/MonieO";
+		
+		workingFolder = new File(workingDirectory);
+		workingFolder.mkdirs();
+		
+		nodesFile = new File(workingFolder.getPath() + "/clients.dat");
+		
+		try {
+			nodesFile.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		try (Scanner c = new Scanner(nodesFile)) {
+			
+			while (c.hasNextLine()) {
+				
+				knownNodes.add(c.nextLine());
+				
+			}
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+	
+	public void attemptRememberNode(String node) {
+		
+		if (!knownNodes.contains(node)) {
+			
+			knownNodes.add(node);
+			
+			try (FileWriter fw = new FileWriter(nodesFile)) {
+				
+				fw.append(node);
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
 		
 	}
 	
@@ -162,6 +242,12 @@ public class Monieo {
 	        hexString.append(hex);
 	    }
 	    return hexString.toString();
+	}
+	
+	public static boolean assertMagicNumbers(String s) {
+		
+		return s.equals(MAGIC_NUMBERS);
+		
 	}
 	
 }

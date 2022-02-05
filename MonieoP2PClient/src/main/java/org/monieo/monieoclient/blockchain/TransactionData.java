@@ -3,6 +3,8 @@ package org.monieo.monieoclient.blockchain;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import org.monieo.monieoclient.Monieo;
+
 public class TransactionData {
 	
 	public final WalletAdress from;
@@ -34,17 +36,18 @@ public class TransactionData {
 		try {
 
 			String[] data = s.split(" ");
-			if (data.length != 8) return null;
+			if (data.length != 9) return null;
+			if (!Monieo.assertMagicNumbers(data[0])) return null;
 			
 			//note that returning a transactiondata without throwing error does not mean the transactiondata is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new TransactionData(new WalletAdress(data[0]),
-					new WalletAdress(data[1]),
-					new BigDecimal(data[2]),
+			return new TransactionData(new WalletAdress(data[1]),
+					new WalletAdress(data[2]),
 					new BigDecimal(data[3]),
-					Long.valueOf(data[4]),
-					new BigInteger(data[5]));
+					new BigDecimal(data[4]),
+					Long.valueOf(data[5]),
+					new BigInteger(data[6]));
 			
 		} catch (Exception e) {
 			

@@ -2,6 +2,8 @@ package org.monieo.monieoclient.blockchain;
 
 import java.math.BigDecimal;
 
+import org.monieo.monieoclient.Monieo;
+
 public class Transaction implements AbstractTransaction {
 	
 	public final TransactionData d;
@@ -21,12 +23,13 @@ public class Transaction implements AbstractTransaction {
 		try {
 
 			String[] data = s.split(" ");
-			if (data.length != 8) return null;
+			if (data.length != 9) return null;
+			if (!Monieo.assertMagicNumbers(data[0])) return null;
 			
 			//note that returning a transaction without throwing error does not mean the transaction is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new Transaction(TransactionData.deserialize(s), data[6], data[7]);
+			return new Transaction(TransactionData.deserialize(s), data[7], data[8]);
 			
 		} catch (Exception e) {
 			

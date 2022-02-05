@@ -1,7 +1,8 @@
 package org.monieo.monieoclient.blockchain;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import org.monieo.monieoclient.Monieo;
 
 public class BlockHeader {
 	
@@ -33,15 +34,16 @@ public class BlockHeader {
 
 			String[] data = s.split(" ");
 			if (data.length != 5) return null;
+			if (!Monieo.assertMagicNumbers(data[0])) return null;
 			
 			//note that returning a blockheader without throwing error does not mean the blockheader is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new BlockHeader(data[0],
-					data[1],
-					Long.valueOf(data[2]),
-					new BigInteger(data[3]),
-					Integer.valueOf(data[4]));
+			return new BlockHeader(data[1],
+					data[2],
+					Long.valueOf(data[3]),
+					new BigInteger(data[4]),
+					Integer.valueOf(data[5]));
 			
 		} catch (Exception e) {
 			
