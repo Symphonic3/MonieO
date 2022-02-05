@@ -8,13 +8,18 @@ import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import org.monieo.monieoclient.gui.UI;
+import org.monieo.monieoclient.wallet.Wallet;
 
 public class Monieo {
 	
@@ -121,9 +126,12 @@ public class Monieo {
 	
 	File workingFolder;
 	File nodesFile;
+	File walletsFolder; 
 	
 	List<Socket> connections = new ArrayList<Socket>();
 	List<String> knownNodes = new ArrayList<String>();
+	
+	public List<Wallet> myWallets = new ArrayList<Wallet>();
 	
 	public Monieo() {
 		
@@ -170,7 +178,87 @@ public class Monieo {
 			e.printStackTrace();
 		}
 		
+		walletsFolder.mkdir();
 		
+		for (File f : walletsFolder.listFiles()) {
+			
+			if (f.isDirectory()) {
+				
+				String[] fn = f.getName().split(".");
+				String name = fn[fn.length-2];
+				
+				File pub = new File(f.getPath() + "/public.key");
+				File priv = new File(f.getPath() + "/private.key");
+				
+				KeyPair kp = deserializeKeyPair(readFileData(pub), readFileData(priv));
+				
+				myWallets.add(new Wallet(name, kp));
+				
+			}
+			
+		}
+		
+	}
+	
+	public Wallet getWalletByNick(String nick) {
+		
+		for (Wallet w : myWallets) {
+			
+			if (w.nickname.equalsIgnoreCase(nick)) {
+				
+				return w;
+				
+			}
+			
+		}
+		
+		return null;
+		
+	}
+	
+	public String createWallet(String nick) {
+		
+		if (getWalletByNick(nick) != null) return "Wallet " + nick + " already exists!";
+		
+		Wallet w = Wallet.newWallet(nick);
+		
+		File f = new File(walletsFolder.getPath() + "/" + nick);
+		f.mkdir();
+		
+		File pub = new File(f.getPath() + "/public.key");
+		File priv = new File(f.getPath() + "/private.key");
+		
+		KeyPair kp = w.getKeyPair();
+		
+		try (FileWriter fw = new FileWriter(pub)) {
+			
+			fw.append(serializeKeyPairPublic(kp));
+			
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+			return "Wallet creation error!";
+			
+		}
+		
+		try (FileWriter fw = new FileWriter(priv)) {
+			
+			fw.append(serializeKeyPairPrivate(kp));
+			
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+			return "Wallet creation error!";
+			
+		}
+		
+		return "Wallet " + nick + " created!";
+		
+	}
+	
+	public void deleteWallet(Wallet wallet) {
+		
+		//TODO this
 		
 	}
 	
@@ -192,25 +280,68 @@ public class Monieo {
 		
 	}
 	
-    public static KeyPair generateKeyPair () {
+    public static KeyPair generateKeyPair() {
         try {
-            KeyPairGenerator gen = KeyPairGenerator.getInstance("EC");
-            gen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
+            KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
             return gen.generateKeyPair();
-            
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
     
-	
-	public BigInteger getCurrentHashMinValue() {
-		
-		//TODO this
-		return BigInteger.ONE;
-		
-	}
+    public static String serializeKeyPairPublic(KeyPair k) {
+    	
+    	return Base64.getEncoder().encodeToString(k.getPublic().getEncoded());
+    	
+    }
+    
+    public static String serializeKeyPairPrivate(KeyPair k) {
+    	
+    	return Base64.getEncoder().encodeToString(k.getPrivate().getEncoded());
+    	
+    }
+
+    public static KeyPair deserializeKeyPair(String pub, String priv) {
+    	
+    	try {
+    		
+			KeyFactory kf = KeyFactory.getInstance("RSA");
+			
+			PublicKey pka = kf.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pub)));
+		    PrivateKey ska = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priv)));
+		        
+		    return new KeyPair(pka, ska);
+            
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			e.printStackTrace();
+		}
+    	
+    	return null;
+    	
+    }
+    
+    public static String readFileData(File f) {
+    	
+    	try (Scanner c = new Scanner(f)) {
+    		
+    		String ret = "";
+    		
+    		while (c.hasNext()) {
+    			
+    			ret += c.next();
+    			
+    		}
+    		
+    		return ret;
+    		
+    	} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+    	
+    	return null;
+    	
+    }
 
 	public static byte[] sha256dRaw(String s) {
 		

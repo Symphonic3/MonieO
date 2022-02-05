@@ -13,7 +13,7 @@ public class Wallet {
     public Wallet(String nick, KeyPair keyPair) {
         this.nickname = nick;
         this.keyPair = keyPair;
-        address = Monieo.sha256d(keyPair.getPublic().toString());
+        address = Monieo.sha256d(Monieo.serializeKeyPairPublic(keyPair));
     }
     
     public static Wallet newWallet(String nick) {
@@ -26,6 +26,12 @@ public class Wallet {
     	
     	//TODO this
     	return null;
+    	
+    }
+    
+    public KeyPair getKeyPair() {
+    	
+    	return keyPair;
     	
     }
     

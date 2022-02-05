@@ -26,8 +26,6 @@ import org.monieo.monieoclient.wallet.Wallet;
 public class UI {
 	private JFrame frame;
 	private final JPanel panel = new JPanel();
-
-	public List<String> wallets = new ArrayList<String>();
 	
 	public UI() {
 	}
@@ -108,12 +106,20 @@ public class UI {
 		JButton BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFrame frame = new JFrame();
 			    Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
 			    if (result.toString() != null) {
-			    	Wallet wal = Wallet.newWallet(result.toString());
-			    	wallets.add(wal.nickname);
-			    	list.setListData(wallets.toArray(new String[wallets.size()]));
+			    	String resp = Monieo.INSTANCE.createWallet(result.toString());
+			    	JOptionPane.showConfirmDialog(frame, resp);
+			    	
+			    	String[] walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
+			    	
+			    	for (int i = 0; i < walletNicks.length; i++) {
+			    		
+			    		walletNicks[i] = Monieo.INSTANCE.myWallets.get(i).nickname;
+			    		
+			    	}
+			    	
+			    	list.setListData(walletNicks);
 			    }
 			}
 		});
