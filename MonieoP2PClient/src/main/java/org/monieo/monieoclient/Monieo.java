@@ -24,7 +24,8 @@ import org.monieo.monieoclient.wallet.Wallet;
 public class Monieo {
 	
 	public static final int PORT = 21093;
-	public static final String MAGIC_NUMBERS = "MEOPROTOCOL1";
+	public static final String MAGIC_NUMBERS = "MEOPROTOCOL";
+	public static final String PROTOCOL_VERSION = "1.0";
 	public static double VERSION;
 	
 	public static int MAX_OUTGOING_CONNECTIONS = 10;
@@ -377,9 +378,9 @@ public class Monieo {
 	    return hexString.toString();
 	}
 	
-	public static boolean assertMagicNumbers(String s) {
+	public static boolean assertSupportedProtocol(String[] s) {
 		
-		return s.equals(MAGIC_NUMBERS);
+		return s[0].equals(MAGIC_NUMBERS) && s[1].equals(PROTOCOL_VERSION);
 		
 	}
 	

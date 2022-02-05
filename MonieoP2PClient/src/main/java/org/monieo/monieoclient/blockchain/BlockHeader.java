@@ -33,17 +33,17 @@ public class BlockHeader {
 		try {
 
 			String[] data = s.split(" ");
-			if (data.length != 5) return null;
-			if (!Monieo.assertMagicNumbers(data[0])) return null;
+			if (data.length != 7) return null;
+			if (!Monieo.assertSupportedProtocol(data)) return null;
 			
 			//note that returning a blockheader without throwing error does not mean the blockheader is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new BlockHeader(data[1],
-					data[2],
-					Long.valueOf(data[3]),
-					new BigInteger(data[4]),
-					Integer.valueOf(data[5]));
+			return new BlockHeader(data[2],
+					data[3],
+					Long.valueOf(data[4]),
+					new BigInteger(data[5]),
+					Integer.valueOf(data[6]));
 			
 		} catch (Exception e) {
 			

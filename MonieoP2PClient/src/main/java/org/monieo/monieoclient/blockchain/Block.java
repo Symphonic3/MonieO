@@ -32,7 +32,7 @@ public class Block {
 		
 		try {
 
-			String[] data = s.split(" ");
+			String[] data = s.split("\n");
 			if (data.length < 2) return null;
 			
 			Transaction[] transactions = new Transaction[data.length-1];

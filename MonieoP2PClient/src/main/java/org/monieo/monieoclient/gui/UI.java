@@ -142,4 +142,5 @@ public class UI {
 		frame.setResizable(false);
 		
 	}
+	
 }

@@ -23,13 +23,13 @@ public class Transaction implements AbstractTransaction {
 		try {
 
 			String[] data = s.split(" ");
-			if (data.length != 9) return null;
-			if (!Monieo.assertMagicNumbers(data[0])) return null;
+			if (data.length != 10) return null;
+			if (!Monieo.assertSupportedProtocol(data)) return null;
 			
 			//note that returning a transaction without throwing error does not mean the transaction is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new Transaction(TransactionData.deserialize(s), data[7], data[8]);
+			return new Transaction(TransactionData.deserialize(s), data[8], data[9]);
 			
 		} catch (Exception e) {
 			

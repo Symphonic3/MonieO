@@ -36,18 +36,18 @@ public class TransactionData {
 		try {
 
 			String[] data = s.split(" ");
-			if (data.length != 9) return null;
-			if (!Monieo.assertMagicNumbers(data[0])) return null;
+			if (data.length != 10) return null;
+			if (!Monieo.assertSupportedProtocol(data)) return null;
 			
 			//note that returning a transactiondata without throwing error does not mean the transactiondata is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new TransactionData(new WalletAdress(data[1]),
-					new WalletAdress(data[2]),
-					new BigDecimal(data[3]),
+			return new TransactionData(new WalletAdress(data[2]),
+					new WalletAdress(data[3]),
 					new BigDecimal(data[4]),
-					Long.valueOf(data[5]),
-					new BigInteger(data[6]));
+					new BigDecimal(data[5]),
+					Long.valueOf(data[6]),
+					new BigInteger(data[7]));
 			
 		} catch (Exception e) {
 			
