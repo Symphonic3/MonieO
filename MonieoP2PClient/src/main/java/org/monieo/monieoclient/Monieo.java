@@ -20,7 +20,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.monieo.monieoclient.gui.UI;
-import org.monieo.monieoclient.networking.AbstractNode;
+import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
 
 public class Monieo {
@@ -139,7 +139,7 @@ public class Monieo {
 	
 	public List<Wallet> myWallets = new ArrayList<Wallet>();
 	
-	public Vector<Socket> unhandledSockets = new Vector<unhandledSockets>;
+	public Vector<Node> nodes = new Vector<Node>();
 	
 	public Monieo() {
 		
