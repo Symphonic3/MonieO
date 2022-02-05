@@ -21,9 +21,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 
 import org.monieo.monieoclient.Monieo;
-import org.monieo.wallet.wallet;
-
-import javax.swing.JScrollPane;
+import org.monieo.monieoclient.wallet.Wallet;
 
 public class UI {
 	private JFrame frame;
@@ -113,7 +111,7 @@ public class UI {
 				JFrame frame = new JFrame();
 			    Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
 			    if (result.toString() != null) {
-			    	wallet wal = new wallet(result.toString());
+			    	Wallet wal = Wallet.newWallet(result.toString());
 			    	wallets.add(wal.nickname);
 			    	list.setListData(wallets.toArray(new String[wallets.size()]));
 			    }
