@@ -192,16 +192,18 @@ public class Monieo {
 		
 	}
 	
-	public static void generateKeyPair () {
-		try {
-			KeyPairGenerator gen = KeyPairGenerator.getInstance("EC");
-			gen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
-			KeyPair pair = gen.generateKeyPair();
-			System.out.println(pair.getPublic());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public static KeyPair generateKeyPair () {
+        try {
+            KeyPairGenerator gen = KeyPairGenerator.getInstance("EC");
+            gen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
+            return gen.generateKeyPair();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
 	
 	public BigInteger getCurrentHashMinValue() {
 		
