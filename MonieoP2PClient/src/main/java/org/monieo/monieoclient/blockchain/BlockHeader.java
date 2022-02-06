@@ -4,7 +4,7 @@ import java.math.BigInteger;
 
 import org.monieo.monieoclient.Monieo;
 
-public class BlockHeader {
+public class BlockHeader extends MonieoDataObject{
 	
 	public final String preHash;
 	public final String merkleRoot;
@@ -12,8 +12,8 @@ public class BlockHeader {
 	public final BigInteger nonce;
 	public final int amntTransactions;
 	
-	public BlockHeader(String p, String m, long t, BigInteger n, int a) {
-		
+	public BlockHeader(String mn, String pv, String p, String m, long t, BigInteger n, int a) {
+		super(mn, pv);
 		this.preHash = p;
 		this.merkleRoot = m;
 		this.timestamp = t;
@@ -37,7 +37,7 @@ public class BlockHeader {
 			//note that returning a blockheader without throwing error does not mean the blockheader is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new BlockHeader(data[2],
+			return new BlockHeader(data[0], data[1], data[2],
 					data[3],
 					Long.valueOf(data[4]),
 					new BigInteger(data[5]),
@@ -49,6 +49,18 @@ public class BlockHeader {
 			return null;
 			
 		}
+		
+	}
+
+	@Override
+	boolean testValidity() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	public String hash() {
+		
+		return Monieo.sha256d(serialize());
 		
 	}
 	

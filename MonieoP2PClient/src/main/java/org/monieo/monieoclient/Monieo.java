@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import org.monieo.monieoclient.blockchain.Block;
+import org.monieo.monieoclient.blockchain.BlockHeader;
+import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
+import org.monieo.monieoclient.blockchain.WalletAdress;
 import org.monieo.monieoclient.gui.UI;
 import org.monieo.monieoclient.networking.NetAdressHolder;
 import org.monieo.monieoclient.networking.Node;
@@ -134,6 +139,8 @@ public class Monieo {
 	File workingFolder;
 	File nodesFile;
 	public File walletsFolder; 
+	public File blocksFolder; 
+	public File blockMetadataFolder; 
 	
 	List<Socket> connections = new ArrayList<Socket>();
 	List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
@@ -185,7 +192,6 @@ public class Monieo {
 		}
 		
 		walletsFolder = new File(workingFolder.getPath() + "/wallets");
-		
 		walletsFolder.mkdir();
 		
 		for (File f : walletsFolder.listFiles()) {
@@ -205,7 +211,72 @@ public class Monieo {
 
         ui = new UI();
         ui.initialize();
+        
+        blocksFolder = new File(blocksFolder.getPath() + "/blocks");
+        blocksFolder.mkdir();
+		
+		blockMetadataFolder = new File(blockMetadataFolder.getPath() + "/blockmeta");
+		blockMetadataFolder.mkdir();
 
+		handleBlock(genesis());
+		
+	}
+
+	public void handleBlock(Block b) {
+		
+		if (!b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
+		
+		String blockname = b.hash();
+		
+		File blockfile = new File(blocksFolder.getPath() + "/" + blockname + ".blk");
+		File blockmetafile = new File(blockMetadataFolder.getPath() + "/" + blockname + ".blkmeta");
+		
+		if (!blockfile.exists()) {
+			
+			try (FileWriter fw = new FileWriter(blockfile)) {
+				
+				fw.write(b.serialize());
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		if (!blockmetafile.exists()) {
+			
+			String ph = b.header.preHash;
+			
+			File prevBlockMetaFile = new File(blockMetadataFolder.getPath() + "/" + ph + ".blkmeta");
+			
+			if (prevBlockMetaFile.exists()) {
+				
+				
+				
+			} else if (b.equals(genesis())) {
+				
+				
+				
+			} else {
+				
+				//we should request this so-called previous block
+				
+			}
+			
+		}
+		
+		//TODO this
+		
+	}
+	
+	public static Block genesis() {
+		
+		CoinbaseTransaction ct = new CoinbaseTransaction(MAGIC_NUMBERS, PROTOCOL_VERSION, new WalletAdress("faa69b10d8d1a8c427e71839a0141e4e83a99c443b5c16e7f7e1cdaca96054de"), new BigDecimal(0));
+		
+		String bh = sha256d(ct.serialize());
+		
+		return new Block(new BlockHeader(PROTOCOL_VERSION, MAGIC_NUMBERS, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1), ct);
+		
 	}
 	
 	public Wallet getWalletByNick(String nick) {

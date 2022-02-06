@@ -6,11 +6,12 @@ import java.security.Signature;
 import java.util.Base64;
 
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.blockchain.WalletAdress;
 
 public class Wallet {
 
     public String nickname;
-    public final String address;
+    private final String address;
     private final KeyPair keyPair;
 
     public Wallet(String nick, KeyPair keyPair) {
@@ -49,6 +50,12 @@ public class Wallet {
     public KeyPair getKeyPair() {
     	
     	return keyPair;
+    	
+    }
+    
+    public WalletAdress getAsWalletAdress() {
+    	
+    	return new WalletAdress(address);
     	
     }
     

@@ -3,6 +3,7 @@ package org.monieo.monieoclient.blockchain;
 import java.math.BigDecimal;
 
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.wallet.Wallet;
 
 public class Transaction extends AbstractTransaction {
 	
@@ -16,6 +17,12 @@ public class Transaction extends AbstractTransaction {
 		 this.pubkey = pubkey;
 		 this.signature = signature;
 		 
+	}
+	
+	public static Transaction createNewTransaction(Wallet fundsOwner, WalletAdress to, BigDecimal amount, BigDecimal fee) {
+		
+		return null;
+		
 	}
 
 	public static Transaction deserialize(String s) {

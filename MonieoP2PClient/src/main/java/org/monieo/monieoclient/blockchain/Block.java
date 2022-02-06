@@ -1,12 +1,12 @@
 package org.monieo.monieoclient.blockchain;
 
-public class Block {
+public class Block extends MonieoDataObject{
 	
 	public final BlockHeader header;
 	public final AbstractTransaction[] transactions;
 	
 	public Block(BlockHeader header, AbstractTransaction... transactions) {
-		
+		super(header.magicn, header.ver);
 		this.header = header;
 		this.transactions = transactions;
 		
@@ -55,6 +55,18 @@ public class Block {
 			return null;
 			
 		}
+		
+	}
+
+	@Override
+	boolean testValidity() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	public String hash() {
+		
+		return header.hash();
 		
 	}
 
