@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.Vector;
 import java.util.function.Consumer;
 
+import org.monieo.monieoclient.Monieo;
+
 public class Node implements Runnable{
 	
 	private Socket socket;
@@ -33,6 +35,11 @@ public class Node implements Runnable{
 		
 		return socket;
 		
+	}
+	
+	public void infraction() {
+		
+		Monieo.INSTANCE.fetchByAdress(getAdress()).ban();
 	}
 	
 	public void queueAction(Consumer<Node> a) {

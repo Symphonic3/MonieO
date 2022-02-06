@@ -20,6 +20,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.monieo.monieoclient.gui.UI;
+import org.monieo.monieoclient.networking.NetAdressHolder;
 import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
 
@@ -135,7 +136,7 @@ public class Monieo {
 	File walletsFolder; 
 	
 	List<Socket> connections = new ArrayList<Socket>();
-	List<String> knownNodes = new ArrayList<String>();
+	List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
 	
 	public List<Wallet> myWallets = new ArrayList<Wallet>();
 	
@@ -144,9 +145,6 @@ public class Monieo {
 	public Monieo() {
 		
 		INSTANCE = this;
-		
-		ui = new UI();
-		ui.initialize();
 		
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
@@ -166,7 +164,7 @@ public class Monieo {
 		workingFolder = new File(workingDirectory);
 		workingFolder.mkdirs();
 		
-		nodesFile = new File(workingFolder.getPath() + "/clients.dat");
+		nodesFile = new File(workingFolder.getPath() + "/nodes.dat");
 		
 		try {
 			nodesFile.createNewFile();
@@ -178,7 +176,7 @@ public class Monieo {
 			
 			while (c.hasNextLine()) {
 				
-				knownNodes.add(c.nextLine());
+				knownNodes.add(NetAdressHolder.deserialize(c.nextLine()));
 				
 			}
 			
@@ -204,6 +202,9 @@ public class Monieo {
 			}
 			
 		}
+		
+        ui = new UI();
+        ui.initialize();
 		
 	}
 	
@@ -306,20 +307,54 @@ public class Monieo {
 		
 	}
 	
-	public void attemptRememberNode(String node) {
+	public NetAdressHolder fetchByAdress(String address) {
 		
-		if (!knownNodes.contains(node)) {
+		for (NetAdressHolder nah : knownNodes) {
 			
-			knownNodes.add(node);
-			
-			try (FileWriter fw = new FileWriter(nodesFile)) {
+			if (nah.adress.equalsIgnoreCase(address)) {
 				
-				fw.append(node);
+				return nah;
 				
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 			
+		}
+		
+		return null;
+		
+	}
+	
+	public void attemptRememberNode(String address) {
+		
+		if (fetchByAdress(address) == null) return;
+		
+		NetAdressHolder n = new NetAdressHolder(address, Long.MAX_VALUE, 0);
+		
+		knownNodes.add(n);
+		
+		saveKnownNodes();
+		
+	}
+	
+	public void saveKnownNodes() {
+		
+		nodesFile = new File(workingFolder.getPath() + "/nodes.dat");
+		
+		try {
+			nodesFile.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		try (FileWriter c = new FileWriter(nodesFile, false)) {
+			
+			for (NetAdressHolder nah : knownNodes) {
+				
+				c.append(nah.serialize() + "\n");
+				
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 	}
