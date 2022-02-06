@@ -145,9 +145,6 @@ public class Monieo {
 		
 		INSTANCE = this;
 		
-		ui = new UI();
-		ui.initialize();
-		
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
 
@@ -205,6 +202,8 @@ public class Monieo {
 			
 		}
 		
+		ui = new UI();
+		ui.initialize();
 	}
 	
 	public Wallet getWalletByNick(String nick) {

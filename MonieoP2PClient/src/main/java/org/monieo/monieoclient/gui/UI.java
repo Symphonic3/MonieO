@@ -4,6 +4,7 @@ import java.awt.Font;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,10 @@ import org.monieo.monieoclient.wallet.Wallet;
 public class UI {
 	private JFrame frame;
 	private final JPanel panel = new JPanel();
+	
+	private String[] walletNicks;
+	
+	public JList<String> list;
 	
 	public UI() {
 	}
@@ -66,9 +71,11 @@ public class UI {
 		panel_1.setBounds(208, 0, 702, 400);
 		frame.getContentPane().add(panel_1);
 		
-		JList<String> list = new JList<String>();
+		list = new JList<String>();
 		list.setBounds(10, 11, 188, 429);
 		frame.getContentPane().add(list);
+		
+		Refresh();
 		
 		JLabel label_1 = new JLabel("Current address:");
 		label_1.setFont(new Font("Tahoma", Font.PLAIN, 13));
@@ -112,15 +119,7 @@ public class UI {
 			    	String resp = Monieo.INSTANCE.createWallet(result.toString());
 			    	JOptionPane.showMessageDialog(frame, resp, "Info", 1);
 			    	
-			    	String[] walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
-			    	
-			    	for (int i = 0; i < walletNicks.length; i++) {
-			    		
-			    		walletNicks[i] = Monieo.INSTANCE.myWallets.get(i).nickname;
-			    		
-			    	}
-			    	
-			    	list.setListData(walletNicks);
+			    	Refresh();
 			    }
 			}
 		});
@@ -142,6 +141,16 @@ public class UI {
 		frame.setVisible(true);
 		frame.setResizable(false);
 		
+	}
+	void Refresh() {
+    	walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
+    	
+    	for (int i = 0; i < walletNicks.length; i++) {
+    		
+    		walletNicks[i] = Monieo.INSTANCE.myWallets.get(i).nickname;
+    		
+    	}
+    	list.setListData(walletNicks);
 	}
 	
 }
