@@ -194,15 +194,12 @@ public class Monieo {
 			
 			if (f.isDirectory()) {
 				
-				String[] fn = f.getName().split(".");
-				String name = fn[fn.length-2];
-				
 				File pub = new File(f.getPath() + "/public.key");
 				File priv = new File(f.getPath() + "/private.key");
 				
 				KeyPair kp = deserializeKeyPair(readFileData(pub), readFileData(priv));
 				
-				myWallets.add(new Wallet(name, kp));
+				myWallets.add(new Wallet(f.getName(), kp));
 				
 			}
 			
