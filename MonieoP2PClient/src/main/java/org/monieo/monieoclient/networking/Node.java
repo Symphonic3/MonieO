@@ -8,6 +8,7 @@ import java.util.Vector;
 import java.util.function.Consumer;
 
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 
 public class Node implements Runnable{
 	
@@ -37,14 +38,25 @@ public class Node implements Runnable{
 		
 	}
 	
+	public void disconnect() {
+		
+		try {
+			socket.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+	}
+	
 	public void infraction() {
 		
 		Monieo.INSTANCE.fetchByAdress(getAdress()).ban();
+		disconnect();
 	}
 	
 	public void queueAction(Consumer<Node> a) {
 		
-		queue.add(a);
+		if (queue.size() > 0) queue.insertElementAt(a, 0); else queue.add(a);
 		
 	}
 	
@@ -80,12 +92,10 @@ public class Node implements Runnable{
 			
 		} catch (IOException e) {
 			
+			disconnect();
+			
 			e.printStackTrace();
-			try {
-				socket.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+
 			return;
 			
 		}
@@ -119,12 +129,51 @@ public class Node implements Runnable{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-			if (nc == null) continue;
 
-			//TODO handle io
+			if (nc == null || !Monieo.assertSupportedProtocol(new String[] {nc.magicn, nc.ver}) || !handle(nc)) {
+				
+				infraction();
+				continue;
+				
+			}
 			
 		}
+		
+	}
+	
+	public boolean handle(NetworkCommand nc) {
+		
+		if (nc.cmd == NetworkCommandType.SEND_VER) {
+			
+			if (!localAcknowledgedRemote) {
+				
+				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.ACK_VER, null));
+				
+				localAcknowledgedRemote = true;
+				
+				if (!remoteAcknowledgedLocal) {
+					
+					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_VER, null));
+					
+				}
+				
+			} else return false;
+			
+		} else if (nc.cmd == NetworkCommandType.ACK_VER) {
+			
+			if (!remoteAcknowledgedLocal) {
+				
+				remoteAcknowledgedLocal = true;
+				
+			} else return false;
+			
+		} else if (nc.cmd == NetworkCommandType.REQUEST_BLOCKS_AFTER) {
+			
+			//TODO do this here this one
+			
+		}
+		
+		return true;
 		
 	}
 	
