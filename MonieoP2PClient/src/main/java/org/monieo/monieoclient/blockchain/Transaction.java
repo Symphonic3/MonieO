@@ -1,6 +1,9 @@
 package org.monieo.monieoclient.blockchain;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.wallet.Wallet;
@@ -20,6 +23,8 @@ public class Transaction extends AbstractTransaction {
 	}
 	
 	public static Transaction createNewTransaction(Wallet fundsOwner, WalletAdress to, BigDecimal amount, BigDecimal fee) {
+		
+		BigInteger nonce = new BigInteger(String.valueOf(System.currentTimeMillis()) + String.valueOf(ThreadLocalRandom.current().nextInt()));
 		
 		return null;
 		
