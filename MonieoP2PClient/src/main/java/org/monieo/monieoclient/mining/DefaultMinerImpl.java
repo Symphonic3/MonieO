@@ -32,4 +32,9 @@ public class DefaultMinerImpl implements AbstractMiner{
 		return null;
 	}
 
+	@Override
+	public String getMiningName() {
+		return "DefaultCPUMiner";
+	}
+
 }

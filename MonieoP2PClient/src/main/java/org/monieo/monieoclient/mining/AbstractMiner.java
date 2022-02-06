@@ -11,6 +11,7 @@ public interface AbstractMiner {
 	public void stop();
 	public Monieo getMonieoInstance();
 	public MiningStatistics retrieveMiningStatistics();
+	public String getMiningName();
 	
 	public class MiningStatistics {
 

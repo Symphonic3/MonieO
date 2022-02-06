@@ -1,6 +1,8 @@
 package org.monieo.monieoclient.networking;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -61,19 +63,61 @@ public class Node implements Runnable{
 	@Override
 	public void run() {
 		
-		if (!queue.isEmpty()) {
+		InputStream in;
+		OutputStream out;
+		
+		try {
+
+			in = socket.getInputStream();
+			out = socket.getOutputStream();
 			
-			for (Consumer<Node> a : queue) {
-				
-				a.accept(this);
-				
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+			try {
+				socket.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
+			return;
 			
 		}
 		
-		queue.clear();
-		
-		//handle io
+		while (true) {
+			
+			if (!queue.isEmpty()) {
+				
+				for (Consumer<Node> a : queue) {
+					
+					a.accept(this);
+					
+				}
+				
+			}
+			
+			queue.clear();
+			
+			NetworkCommand nc = null;
+			
+			try {
+				
+				if (in.available() != 0) {
+					
+					String s = new String(in.readAllBytes(), "UTF8");
+					
+					nc = NetworkCommand.deserialize(s);
+					
+				}
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			if (nc == null) continue;
+
+			//TODO handle io
+			
+		}
 		
 	}
 	
