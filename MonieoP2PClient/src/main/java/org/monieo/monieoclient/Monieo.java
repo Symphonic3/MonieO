@@ -202,10 +202,10 @@ public class Monieo {
 			}
 			
 		}
-		
+
         ui = new UI();
         ui.initialize();
-		
+
 	}
 	
 	public Wallet getWalletByNick(String nick) {
