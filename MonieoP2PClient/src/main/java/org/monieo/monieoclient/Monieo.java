@@ -133,7 +133,7 @@ public class Monieo {
 	
 	File workingFolder;
 	File nodesFile;
-	File walletsFolder; 
+	public File walletsFolder; 
 	
 	List<Socket> connections = new ArrayList<Socket>();
 	List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
@@ -273,6 +273,7 @@ public class Monieo {
 		if (f.exists() && f.isDirectory()) {
 			
 			deleteRecursively(f);
+			myWallets.remove(wallet);
 			return true;
 			
 		}

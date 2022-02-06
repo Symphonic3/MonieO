@@ -4,9 +4,12 @@ import java.awt.Font;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Console;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.io.comparator.DirectoryFileComparator;
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.wallet.Wallet;
 
@@ -105,11 +109,15 @@ public class UI {
 		list.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
+				try {
 				Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
 				addressLabel.setText(selectedWal.address);
 				nickLabel.setText(selectedWal.nickname);
 				//TODO DO BALANCE TAKE TAKE AND HHAVE THE BALANCE
 				//INDIVbalanceLabel.setText( selectedWal); stage changed
+				} catch (Exception e2) {
+					
+				}
 			}
 		});
 		
@@ -129,6 +137,40 @@ public class UI {
 		label_5.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_5.setBounds(10, 91, 133, 29);
 		panel_1.add(label_5);
+		
+		JButton btnDelWal = new JButton("Delete selected wallet");
+		btnDelWal.setBounds(10, 346, 160, 29);
+		panel_1.add(btnDelWal);
+		btnDelWal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+				if (list.getSelectedValue() != null) {
+					String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
+					if (confirmation.equals(walletInQuestion.nickname)) {
+						Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
+						Refresh();
+					}
+				}
+			}
+		});
+		
+		JButton btnChangeWalName = new JButton("Change wallet name");
+		btnChangeWalName.setBounds(513, 346, 160, 29);
+		panel_1.add(btnChangeWalName);
+		btnChangeWalName.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (list.getSelectedValue() != null) {
+					/*Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+					String newNick = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
+					if (newNick != null) {
+						selectedWal.nickname = newNick;
+						File newWalletFolder = new File((Monieo.INSTANCE.walletsFolder.toString() + "/" + newNick));
+						Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(selectedWal.nickname));
+						Refresh();
+					}*/
+				}
+			}
+		});
 		
 		JButton BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
