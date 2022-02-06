@@ -109,7 +109,7 @@ public class UI {
 				addressLabel.setText(selectedWal.address);
 				nickLabel.setText(selectedWal.nickname);
 				//TODO DO BALANCE TAKE TAKE AND HHAVE THE BALANCE
-				//INDIVbalanceLabel.setText( selectedWal);
+				//INDIVbalanceLabel.setText( selectedWal); stage changed
 			}
 		});
 		
