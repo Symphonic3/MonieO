@@ -1,6 +1,7 @@
  package org.monieo.monieoclient.gui;
 
 import java.awt.Font;
+import java.awt.Panel;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,7 +37,9 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.io.comparator.DirectoryFileComparator;
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.wallet.Wallet;
+import javax.swing.JTextField;
 
 public class UI {
 	private JFrame frame;
@@ -48,6 +51,9 @@ public class UI {
 	public JLabel LblADDRESSES;
 	public JButton btnChangeWalName;
 	public JButton btnDelWal;
+	private JTextField textField;
+	private JTextField textField_1;
+	private JTextField textField_2;
 	
 	public UI() {
 	}
@@ -99,6 +105,11 @@ public class UI {
 		INDIVbalanceLabel.setBounds(144, 91, 385, 29);
 		panel_1.add(INDIVbalanceLabel);
 		
+		JPanel panel = new JPanel();
+		panel.setBounds(10, 152, 663, 225);
+		panel_1.add(panel);
+		panel.setLayout(null);
+		
 		btnChangeWalName = new JButton("Change wallet name");
 		btnChangeWalName.setBounds(480, 39, 160, 29);
 		panel_1.add(btnChangeWalName);
@@ -115,6 +126,7 @@ public class UI {
 						Refresh();
 						btnDelWal.setVisible(false);
 						btnChangeWalName.setVisible(false);
+						panel.setVisible(false);
 					}
 				}
 			}
@@ -134,6 +146,7 @@ public class UI {
 						Refresh();
 						btnDelWal.setVisible(false);
 						btnChangeWalName.setVisible(false);
+						panel.setVisible(false);
 					}
 				}
 			}
@@ -151,7 +164,7 @@ public class UI {
 			public void valueChanged(ListSelectionEvent e) {
 				try {
 				Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
-				addressLabel.setText(selectedWal.address);
+				addressLabel.setText(selectedWal.getAsWalletAdress().adress);
 				nickLabel.setText(selectedWal.nickname);
 				//TODO DO BALANCE TAKE TAKE AND HHAVE THE BALANCE
 				//INDIVbalanceLabel.setText( selectedWal); stage changed
@@ -160,6 +173,7 @@ public class UI {
 				}
 				btnChangeWalName.setVisible(true);
 				btnDelWal.setVisible(true);
+				panel.setVisible(true);
 			}
 		});
 		
@@ -185,6 +199,48 @@ public class UI {
 		label_5.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_5.setBounds(10, 91, 133, 29);
 		panel_1.add(label_5);
+		
+		JButton sentTrnt = new JButton("Send transaction");
+		sentTrnt.setBounds(84, 191, 123, 23);
+		panel.add(sentTrnt);
+		sentTrnt.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					
+					//Transaction t = new Transaction();
+					
+				} catch (Exception e2) {
+					System.out.println("invalid data entered fatty");
+				}
+			}
+		});
+		
+		textField = new JTextField();
+		textField.setBounds(84, 36, 491, 20);
+		panel.add(textField);
+		textField.setColumns(10);
+		
+		JLabel lblNewLabel = new JLabel("Recipient address:");
+		lblNewLabel.setBounds(84, 11, 117, 14);
+		panel.add(lblNewLabel);
+		
+		JLabel lblTransactionAmount = new JLabel("Transaction amount:");
+		lblTransactionAmount.setBounds(84, 67, 117, 14);
+		panel.add(lblTransactionAmount);
+		
+		textField_1 = new JTextField();
+		textField_1.setColumns(10);
+		textField_1.setBounds(84, 92, 491, 20);
+		panel.add(textField_1);
+		
+		JLabel lblFee = new JLabel("Fee:");
+		lblFee.setBounds(84, 120, 117, 14);
+		panel.add(lblFee);
+		
+		textField_2 = new JTextField();
+		textField_2.setColumns(10);
+		textField_2.setBounds(84, 145, 491, 20);
+		panel.add(textField_2);
 		
 		JButton BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
@@ -220,6 +276,7 @@ public class UI {
 		frame.setVisible(true);
 		frame.setResizable(false);
 		
+		panel.setVisible(false);
 	}
 	void Refresh() {
 		
