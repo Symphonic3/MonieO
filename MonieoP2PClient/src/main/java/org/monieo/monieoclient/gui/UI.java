@@ -12,6 +12,9 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +26,11 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneLayout;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -35,15 +40,14 @@ import org.monieo.monieoclient.wallet.Wallet;
 
 public class UI {
 	private JFrame frame;
-	private final JPanel panel = new JPanel();
 	
 	private String[] walletNicks;
 	
 	public JList<String> list;
-	
 	public JLabel addressLabel;
-	
 	public JLabel LblADDRESSES;
+	public JButton btnChangeWalName;
+	public JButton btnDelWal;
 	
 	public UI() {
 	}
@@ -70,11 +74,7 @@ public class UI {
 		//TgBtnTOGGLEMINING.addActionListener(new ActionListener() {
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
-	    
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 11, 186, 434);
-		
-		panel.add(scrollPane);			
+			
 		JLabel lblNewLabel_1 = new JLabel("Total addresses:");
 		lblNewLabel_1.setBounds(208, 411, 96, 34);
 		frame.getContentPane().add(lblNewLabel_1);
@@ -99,13 +99,53 @@ public class UI {
 		INDIVbalanceLabel.setBounds(144, 91, 385, 29);
 		panel_1.add(INDIVbalanceLabel);
 		
+		btnChangeWalName = new JButton("Change wallet name");
+		btnChangeWalName.setBounds(480, 39, 160, 29);
+		panel_1.add(btnChangeWalName);
+		btnChangeWalName.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (list.getSelectedValue() != null) {
+					Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+					String newNick = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
+					if (newNick != null) {
+						File oldWalletFolder = new File((Monieo.INSTANCE.walletsFolder.toString() + "/" + selectedWal.nickname));
+						File newWalletFolder = new File((oldWalletFolder.getParentFile().getPath() + "/" + newNick));
+						oldWalletFolder.renameTo(newWalletFolder);
+						Monieo.INSTANCE.getWalletByNick(selectedWal.nickname).nickname = newNick;
+						Refresh();
+						btnDelWal.setVisible(false);
+						btnChangeWalName.setVisible(false);
+					}
+				}
+			}
+		});
+		btnChangeWalName.setVisible(false);
+		
+		btnDelWal = new JButton("Delete selected wallet");
+		btnDelWal.setBounds(480, 76, 160, 29);
+		panel_1.add(btnDelWal);
+		btnDelWal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+				if (list.getSelectedValue() != null) {
+					String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
+					if (confirmation.equals(walletInQuestion.nickname)) {
+						Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
+						Refresh();
+						btnDelWal.setVisible(false);
+						btnChangeWalName.setVisible(false);
+					}
+				}
+			}
+		});
+		btnDelWal.setVisible(false);
+		
 		LblADDRESSES = new JLabel("(addresses #)");
 		LblADDRESSES.setBounds(304, 411, 86, 34);
 		frame.getContentPane().add(LblADDRESSES);
 		
 		list = new JList<String>();
 		list.setBounds(10, 11, 188, 429);
-		frame.getContentPane().add(list);
 		list.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
@@ -118,10 +158,18 @@ public class UI {
 				} catch (Exception e2) {
 					
 				}
+				btnChangeWalName.setVisible(true);
+				btnDelWal.setVisible(true);
 			}
 		});
 		
 		Refresh();
+		
+		JScrollPane scrollPane = new JScrollPane(list);
+		scrollPane.setBounds(10, 11, 186, 434);
+		scrollPane.createVerticalScrollBar();
+        scrollPane.setLayout(new ScrollPaneLayout());
+		frame.getContentPane().add(scrollPane);
 		
 		JLabel label_1 = new JLabel("Selected address:");
 		label_1.setFont(new Font("Tahoma", Font.PLAIN, 13));
@@ -137,40 +185,6 @@ public class UI {
 		label_5.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_5.setBounds(10, 91, 133, 29);
 		panel_1.add(label_5);
-		
-		JButton btnDelWal = new JButton("Delete selected wallet");
-		btnDelWal.setBounds(10, 346, 160, 29);
-		panel_1.add(btnDelWal);
-		btnDelWal.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
-				if (list.getSelectedValue() != null) {
-					String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
-					if (confirmation.equals(walletInQuestion.nickname)) {
-						Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
-						Refresh();
-					}
-				}
-			}
-		});
-		
-		JButton btnChangeWalName = new JButton("Change wallet name");
-		btnChangeWalName.setBounds(513, 346, 160, 29);
-		panel_1.add(btnChangeWalName);
-		btnChangeWalName.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (list.getSelectedValue() != null) {
-					/*Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
-					String newNick = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
-					if (newNick != null) {
-						selectedWal.nickname = newNick;
-						File newWalletFolder = new File((Monieo.INSTANCE.walletsFolder.toString() + "/" + newNick));
-						Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(selectedWal.nickname));
-						Refresh();
-					}*/
-				}
-			}
-		});
 		
 		JButton BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
@@ -192,13 +206,17 @@ public class UI {
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
 		JLabel lblTotalBalance = new JLabel("Total balance:");
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(10, 11, 188, 429);
+		frame.getContentPane().add(scrollPane_1);
+		
 		lblTotalBalance.setBounds(758, 406, 76, 44);
 		frame.getContentPane().add(lblTotalBalance);
 		
 		JLabel label = new JLabel("Total balance:");
 		label.setBounds(842, 406, 53, 44);
 		frame.getContentPane().add(label);
-		
+				
 		frame.setVisible(true);
 		frame.setResizable(false);
 		
