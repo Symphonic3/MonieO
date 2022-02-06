@@ -1,6 +1,7 @@
  package org.monieo.monieoclient.gui;
 
 import java.awt.Font;
+import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -109,7 +110,7 @@ public class UI {
 			    Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
 			    if (result.toString() != null) {
 			    	String resp = Monieo.INSTANCE.createWallet(result.toString());
-			    	JOptionPane.showConfirmDialog(frame, resp);
+			    	JOptionPane.showMessageDialog(frame, resp, "Info", 1);
 			    	
 			    	String[] walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
 			    	
