@@ -262,6 +262,8 @@ public class Monieo {
 			
 		}
 		
+		myWallets.add(w);
+		
 		return "Wallet " + nick + " created!";
 		
 	}
