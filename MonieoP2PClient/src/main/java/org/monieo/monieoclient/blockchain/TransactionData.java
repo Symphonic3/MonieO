@@ -3,8 +3,6 @@ package org.monieo.monieoclient.blockchain;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.monieo.monieoclient.Monieo;
-
 public class TransactionData extends MonieoDataObject{
 	
 	public final WalletAdress from;
@@ -59,8 +57,34 @@ public class TransactionData extends MonieoDataObject{
 
 	@Override
 	boolean testValidity() {
-		// TODO Auto-generated method stub
-		return false;
+		
+		if (!from.isValid() || !to.isValid()) return false;
+		
+		return true;
+		
+	}
+	
+	public boolean testValidityWithEffectiveMeta(BlockMetadata m, long timetest) {
+		
+		if (!testValidityWithTime(timetest)) return false;
+		
+		BigDecimal bal = m.balance(from);
+		
+		if (amount.add(fee).compareTo(bal) == 1) return false;
+		
+		return true;
+		
+	}
+	
+	public boolean testValidityWithTime(long timetest) {
+		
+		if (!validate()) return false;
+		
+		if (timetest > timestamp + 86400000); //1d
+		if (timetest + 7200000 < timestamp) return false; //2h
+		
+		return true;
+		
 	}
 	
 }

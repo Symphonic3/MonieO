@@ -463,16 +463,39 @@ public class Monieo {
 
     public static KeyPair deserializeKeyPair(String pub, String priv) {
     	
+    	return new KeyPair(deserializePublicKey(pub), deserializePrivateKey(priv));
+    	
+    }
+    
+    public static PublicKey deserializePublicKey(String pub) {
+    	
     	try {
     		
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			
 			PublicKey pka = kf.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pub)));
-		    PrivateKey ska = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priv)));
-		        
-		    return new KeyPair(pka, ska);
+		    
+			return pka;
             
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	
+    	return null;
+    	
+    }
+    
+    public static PrivateKey deserializePrivateKey(String priv) {
+    	
+    	try {
+    		
+			KeyFactory kf = KeyFactory.getInstance("RSA");
+	    	
+		    PrivateKey ska = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priv)));
+		    
+			return ska;
+            
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
     	

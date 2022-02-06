@@ -2,6 +2,7 @@ package org.monieo.monieoclient.blockchain;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.PublicKey;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -23,6 +24,8 @@ public class Transaction extends AbstractTransaction {
 	}
 	
 	public static Transaction createNewTransaction(Wallet fundsOwner, WalletAdress to, BigDecimal amount, BigDecimal fee) {
+		
+		//TODO this
 		
 		BigInteger nonce = new BigInteger(String.valueOf(System.currentTimeMillis()) + String.valueOf(ThreadLocalRandom.current().nextInt()));
 		
@@ -72,8 +75,41 @@ public class Transaction extends AbstractTransaction {
 
 	@Override
 	boolean testValidity() {
-		// TODO Auto-generated method stub
+
+		if (!d.validate()) return false;
+		
+		if (!Monieo.sha256d(pubkey).equals(d.from.adress)) return false;
+		
+		PublicKey pk = Monieo.deserializePublicKey(pubkey);
+		
+		if (pk == null) return false;
+		try {
+			
+			if (Monieo.verifySignature(d.serialize(), signature, pk)) return true;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+
 		return false;
+		
+	}
+	
+	public boolean testValidityWithEffectiveMeta(BlockMetadata m, long timetest) {
+		
+		if (!testValidityWithTime(timetest)) return false;
+		
+		return d.testValidityWithEffectiveMeta(m, timetest);
+		
+	}
+	
+	public boolean testValidityWithTime(long timetest) {
+		
+		if (!validate()) return false;
+		
+		return d.testValidityWithTime(timetest);
+		
 	}
 	
 }

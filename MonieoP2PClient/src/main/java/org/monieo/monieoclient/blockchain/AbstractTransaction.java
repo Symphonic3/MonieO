@@ -20,6 +20,4 @@ public abstract class AbstractTransaction extends MonieoDataObject{
 		
 	}
 	
-	public abstract boolean expired();
-	
 }

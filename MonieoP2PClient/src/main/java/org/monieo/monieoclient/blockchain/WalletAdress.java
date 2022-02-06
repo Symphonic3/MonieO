@@ -17,13 +17,5 @@ public class WalletAdress {
 		return adress.length() == 64;
 		
 	}
-	
-	//computationally expensive method, not cached!
-	public BigDecimal getAvailableBalance() {
-		
-		//TODO this
-		return null;
-		
-	}
 
 }
