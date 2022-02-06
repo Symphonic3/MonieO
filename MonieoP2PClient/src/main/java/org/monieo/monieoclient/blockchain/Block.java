@@ -1,5 +1,10 @@
 package org.monieo.monieoclient.blockchain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.monieo.monieoclient.Monieo;
+
 public class Block extends MonieoDataObject{
 	
 	public final BlockHeader header;
@@ -60,8 +65,53 @@ public class Block extends MonieoDataObject{
 
 	@Override
 	boolean testValidity() {
-		// TODO Auto-generated method stub
-		return false;
+		
+		if (transactions.length == 0) return false;
+		if (!merkle().equals(header.merkleRoot)) return false;
+		if (!header.validate()) return false;
+		for (AbstractTransaction t : transactions) {
+			
+			if (!t.validate()) return false;
+			if (t.expired()) return false;
+			
+		}
+		
+		return true;
+		
+	}
+	
+	public String merkle() {
+		
+		List<String> hashes = new ArrayList<String>();
+		
+		for (int i = 0; i < transactions.length; i++) {
+			
+			hashes.add(transactions[i].hash());
+			
+			if (i == transactions.length-1 && (transactions.length % 2 == 1)) {
+				
+				hashes.add(transactions[i].hash());
+				
+			}
+			
+		}
+		
+		while (hashes.size() != 1) {
+			
+			List<String> hashesn = new ArrayList<String>();
+			
+			for (int i = 0; i < hashes.size(); i+=2) {
+				
+				hashesn.add(Monieo.sha256d(hashes.get(i) + hashes.get(i+1)));
+				
+			}
+			
+			hashes = hashesn;
+			
+		}
+	
+		return hashes.get(0);
+		
 	}
 	
 	public String hash() {

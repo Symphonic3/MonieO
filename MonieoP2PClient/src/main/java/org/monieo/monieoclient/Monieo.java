@@ -40,7 +40,7 @@ public class Monieo {
 	public static int MAX_INCOMING_CONNECTIONS = 10;
 	
 	public static int CONFIRMATIONS = 5;
-	public static int CONFIRMATIONS_DISCARD_BLOCK = 30;
+	public static int CONFIRMATIONS_DISCARD_BLOCK = 60; //TODO if we get a new block that attempts to extend the blockchain past this point, discard it
 	
 	public static Monieo INSTANCE;
 	
@@ -222,6 +222,14 @@ public class Monieo {
 		
 	}
 
+	public long getNetAdjustedTime() {
+		
+		//TODO IMPORTANT! MAKE THIS WORK!
+		
+		return System.currentTimeMillis();
+		
+	}
+	
 	public void handleBlock(Block b) {
 		
 		if (!b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
