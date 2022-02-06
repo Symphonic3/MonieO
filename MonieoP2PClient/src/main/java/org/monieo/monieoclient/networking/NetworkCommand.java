@@ -11,7 +11,7 @@ public class NetworkCommand {
 		REQUEST_NODES,
 		REQUEST_TIME,
 		SEND_TRANSACTION,
-		SEND_BLOCKS,
+		SEND_BLOCK,
 		SEND_ADRESSES,
 		SEND_TIME
 			
@@ -33,7 +33,7 @@ public class NetworkCommand {
 	
 	public String serialize() {
 		
-		return String.join("\n", String.join(" ", magicn, ver, cmd.toString()), data);
+		return String.join("\n", String.join(" ", magicn, ver, cmd.toString()), data == null ? "" : data);
 		
 	}
 	
@@ -42,10 +42,21 @@ public class NetworkCommand {
 		try {
 			
 			int ind = s.indexOf("\n");
+			if (ind == -1) ind = s.length();
 			
 			String[] netinfo = s.substring(0, ind).split(" ");
 			
-			String data = s.substring(ind+2);
+			String data;
+			
+			try {
+				
+				data = s.substring(ind+2);
+				
+			} catch (IndexOutOfBoundsException e) {
+				
+				data = "";
+				
+			}
 			
 			NetworkCommandType nct = NetworkCommandType.valueOf(netinfo[2]);
 			
