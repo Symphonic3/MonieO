@@ -4,19 +4,61 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 
 public class Node implements Runnable{
 	
+	public class PacketCommitment {
+		
+		public boolean isFilled = false;
+		public long timeMax;
+		
+		Predicate<NetworkCommand> test;
+		
+		public PacketCommitment(Predicate<NetworkCommand> testResponse) {
+			
+			timeMax = System.currentTimeMillis() + MIN_RESPONSE_TIME;
+			this.test = testResponse;
+			
+		}
+		
+		public boolean attemptFillShouldBanNode(NetworkCommand nc) {
+			
+			if (test.test(nc)) {
+				
+				isFilled = true;
+				return false;
+				
+			} else {
+				
+				if (System.currentTimeMillis() > timeMax) {
+					
+					return true;
+					
+				}
+				
+				return false;
+				
+			}
+			
+		}
+		
+	}
+	
 	private Socket socket;
 	
 	private boolean remoteAcknowledgedLocal = false;
 	private boolean localAcknowledgedRemote = false;
-	public long minResponseTime = Long.MAX_VALUE;
+	public static long MIN_RESPONSE_TIME = 15000;
+	
+	public volatile boolean busy = false;
+	public Vector<PacketCommitment> packetCommitments = new Vector<PacketCommitment>();
 	
 	public Vector<Consumer<Node>> queue = new Vector<Consumer<Node>>();
 	
@@ -60,7 +102,7 @@ public class Node implements Runnable{
 		
 	}
 	
-	public void sendNetworkCommand(NetworkCommand nc) {
+	public void sendNetworkCommand(NetworkCommand nc, PacketCommitment pc) {
 		
 		queueAction(new Consumer<Node>() {
 
@@ -77,21 +119,56 @@ public class Node implements Runnable{
 			
 		});
 		
+		if (pc == null) return;
+		
+		if (packetCommitments.size() > 0) packetCommitments.insertElementAt(pc, 0); else packetCommitments.add(pc);
+		
 	}
 
 	@Override
 	public void run() {
-		
-		InputStream in;
-		OutputStream out;
-		
+
 		try {
 
-			in = socket.getInputStream();
-			out = socket.getOutputStream();
+			InputStream in = socket.getInputStream();
+			OutputStream out = socket.getOutputStream();
 			
-		} catch (IOException e) {
+			while (true) {
+				
+				if (!queue.isEmpty()) {
+					
+					busy = true;
+					
+					for (Consumer<Node> a : queue) {
+						
+						a.accept(this);
+						
+					}
+					
+					busy = false;
+					
+				}
+				
+				queue.clear();
+				
+				NetworkCommand nc = null;
+				
+				String s = new String(in.readAllBytes(), "UTF8");
+				
+				nc = NetworkCommand.deserialize(s);
+
+				if (nc == null || !Monieo.assertSupportedProtocol(new String[] {nc.magicn, nc.ver}) || !handle(nc)) {
+					
+					infraction();
+					continue;
+					
+				}
+				
+			}
 			
+		} catch (Exception e) {
+			
+			//TODO possibly infraction here?
 			disconnect();
 			
 			e.printStackTrace();
@@ -100,60 +177,39 @@ public class Node implements Runnable{
 			
 		}
 		
-		while (true) {
+	}
+	
+	public boolean handle(NetworkCommand nc) {
+		
+		for (PacketCommitment pc : packetCommitments) {
 			
-			if (!queue.isEmpty()) {
-				
-				for (Consumer<Node> a : queue) {
-					
-					a.accept(this);
-					
-				}
-				
-			}
-			
-			queue.clear();
-			
-			NetworkCommand nc = null;
-			
-			try {
-				
-				if (in.available() != 0) {
-					
-					String s = new String(in.readAllBytes(), "UTF8");
-					
-					nc = NetworkCommand.deserialize(s);
-					
-				}
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			if (pc.attemptFillShouldBanNode(nc)) {
 
-			if (nc == null || !Monieo.assertSupportedProtocol(new String[] {nc.magicn, nc.ver}) || !handle(nc)) {
-				
-				infraction();
-				continue;
+				return false;
 				
 			}
 			
 		}
 		
-	}
-	
-	public boolean handle(NetworkCommand nc) {
-		
 		if (nc.cmd == NetworkCommandType.SEND_VER) {
 			
 			if (!localAcknowledgedRemote) {
 				
-				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.ACK_VER, null));
+				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.ACK_VER, null), null);
 				
 				localAcknowledgedRemote = true;
 				
 				if (!remoteAcknowledgedLocal) {
 					
-					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_VER, null));
+					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_VER, null),
+							new PacketCommitment(new Predicate<NetworkCommand>() {
+
+								@Override
+								public boolean test(NetworkCommand t) {
+									return (t.cmd == NetworkCommandType.ACK_VER);
+								}
+								
+							}));
 					
 				}
 				
