@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
@@ -212,10 +213,10 @@ public class Monieo {
         ui = new UI();
         ui.initialize();
         
-        blocksFolder = new File(blocksFolder.getPath() + "/blocks");
+        blocksFolder = new File(workingFolder.getPath() + "/blocks");
         blocksFolder.mkdir();
 		
-		blockMetadataFolder = new File(blockMetadataFolder.getPath() + "/blockmeta");
+		blockMetadataFolder = new File(workingFolder.getPath() + "/blockmeta");
 		blockMetadataFolder.mkdir();
 
 		handleBlock(genesis());
@@ -256,6 +257,8 @@ public class Monieo {
 			String ph = b.header.preHash;
 			
 			File prevBlockMetaFile = new File(blockMetadataFolder.getPath() + "/" + ph + ".blkmeta");
+			
+			HashMap<WalletAdress, BigDecimal> balances = new HashMap<WalletAdress, BigDecimal>();
 			
 			if (prevBlockMetaFile.exists()) {
 				
