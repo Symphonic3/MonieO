@@ -60,6 +60,9 @@ public class TransactionData extends MonieoDataObject{
 		
 		if (!from.isValid() || !to.isValid()) return false;
 		
+		if (amount.signum() != 1 || amount.scale() > 8) return false;
+		if (fee.signum() != 1 || fee.scale() > 8) return false;
+		
 		return true;
 		
 	}

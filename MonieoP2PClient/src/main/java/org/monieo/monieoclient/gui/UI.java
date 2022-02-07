@@ -212,11 +212,15 @@ public class UI {
 		sentTrnt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
+					//TODO sanitize data and do pending in/out money. Client should allow you to create transactions spending funds that are already sent in other transactions,
+					//TODO but not without warning first. Client should also track the expiry of generated transactions and un-pend funds that do not make it into blocks
+					//TODO warning/confirmation about transaction
+					
 					Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
 					Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new WalletAdress(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
 					NetworkCommand netCommand = new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_TRANSACTION, newTransaction.serialize());
 					for (Node node : Monieo.INSTANCE.nodes) {
-						node.sendNetworkCommand(netCommand, /*what the frikp iis a packet commitment*/null);
+						node.sendNetworkCommand(netCommand, null);
 					}
 					
 				} catch (Exception e2) {

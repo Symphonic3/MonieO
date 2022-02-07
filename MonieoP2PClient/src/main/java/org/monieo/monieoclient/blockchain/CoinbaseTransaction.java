@@ -25,7 +25,7 @@ public class CoinbaseTransaction extends AbstractTransaction{
 
 	@Override
 	boolean testValidity() {
-		// TODO check coinbase amount
+		// TODO check coinbase amount & sign & decimal precision
 		return true;
 	}
 	
