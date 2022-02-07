@@ -270,7 +270,7 @@ public class Monieo {
 				
 			} else {
 				
-				//we should request this so-called previous block
+				//we should request this so-called previous block, possibly, at some point
 				
 			}
 			

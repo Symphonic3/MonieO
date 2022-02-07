@@ -72,7 +72,7 @@ public class Block extends MonieoDataObject{
 		for (AbstractTransaction t : transactions) {
 			
 			if (!t.validate()) return false;
-			if (t.expired()) return false;
+			//if (t.expired()) return false;
 			
 		}
 		
