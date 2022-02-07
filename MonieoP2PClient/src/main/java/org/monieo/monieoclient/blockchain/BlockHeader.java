@@ -54,7 +54,7 @@ public class BlockHeader extends MonieoDataObject{
 
 	@Override
 	boolean testValidity() {
-		// TODO Auto-generated method stub na dverify that wallets are  v vkllpaliud
+		// TODO Auto-generated method stub
 		return true;
 	}
 	
