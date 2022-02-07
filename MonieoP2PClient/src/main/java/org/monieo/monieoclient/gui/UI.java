@@ -38,6 +38,9 @@ import javax.swing.event.ListSelectionListener;
 import org.apache.commons.io.comparator.DirectoryFileComparator;
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.Transaction;
+import org.monieo.monieoclient.blockchain.WalletAdress;
+import org.monieo.monieoclient.networking.NetworkCommand;
+import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 import org.monieo.monieoclient.wallet.Wallet;
 import javax.swing.JTextField;
 
@@ -206,11 +209,13 @@ public class UI {
 		sentTrnt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					
-					//Transaction t = new Transaction();
+					Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+					Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new WalletAdress(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
+					NetworkCommand netCommand = new NetworkCommand(Monieo.MAGIC_NUMBERS, String.valueOf(Monieo.VERSION), NetworkCommandType.SEND_TRANSACTION, newTransaction.serialize());
 					
 				} catch (Exception e2) {
 					System.out.println("invalid data entered fatty");
+					e2.printStackTrace();
 				}
 			}
 		});
@@ -246,7 +251,7 @@ public class UI {
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			    Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
-			    if (result.toString() != null) {
+			    if (result!= null) {
 			    	String resp = Monieo.INSTANCE.createWallet(result.toString());
 			    	JOptionPane.showMessageDialog(frame, resp, "Info", 1);
 			    	
