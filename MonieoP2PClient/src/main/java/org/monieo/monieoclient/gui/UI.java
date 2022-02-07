@@ -1,14 +1,19 @@
  package org.monieo.monieoclient.gui;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Panel;
+import java.awt.Toolkit;
+import java.awt.Dialog.ModalityType;
 import java.awt.TrayIcon.MessageType;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
@@ -18,15 +23,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
@@ -46,6 +56,7 @@ import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 import org.monieo.monieoclient.networking.Node.PacketCommitment;
 import org.monieo.monieoclient.wallet.Wallet;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 public class UI {
 	private JFrame frame;
@@ -87,7 +98,10 @@ public class UI {
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
 			
-		JLabel lblNewLabel_1 = new JLabel("Total addresses:");
+		JTextField lblNewLabel_1 = new JTextField("Total addresses:");
+		lblNewLabel_1.setEditable(false);
+		lblNewLabel_1.setOpaque(false); //this is the same as a JLabel
+		lblNewLabel_1.setBorder(null); //remove the border
 		lblNewLabel_1.setBounds(208, 411, 96, 34);
 		frame.getContentPane().add(lblNewLabel_1);
 		
@@ -96,19 +110,65 @@ public class UI {
 		panel_1.setBounds(208, 0, 702, 400);
 		frame.getContentPane().add(panel_1);
 		
-		JLabel addressLabel = new JLabel("(address)");
+		JTextField addressLabel = new JTextField("(address)");
+		addressLabel.setEditable(false);
+		addressLabel.setOpaque(false); //this is the same as a JLabel
+		addressLabel.setBorder(null); //remove the border
 		addressLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		addressLabel.setBounds(144, 11, 529, 29);
+		
+		addressLabel.addMouseListener(new MouseAdapter() {
+			
+			 @Override
+             public void mouseClicked(MouseEvent e) {
+                StringSelection ss = new StringSelection(addressLabel.getText());
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
+                
+                JDialog jd = new JDialog();
+                jd.setSize(50, 15);
+                jd.setLocation(e.getLocationOnScreen());
+                jd.getContentPane().add(new JLabel("Copied!"));
+                jd.setUndecorated(true);
+                ((JPanel)jd.getContentPane()).setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                jd.setFocusable(false);
+                jd.setFocusableWindowState(false);
+                
+                jd.setModalityType(ModalityType.MODELESS);
+
+                jd.setVisible(true);
+                
+                new Timer().schedule(new TimerTask() {
+					
+					@Override
+					public void run() {
+						
+                		jd.setVisible(false);
+                        jd.dispose();
+						
+					}
+					
+				}, 1000);
+                
+             }
+			
+		});
+		
 		panel_1.add(addressLabel);
 		
-		JLabel nickLabel = new JLabel("(address nickname)");
+		JTextField nickLabel = new JTextField("(address nickname)");
+		nickLabel.setEditable(false);
+		nickLabel.setOpaque(false); //this is the same as a JLabel
+		nickLabel.setBorder(null); //remove the border
 		nickLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		nickLabel.setBounds(144, 51, 377, 29);
+		nickLabel.setBounds(144, 51, 331, 29);
 		panel_1.add(nickLabel);
 		
-		JLabel INDIVbalanceLabel = new JLabel("(address balance)");
+		JTextField INDIVbalanceLabel = new JTextField("(address balance)");
+		INDIVbalanceLabel.setEditable(false);
+		INDIVbalanceLabel.setOpaque(false); //this is the same as a JLabel
+		INDIVbalanceLabel.setBorder(null); //remove the border
 		INDIVbalanceLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		INDIVbalanceLabel.setBounds(144, 91, 385, 29);
+		INDIVbalanceLabel.setBounds(144, 91, 331, 29);
 		panel_1.add(INDIVbalanceLabel);
 		
 		JPanel panel = new JPanel();
@@ -117,7 +177,7 @@ public class UI {
 		panel.setLayout(null);
 		
 		btnChangeWalName = new JButton("Change wallet name");
-		btnChangeWalName.setBounds(480, 39, 160, 29);
+		btnChangeWalName.setBounds(480, 60, 160, 29);
 		panel_1.add(btnChangeWalName);
 		btnChangeWalName.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -140,7 +200,7 @@ public class UI {
 		btnChangeWalName.setVisible(false);
 		
 		btnDelWal = new JButton("Delete selected wallet");
-		btnDelWal.setBounds(480, 76, 160, 29);
+		btnDelWal.setBounds(480, 97, 160, 29);
 		panel_1.add(btnDelWal);
 		btnDelWal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
