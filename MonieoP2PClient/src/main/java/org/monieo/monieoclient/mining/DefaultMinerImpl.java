@@ -10,7 +10,8 @@ public class DefaultMinerImpl implements AbstractMiner{
 	
 	@Override
 	public void begin(Monieo m) {
-		// TODO Auto-generated method stub
+		
+		this.m = m;
 		
 	}
 
@@ -22,8 +23,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 
 	@Override
 	public Monieo getMonieoInstance() {
-		// TODO Auto-generated method stub
-		return null;
+		return m;
 	}
 
 	@Override
