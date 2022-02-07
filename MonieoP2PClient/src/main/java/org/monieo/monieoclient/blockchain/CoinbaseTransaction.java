@@ -25,8 +25,8 @@ public class CoinbaseTransaction extends AbstractTransaction{
 
 	@Override
 	boolean testValidity() {
-		// TODO Auto-generated method stub
-		return false;
+		// TODO check coinbase amount
+		return true;
 	}
 	
 	public static CoinbaseTransaction deserialize(String s) {

@@ -271,6 +271,10 @@ public class Monieo {
 			} else {
 				
 				//we should request this so-called previous block, possibly, at some point
+				//can't be bothered to implement this right now.
+				//TODO fix this, at some point
+				
+				return;
 				
 			}
 			
@@ -286,7 +290,7 @@ public class Monieo {
 		
 		String bh = sha256d(ct.serialize());
 		
-		return new Block(new BlockHeader(PROTOCOL_VERSION, MAGIC_NUMBERS, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1), ct);
+		return new Block(new BlockHeader(MAGIC_NUMBERS, PROTOCOL_VERSION, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1), ct);
 		
 	}
 	

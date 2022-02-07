@@ -65,7 +65,7 @@ public class Block extends MonieoDataObject{
 
 	@Override
 	boolean testValidity() {
-		
+
 		if (transactions.length == 0) return false;
 		if (!merkle().equals(header.merkleRoot)) return false;
 		if (!header.validate()) return false;
