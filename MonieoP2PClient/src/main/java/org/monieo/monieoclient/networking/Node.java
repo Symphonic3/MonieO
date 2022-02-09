@@ -291,7 +291,7 @@ public class Node implements Runnable{
 				
 			} else if (nc.cmd == NetworkCommandType.REQUEST_SINGLE_BLOCK) {
 				
-				//test
+
 				
 			}
 			
