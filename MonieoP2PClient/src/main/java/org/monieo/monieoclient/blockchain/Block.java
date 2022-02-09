@@ -25,6 +25,20 @@ public class Block extends MonieoDataObject{
 		this.transactions = transactions;
 		
 	}
+	
+	public static Block getByHash(String hash) {
+		
+		File f = new File(Monieo.INSTANCE.blocksFolder.getPath() + "/" + hash + ".blk");
+		
+		return Block.deserialize(Monieo.readFileData(f));
+		
+	}
+	
+	public Block getPrevious() {
+		
+		return getByHash(header.preHash);
+		
+	}
 
 	public String serialize() {
 

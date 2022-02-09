@@ -143,6 +143,8 @@ public class Monieo {
 	public File blocksFolder; 
 	public File blockMetadataFolder; 
 	
+	public File blkhighest;
+	
 	List<Socket> connections = new ArrayList<Socket>();
 	List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
 	
@@ -218,8 +220,38 @@ public class Monieo {
 		
 		blockMetadataFolder = new File(workingFolder.getPath() + "/blockmeta");
 		blockMetadataFolder.mkdir();
+		
+		blkhighest = new File(workingFolder.getPath() + "/.blkhighest");
+		
+		if (!blkhighest.exists()) {
+			
+			try {
+				blkhighest.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
-		handleBlock(genesis());
+			handleBlock(genesis());
+			
+		}
+		
+	}
+	
+	public void setHighestBlock(Block b) {
+		
+		try (FileWriter fw = new FileWriter(blkhighest, false)) {
+			
+			fw.write(b.hash());
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public Block getHighestBlock() {
+		
+		return Block.deserialize(readFileData(new File(blocksFolder.getPath() + "/" + readFileData(blkhighest) + ".blk")));
 		
 	}
 
@@ -251,6 +283,12 @@ public class Monieo {
 			
 		}
 		
+		if (b.header.height > getHighestBlock().header.height) {
+			
+			setHighestBlock(b);
+			
+		}
+		
 		b.generateMetadata();
 		
 	}
@@ -261,7 +299,7 @@ public class Monieo {
 		
 		String bh = sha256d(ct.serialize());
 		
-		return new Block(new BlockHeader(MAGIC_NUMBERS, PROTOCOL_VERSION, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1), ct);
+		return new Block(new BlockHeader(MAGIC_NUMBERS, PROTOCOL_VERSION, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1, 0), ct);
 		
 	}
 	

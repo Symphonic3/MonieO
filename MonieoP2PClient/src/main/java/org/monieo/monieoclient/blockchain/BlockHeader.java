@@ -11,20 +11,23 @@ public class BlockHeader extends MonieoDataObject{
 	public final long timestamp;
 	public final BigInteger nonce;
 	public final int amntTransactions;
+	public final long height;
 	
-	public BlockHeader(String mn, String pv, String p, String m, long t, BigInteger n, int a) {
+	public BlockHeader(String mn, String pv, String p, String m, long t, BigInteger n, int a, long h) {
 		super(mn, pv);
 		this.preHash = p;
 		this.merkleRoot = m;
 		this.timestamp = t;
 		this.nonce = n;
 		this.amntTransactions = a;
+		this.height = h;
 		
 	}
 
 	public String serialize() {
 
-		return String.join(" ", Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, preHash, merkleRoot, String.valueOf(timestamp), nonce.toString(), String.valueOf(amntTransactions));
+		return String.join(" ", Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION,
+				preHash, merkleRoot, String.valueOf(timestamp), nonce.toString(), String.valueOf(amntTransactions), String.valueOf(height));
 		
 	}
 
@@ -41,7 +44,8 @@ public class BlockHeader extends MonieoDataObject{
 					data[3],
 					Long.valueOf(data[4]),
 					new BigInteger(data[5]),
-					Integer.valueOf(data[6]));
+					Integer.valueOf(data[6]),
+					Long.valueOf(data[7]));
 			
 		} catch (Exception e) {
 			

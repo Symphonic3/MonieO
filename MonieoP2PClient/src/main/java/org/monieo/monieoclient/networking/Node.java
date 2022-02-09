@@ -5,12 +5,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 
 public class Node implements Runnable{
@@ -252,7 +254,46 @@ public class Node implements Runnable{
 				
 			} else return false;
 			
-		} else if (nc.cmd == NetworkCommandType.REQUEST_BLOCKS_AFTER) {
+		} else if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
+			
+			if (nc.cmd == NetworkCommandType.REQUEST_BLOCKS_AFTER) {
+				
+				String wantedHash = nc.data;
+				
+				List<String> hashes = new ArrayList<String>();
+				
+				Block b = Monieo.INSTANCE.getHighestBlock();
+				Block g = Monieo.genesis();
+				
+				while(true) {
+					
+					if (b.equals(g)) {
+						
+						//don't have block, sorry
+						return true;
+						
+					}
+					
+					if (!b.hash().equals(wantedHash)) {
+						
+						hashes.add(b.hash());
+						
+					} else break;
+					
+				}
+				
+				for (String s : hashes) {
+					
+					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, 
+							Block.getByHash(wantedHash).serialize()), null);
+					
+				}
+				
+			} else if (nc.cmd == NetworkCommandType.REQUEST_SINGLE_BLOCK) {
+				
+
+				
+			}
 			
 			//TODO do this here this one
 			
