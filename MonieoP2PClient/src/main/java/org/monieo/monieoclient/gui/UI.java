@@ -92,7 +92,6 @@ public class UI {
 	JButton BtnNEWADDRESS;
 	JLabel lblToggleExperimentalMining;
 	JLabel lblTotalBalance;
-	JScrollPane scrollPane_1;
 	JLabel label;
 	
 	public UI() {
@@ -269,7 +268,7 @@ public class UI {
 		Refresh();
 		
 		scrollPane = new JScrollPane(list);
-		scrollPane.setBounds(10, 11, 186, 434);
+		scrollPane.setBounds(10, 11, 186, 424);
 		scrollPane.createVerticalScrollBar();
         scrollPane.setLayout(new ScrollPaneLayout());
 		frame.getContentPane().add(scrollPane);
@@ -357,13 +356,10 @@ public class UI {
 		frame.getContentPane().add(BtnNEWADDRESS);
 		
 		lblToggleExperimentalMining = new JLabel("Toggle experimental mining (CPU only):");
-		lblToggleExperimentalMining.setBounds(474, 406, 188, 445);
+		lblToggleExperimentalMining.setBounds(474, 414, 188, 29);
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
 		lblTotalBalance = new JLabel("Total balance:");
-		scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBounds(10, 11, 188, 429);
-		frame.getContentPane().add(scrollPane_1);
 		
 		lblTotalBalance.setBounds(758, 406, 76, 44);
 		frame.getContentPane().add(lblTotalBalance);
