@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -104,6 +105,26 @@ public class Node implements Runnable{
 	public void queueAction(Consumer<Node> a) {
 		
 		if (queue.size() > 0) queue.insertElementAt(a, 0); else queue.add(a);
+		
+	}
+	
+	public static void propagateAll(NetworkCommand nc, PacketCommitment pc) {
+		
+		Monieo.INSTANCE.nodes.forEach(new Consumer<Node>() {
+
+			@Override
+			public void accept(Node t) {
+				t.sendNetworkCommand(nc, pc);
+				
+			}
+			
+		});
+		
+	}
+	
+	public static Node randomNode() {
+		
+		return Monieo.INSTANCE.nodes.get(ThreadLocalRandom.current().nextInt(Monieo.INSTANCE.nodes.size()));
 		
 	}
 	
