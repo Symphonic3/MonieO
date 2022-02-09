@@ -175,7 +175,7 @@ public class Node implements Runnable{
 			
 		} catch (Exception e) {
 			
-			//TODO possibly infraction here?
+			//possibly infraction here?
 			disconnect();
 			
 			e.printStackTrace();
