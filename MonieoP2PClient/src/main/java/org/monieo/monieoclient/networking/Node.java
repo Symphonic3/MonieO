@@ -291,7 +291,13 @@ public class Node implements Runnable{
 				
 			} else if (nc.cmd == NetworkCommandType.REQUEST_SINGLE_BLOCK) {
 				
-
+				Block b = Block.getByHash(nc.data);
+				
+				if (b != null && b.validate()) {
+					
+					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
+					
+				}
 				
 			}
 			

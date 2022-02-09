@@ -531,6 +531,8 @@ public class Monieo {
     
     public static String readFileData(File f) {
     	
+    	if (f == null || !f.exists()) return null;
+    	
     	try (Scanner c = new Scanner(f)) {
     		
     		String ret = "";
