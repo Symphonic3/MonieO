@@ -1,6 +1,7 @@
  package org.monieo.monieoclient.gui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Dialog.ModalityType;
@@ -12,8 +13,11 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Consumer;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -432,11 +436,35 @@ public class UI {
 		TgBtnTOGGLEMINING.setBackground(highlight);
 		TgBtnTOGGLEMINING.setForeground(text);
 		
-		scrollPane.getVerticalScrollBar().setBackground(main);
-		scrollPane.getVerticalScrollBar().setForeground(highlight);
+		scrollPane.getVerticalScrollBar().setBackground(highlight);
+		scrollPane.getVerticalScrollBar().setForeground(text);
 		
-		scrollPane.getHorizontalScrollBar().setBackground(main);
-		scrollPane.getHorizontalScrollBar().setForeground(highlight);
+		new ArrayList<Component>(Arrays.asList(scrollPane.getVerticalScrollBar().getComponents())).forEach(new Consumer<Component>() {
+
+			@Override
+			public void accept(Component t) {
+				
+				t.setBackground(highlight);
+				t.setForeground(text);
+				
+			}
+
+		});
+		
+		scrollPane.getHorizontalScrollBar().setBackground(highlight);
+		scrollPane.getHorizontalScrollBar().setForeground(text);
+		
+		new ArrayList<Component>(Arrays.asList(scrollPane.getHorizontalScrollBar().getComponents())).forEach(new Consumer<Component>() {
+
+			@Override
+			public void accept(Component t) {
+				
+				t.setBackground(highlight);
+				t.setForeground(text);
+				
+			}
+
+		});
 
 		
 		frame.repaint();
