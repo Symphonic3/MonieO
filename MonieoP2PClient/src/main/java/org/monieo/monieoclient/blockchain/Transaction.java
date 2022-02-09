@@ -78,6 +78,7 @@ public class Transaction extends AbstractTransaction {
 	@Override
 	boolean testValidity() {
 
+		if (d == null) return false;
 		if (!d.validate()) return false;
 		
 		if (!Monieo.sha256d(pubkey).equals(d.from.adress)) return false;

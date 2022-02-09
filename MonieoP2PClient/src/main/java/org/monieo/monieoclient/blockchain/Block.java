@@ -77,9 +77,11 @@ public class Block extends MonieoDataObject{
 
 		if (transactions.length == 0) return false;
 		if (!merkle().equals(header.merkleRoot)) return false;
+		if (header == null) return false;
 		if (!header.validate()) return false;
 		for (AbstractTransaction t : transactions) {
 			
+			if (t == null) return false;
 			if (!t.validate()) return false;
 			//if (t.expired()) return false;
 			

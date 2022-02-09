@@ -233,7 +233,7 @@ public class Monieo {
 	
 	public void handleBlock(Block b) {
 		
-		if (!b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
+		if (b == null || !b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
 		
 		String blockname = b.hash();
 		
