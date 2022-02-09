@@ -1,35 +1,22 @@
  package org.monieo.monieoclient.gui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
-import java.awt.Panel;
 import java.awt.Toolkit;
 import java.awt.Dialog.ModalityType;
-import java.awt.TrayIcon.MessageType;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -37,30 +24,20 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
-import javax.swing.ListSelectionModel;
-import javax.swing.LookAndFeel;
 import javax.swing.ScrollPaneLayout;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.apache.commons.io.comparator.DirectoryFileComparator;
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.blockchain.WalletAdress;
 import org.monieo.monieoclient.networking.NetworkCommand;
 import org.monieo.monieoclient.networking.Node;
-import org.monieo.monieoclient.networking.ServerConnectionHandler;
 import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
-import org.monieo.monieoclient.networking.Node.PacketCommitment;
 import org.monieo.monieoclient.wallet.Wallet;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 
 public class UI {
 	private JFrame frame;
@@ -93,6 +70,7 @@ public class UI {
 	JLabel lblToggleExperimentalMining;
 	JLabel lblTotalBalance;
 	JLabel label;
+	JToggleButton TgBtnTOGGLEMINING;
 	
 	public UI() {
 	}
@@ -114,7 +92,7 @@ public class UI {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		JToggleButton TgBtnTOGGLEMINING = new JToggleButton("Off");
+		TgBtnTOGGLEMINING = new JToggleButton("Off");
 		TgBtnTOGGLEMINING.setBounds(672, 417, 76, 23);
 		//TgBtnTOGGLEMINING.addActionListener(new ActionListener() {
 
@@ -137,7 +115,7 @@ public class UI {
 		addressLabel.setOpaque(false); //this is the same as a JLabel
 		addressLabel.setBorder(null); //remove the border
 		addressLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		addressLabel.setBounds(144, 11, 529, 29);
+		addressLabel.setBounds(144, 11, 496, 29);
 		
 		addressLabel.addMouseListener(new MouseAdapter() {
 			
@@ -290,7 +268,7 @@ public class UI {
 		
 		//what is a trnt and why is it already sent
 		sentTrnt = new JButton("Send transaction");
-		sentTrnt.setBounds(84, 191, 123, 23);
+		sentTrnt.setBounds(84, 191, 144, 23);
 		panel.add(sentTrnt);
 		sentTrnt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -340,6 +318,16 @@ public class UI {
 		textField_2.setBounds(84, 145, 491, 20);
 		panel.add(textField_2);
 		
+		JButton btnNewButton = new JButton("New button");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				toggleDarkMode();
+			}
+		});
+		
+		btnNewButton.setBounds(650, 11, 23, 23);
+		panel_1.add(btnNewButton);
+		
 		BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -371,9 +359,7 @@ public class UI {
 		frame.setResizable(false);
 		
 		panel.setVisible(false);
-		
-		setDarkMode(false);
-		
+				
 		frame.setVisible(true);
 		
 	}
@@ -391,28 +377,68 @@ public class UI {
     	
 	}
 	
-	public void setDarkMode(boolean dark) {
+	public void toggleDarkMode() {
 		
-		//TODO do this
-		
-		/*try {
-			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-				| UnsupportedLookAndFeelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		
-		/*if (dark) {
-			
-			setColors(new Color(33, 33, 33), new Color(48, 48, 48), new Color(255, 255, 255));
-			
-		} else {
-			
-			setColors(new Color(222, 222, 222), new Color(255, 255, 255), new Color(0, 0, 0));
-			
-		}*/
-		
+		setColors(new Color(33, 33, 33), new Color(48, 48, 48), new Color(255, 255, 255));
 	}
 	
+	void setColors(Color main, Color highlight, Color text) {
+		
+		//main components
+		frame.getContentPane().setBackground(main);
+		panel.setBackground(main);
+		panel_1.setBackground(main);
+		scrollPane.setBackground(main);
+		list.setBackground(main);
+		list.setForeground(text);
+		
+		//text labels
+		lblNewLabel.setForeground(text);
+		LblADDRESSES.setForeground(text);
+		lblFee.setForeground(text);
+		lblNewLabel_1.setForeground(text);
+		lblTotalBalance.setForeground(text);
+		lblToggleExperimentalMining.setForeground(text);
+		lblTransactionAmount.setForeground(text);
+		label_1.setForeground(text);
+		label_3.setForeground(text);
+		label_5.setForeground(text);
+		addressLabel.setForeground(text);
+		INDIVbalanceLabel.setForeground(text);
+		nickLabel.setForeground(text);
+		label.setForeground(text);
+
+		//things
+		textField.setBackground(highlight);
+		textField_1.setBackground(highlight);
+		textField_2.setBackground(highlight);
+		textField.setForeground(text);
+		textField_1.setForeground(text);
+		textField_2.setForeground(text);
+		
+		//buttoibns
+		sentTrnt.setBackground(highlight);
+		sentTrnt.setForeground(text);
+		
+		btnChangeWalName.setBackground(highlight);
+		btnChangeWalName.setForeground(text);
+		
+		btnDelWal.setBackground(highlight);
+		btnDelWal.setForeground(text);
+		
+		BtnNEWADDRESS.setBackground(highlight);
+		BtnNEWADDRESS.setForeground(text);
+		
+		TgBtnTOGGLEMINING.setBackground(highlight);
+		TgBtnTOGGLEMINING.setForeground(text);
+		
+		scrollPane.getVerticalScrollBar().setBackground(main);
+		scrollPane.getVerticalScrollBar().setForeground(highlight);
+		
+		scrollPane.getHorizontalScrollBar().setBackground(main);
+		scrollPane.getHorizontalScrollBar().setForeground(highlight);
+
+		
+		frame.repaint();
+	}
 }
