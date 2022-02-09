@@ -60,6 +60,8 @@ public class Node implements Runnable{
 	public volatile boolean busy = false;
 	public Vector<PacketCommitment> packetCommitments = new Vector<PacketCommitment>();
 	
+	private boolean kill = false;
+	
 	public Vector<Consumer<Node>> queue = new Vector<Consumer<Node>>();
 	
 	public Node(Socket s) {
@@ -87,6 +89,8 @@ public class Node implements Runnable{
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+		Monieo.INSTANCE.nodes.remove(this);
+		kill = true;
 		
 	}
 	
@@ -94,6 +98,7 @@ public class Node implements Runnable{
 		
 		Monieo.INSTANCE.fetchByAdress(getAdress()).ban();
 		disconnect();
+		
 	}
 	
 	public void queueAction(Consumer<Node> a) {
@@ -134,6 +139,8 @@ public class Node implements Runnable{
 			OutputStream out = socket.getOutputStream();
 			
 			while (true) {
+				
+				if (kill) return;
 				
 				if (!queue.isEmpty()) {
 					
@@ -183,9 +190,10 @@ public class Node implements Runnable{
 		
 		for (PacketCommitment pc : packetCommitments) {
 			
-			if (pc.attemptFillShouldBanNode(nc)) {
+			if (pc.attemptFillShouldBanNode(nc)) { //disconnects node instead of banning, as this is only indicitive that the node is disconnected, not nessecarily that it is uncooperative
 
-				return false;
+				disconnect();
+				return true;
 				
 			}
 			

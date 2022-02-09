@@ -71,7 +71,7 @@ public class TransactionData extends MonieoDataObject{
 		
 		if (!testValidityWithTime(timetest)) return false;
 		
-		BigDecimal bal = m.balance(from);
+		BigDecimal bal = BlockMetadata.getSpendableBalance(m.getFullTransactions(from));
 		
 		if (amount.add(fee).compareTo(bal) == 1) return false;
 		
