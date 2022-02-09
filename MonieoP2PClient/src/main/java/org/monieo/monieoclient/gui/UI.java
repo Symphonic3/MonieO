@@ -33,6 +33,7 @@ import javax.swing.JToggleButton;
 import javax.swing.ScrollPaneLayout;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.Transaction;
@@ -75,6 +76,8 @@ public class UI {
 	JLabel lblTotalBalance;
 	JLabel label;
 	JToggleButton TgBtnTOGGLEMINING;
+	
+	public boolean modeToggleStatus;
 	
 	public UI() {
 	}
@@ -363,7 +366,9 @@ public class UI {
 		frame.setResizable(false);
 		
 		panel.setVisible(false);
-				
+		
+		setColors(new Color(222, 222, 222), new Color(255, 255, 255), new Color(0, 0, 0));
+		
 		frame.setVisible(true);
 		
 	}
@@ -382,8 +387,12 @@ public class UI {
 	}
 	
 	public void toggleDarkMode() {
-		
-		setColors(new Color(33, 33, 33), new Color(48, 48, 48), new Color(255, 255, 255));
+		if (!modeToggleStatus) {
+			setColors(new Color(54,57,63), new Color(64,68,75), new Color(255, 255, 255));
+		} else {
+            setColors(new Color(222, 222, 222), new Color(255, 255, 255), new Color(0, 0, 0));
+		}
+		modeToggleStatus = !modeToggleStatus;
 	}
 	
 	void setColors(Color main, Color highlight, Color text) {
@@ -392,8 +401,8 @@ public class UI {
 		frame.getContentPane().setBackground(main);
 		panel.setBackground(main);
 		panel_1.setBackground(main);
-		scrollPane.setBackground(main);
-		list.setBackground(main);
+		scrollPane.setBackground(highlight);
+		list.setBackground(highlight);
 		list.setForeground(text);
 		
 		//text labels
@@ -439,33 +448,29 @@ public class UI {
 		scrollPane.getVerticalScrollBar().setBackground(highlight);
 		scrollPane.getVerticalScrollBar().setForeground(text);
 		
-		new ArrayList<Component>(Arrays.asList(scrollPane.getVerticalScrollBar().getComponents())).forEach(new Consumer<Component>() {
-
+		scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+			
 			@Override
-			public void accept(Component t) {
-				
-				t.setBackground(highlight);
-				t.setForeground(text);
-				
+			protected void configureScrollBarColors() {
+				this.trackColor = main;
+				this.thumbDarkShadowColor = highlight;
+				this.thumbHighlightColor = main;
 			}
-
 		});
 		
-		scrollPane.getHorizontalScrollBar().setBackground(highlight);
-		scrollPane.getHorizontalScrollBar().setForeground(text);
-		
-		new ArrayList<Component>(Arrays.asList(scrollPane.getHorizontalScrollBar().getComponents())).forEach(new Consumer<Component>() {
-
+		scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
+			
 			@Override
-			public void accept(Component t) {
-				
-				t.setBackground(highlight);
-				t.setForeground(text);
-				
+			protected void configureScrollBarColors() {
+				this.trackColor = main;
+				this.thumbDarkShadowColor = highlight;
+				this.thumbHighlightColor = main;
 			}
-
 		});
-
+		
+		
+		
+		
 		
 		frame.repaint();
 	}
