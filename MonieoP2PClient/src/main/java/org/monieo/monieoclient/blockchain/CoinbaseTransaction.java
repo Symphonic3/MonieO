@@ -25,8 +25,17 @@ public class CoinbaseTransaction extends AbstractTransaction{
 
 	@Override
 	boolean testValidity() {
-		// TODO check coinbase amount & sign & decimal precision
-		return true;
+		return false;
+	}
+	
+	public boolean validate(Block b) {
+		
+		if (amount.signum() != 1 || amount.scale() > 8) return false;
+		
+		if (amount.compareTo(b.getMaxCoinbase()) != 1) return true;
+		
+		return false;
+		
 	}
 	
 	public static CoinbaseTransaction deserialize(String s) {

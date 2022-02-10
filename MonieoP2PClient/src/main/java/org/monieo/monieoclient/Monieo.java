@@ -10,10 +10,13 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
@@ -26,6 +29,8 @@ import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
 import org.monieo.monieoclient.blockchain.WalletAdress;
 import org.monieo.monieoclient.gui.UI;
+import org.monieo.monieoclient.mining.TxPool;
+import org.monieo.monieoclient.networking.ConnectionHandler;
 import org.monieo.monieoclient.networking.NetAdressHolder;
 import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
@@ -152,6 +157,10 @@ public class Monieo {
 	
 	public Vector<Node> nodes = new Vector<Node>();
 	
+	public TxPool txp;
+	
+	public ConnectionHandler ch;
+	
 	public Monieo() {
 		
 		INSTANCE = this;
@@ -235,6 +244,40 @@ public class Monieo {
 			
 		}
 		
+		txp = new TxPool();
+		
+		ch = new ConnectionHandler();
+		new Thread(ch).run();
+		
+		new Timer().schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				
+				int amntns = 0;
+				
+				for (Node n : nodes) {
+					
+					if (!n.isServer()) amntns++;
+					
+				}
+				
+				if (amntns < MAX_OUTGOING_CONNECTIONS) {
+					
+					List<String> rn = getValidNodesRightNow();
+					
+					for (int i = 0; i < amntns; i++) {
+						
+						ch.connect(rn.get(i));
+						
+					}
+					
+				}
+				
+			}
+			
+		}, 1000);
+		
 	}
 	
 	public void setHighestBlock(Block b) {
@@ -283,7 +326,7 @@ public class Monieo {
 			
 		}
 		
-		if (b.header.height > getHighestBlock().header.height) {
+		if (getHighestBlock() == null || b.header.height > getHighestBlock().header.height) {
 			
 			setHighestBlock(b);
 			
@@ -403,6 +446,26 @@ public class Monieo {
 		
 	}
 	
+	public List<String> getValidNodesRightNow() {
+		
+		pruneKnownNodes();
+		
+		List<String> ad = new ArrayList<String>();
+		
+		for (NetAdressHolder nah : knownNodes) {
+			
+			if (!nah.isBanned()) ad.add(nah.adress);
+			
+		}
+		
+		Collections.shuffle(ad);
+		
+		if (ad.size() > 1000) ad.subList(1000, ad.size()).clear();
+		
+		return ad;
+		
+	}
+	
 	public NetAdressHolder fetchByAdress(String address) {
 		
 		for (NetAdressHolder nah : knownNodes) {
@@ -421,7 +484,9 @@ public class Monieo {
 	
 	public void attemptRememberNode(String address) {
 		
-		if (fetchByAdress(address) == null) return;
+		pruneKnownNodes();
+		
+		if (fetchByAdress(address) != null) return;
 		
 		NetAdressHolder n = new NetAdressHolder(address, Long.MAX_VALUE, 0);
 		
@@ -432,15 +497,7 @@ public class Monieo {
 	}
 	
 	public void saveKnownNodes() {
-		
-		nodesFile = new File(workingFolder.getPath() + "/nodes.dat");
-		
-		try {
-			nodesFile.createNewFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+
 		try (FileWriter c = new FileWriter(nodesFile, false)) {
 			
 			for (NetAdressHolder nah : knownNodes) {
@@ -452,6 +509,12 @@ public class Monieo {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+	}
+	
+	public void pruneKnownNodes() {
+		
+		knownNodes.removeIf(t -> t.isExpired());
 		
 	}
 	
@@ -553,7 +616,7 @@ public class Monieo {
     	
     }
 
-	public static byte[] sha256dRaw(String s) {
+	private static byte[] sha256dRaw(String s) {
 		
 		MessageDigest digest = null;
 		try {

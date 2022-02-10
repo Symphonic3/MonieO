@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,7 +22,7 @@ public class Block extends MonieoDataObject{
 	public final AbstractTransaction[] transactions;
 	
 	public Block(BlockHeader header, AbstractTransaction... transactions) {
-		super(header.magicn, header.ver);
+		super(header.mn, header.pv);
 		this.header = header;
 		this.transactions = transactions;
 		
@@ -85,6 +87,44 @@ public class Block extends MonieoDataObject{
 		}
 		
 	}
+	
+	public BigInteger calculateDifficulty() {
+		
+		List<Block> blocksToAverage = new ArrayList<Block>();
+		
+		Block b = getPrevious();
+
+		BigInteger diffbef = b.header.diff; //already validated so we can use this value
+		
+		while (b != null) {
+			
+			blocksToAverage.add(b);
+			
+			if (blocksToAverage.size() >= 30) break;
+			
+			b = b.getPrevious();
+			
+		}
+		
+		if (blocksToAverage.size() < 2) return BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE);
+		
+		long sum = 0;
+		
+		for (int i = 1; i < blocksToAverage.size(); i++) {
+			
+			Block bz = blocksToAverage.get(i);
+			
+			sum += bz.header.timestamp - blocksToAverage.get(i-1).header.timestamp;
+			
+		}
+		
+		BigDecimal av = new BigDecimal(sum).divide(new BigDecimal(blocksToAverage.size()));
+		
+		BigDecimal discrepancy = new BigDecimal(120000).divide(av); //2min
+		
+		return diffbef.multiply(discrepancy.round(new MathContext(0)).toBigIntegerExact());
+		
+	}
 
 	@Override
 	boolean testValidity() {
@@ -92,11 +132,32 @@ public class Block extends MonieoDataObject{
 		if (transactions.length == 0) return false;
 		if (!merkle().equals(header.merkleRoot)) return false;
 		if (header == null) return false;
-		if (!header.validate()) return false;
+		
+		Block prev = getPrevious();
+		
+		if (prev == null) return false;
+		if (header.height != prev.header.height+1) return false;
+		if (!calculateDifficulty().equals(header.diff)) return false;
+		if (new BigInteger(hash().getBytes()).compareTo(header.diff) == 0-1) return false;
+		if (prev.header.timestamp >= header.timestamp) return false;
+		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
+		
 		for (AbstractTransaction t : transactions) {
 			
 			if (t == null) return false;
-			if (!t.validate()) return false;
+			
+			if (t instanceof CoinbaseTransaction) {
+				
+				if (!((CoinbaseTransaction) t).validate(this)) return false;
+				
+			} else if (t instanceof Transaction) {
+				
+				if (!((Transaction) t).testValidityWithEffectiveMeta(prev.getMetadata(), header.timestamp)) return false;
+				
+			}
+			
+			return false;
+			
 			//if (t.expired()) return false;
 			
 		}
@@ -138,6 +199,22 @@ public class Block extends MonieoDataObject{
 		}
 	
 		return hashes.get(0);
+		
+	}
+	
+	public BigDecimal getMaxCoinbase() {
+		
+		BigDecimal defaultAmount = new BigDecimal("10");
+		
+		int halvings = (int)(header.height/525600);
+		
+		for (int i = 0; i < halvings; i++) {
+			
+			defaultAmount = defaultAmount.divide(new BigDecimal("2"));
+			
+		}
+		
+		return defaultAmount;
 		
 	}
 	

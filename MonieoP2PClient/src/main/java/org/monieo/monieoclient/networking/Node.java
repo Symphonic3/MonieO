@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
@@ -13,46 +14,10 @@ import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.Block;
+import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 
 public class Node implements Runnable{
-	
-	public class PacketCommitment {
-		
-		public boolean isFilled = false;
-		public long timeMax;
-		
-		Predicate<NetworkCommand> test;
-		
-		public PacketCommitment(Predicate<NetworkCommand> testResponse) {
-			
-			timeMax = System.currentTimeMillis() + MIN_RESPONSE_TIME;
-			this.test = testResponse;
-			
-		}
-		
-		public boolean attemptFillShouldBanNode(NetworkCommand nc) {
-			
-			if (test.test(nc)) {
-				
-				isFilled = true;
-				return false;
-				
-			} else {
-				
-				if (System.currentTimeMillis() > timeMax) {
-					
-					return true;
-					
-				}
-				
-				return false;
-				
-			}
-			
-		}
-		
-	}
 	
 	private Socket socket;
 	
@@ -67,12 +32,21 @@ public class Node implements Runnable{
 	
 	public Vector<Consumer<Node>> queue = new Vector<Consumer<Node>>();
 	
-	public Node(Socket s) {
+	private boolean server;
+	
+	public Node(Socket s, boolean server) {
 		
 		this.socket = s;
-
+		this.server = server;
+		
 	}
 
+	public boolean isServer() {
+		
+		return server;
+		
+	}
+	
 	public String getAdress() {
 		
 		return socket.getInetAddress().getHostAddress();
@@ -185,6 +159,8 @@ public class Node implements Runnable{
 				
 				String s = new String(in.readAllBytes(), "UTF8");
 				
+				if (s == null || s.equals("")) continue;
+				
 				nc = NetworkCommand.deserialize(s);
 
 				if (nc == null || !Monieo.assertSupportedProtocol(new String[] {nc.magicn, nc.ver}) || !handle(nc)) {
@@ -229,20 +205,6 @@ public class Node implements Runnable{
 				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.ACK_VER, null), null);
 				
 				localAcknowledgedRemote = true;
-				
-				if (!remoteAcknowledgedLocal) {
-					
-					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_VER, null),
-							new PacketCommitment(new Predicate<NetworkCommand>() {
-
-								@Override
-								public boolean test(NetworkCommand t) {
-									return (t.cmd == NetworkCommandType.ACK_VER);
-								}
-								
-							}));
-					
-				}
 				
 			} else return false;
 			
@@ -298,6 +260,52 @@ public class Node implements Runnable{
 					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
 					
 				}
+				
+			} else if (nc.cmd == NetworkCommandType.REQUEST_NODES) {
+				
+				List<String> s = Monieo.INSTANCE.getValidNodesRightNow();
+				
+				String k = "";
+				
+				for (String a : s) {
+					
+					k = a + " ";
+					
+				}
+				
+				k = k.substring(0, k.length() - 1);
+				
+				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_NODES, k), null);
+				
+			} else if (nc.cmd == NetworkCommandType.REQUEST_TIME) {
+				
+				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_TIME, String.valueOf(System.currentTimeMillis())), null);
+				
+			} else if (nc.cmd == NetworkCommandType.SEND_TRANSACTION) {
+				
+				Block hb = Monieo.INSTANCE.getHighestBlock();
+				
+				Transaction t = Transaction.deserialize(nc.data);
+
+				if (t == null || !t.testValidityWithEffectiveMeta(hb.getMetadata(), Monieo.INSTANCE.getNetAdjustedTime())) return false;
+				
+				Monieo.INSTANCE.txp.add(t);
+				
+			} else if (nc.cmd == NetworkCommandType.SEND_BLOCK) {
+				
+				Block b = Block.deserialize(nc.data);
+				
+				if (b == null || !b.validate()) return false;
+				
+				Monieo.INSTANCE.handleBlock(b);
+				
+			} else if (nc.cmd == NetworkCommandType.SEND_NODES) {
+				
+				
+				
+			} else if (nc.cmd == NetworkCommandType.SEND_TIME) {
+				
+				
 				
 			}
 			

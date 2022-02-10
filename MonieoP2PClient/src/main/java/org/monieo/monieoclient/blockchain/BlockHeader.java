@@ -4,7 +4,10 @@ import java.math.BigInteger;
 
 import org.monieo.monieoclient.Monieo;
 
-public class BlockHeader extends MonieoDataObject{
+public class BlockHeader{
+	
+	String mn;
+	String pv;
 	
 	public final String preHash;
 	public final String merkleRoot;
@@ -12,22 +15,25 @@ public class BlockHeader extends MonieoDataObject{
 	public final BigInteger nonce;
 	public final int amntTransactions;
 	public final long height;
+	public final BigInteger diff;
 	
-	public BlockHeader(String mn, String pv, String p, String m, long t, BigInteger n, int a, long h) {
-		super(mn, pv);
+	public BlockHeader(String mn, String pv, String p, String m, long t, BigInteger n, int a, long h, BigInteger d) {
+		this.mn = mn;
+		this.pv = pv;
 		this.preHash = p;
 		this.merkleRoot = m;
 		this.timestamp = t;
 		this.nonce = n;
 		this.amntTransactions = a;
 		this.height = h;
+		this.diff = d;
 		
 	}
 
 	public String serialize() {
 
 		return String.join(" ", Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION,
-				preHash, merkleRoot, String.valueOf(timestamp), nonce.toString(), String.valueOf(amntTransactions), String.valueOf(height));
+				preHash, merkleRoot, String.valueOf(timestamp), nonce.toString(), String.valueOf(amntTransactions), String.valueOf(height), diff.toString());
 		
 	}
 
@@ -45,7 +51,7 @@ public class BlockHeader extends MonieoDataObject{
 					Long.valueOf(data[4]),
 					new BigInteger(data[5]),
 					Integer.valueOf(data[6]),
-					Long.valueOf(data[7]));
+					Long.valueOf(data[7]), new BigInteger(data[8]));
 			
 		} catch (Exception e) {
 			
@@ -56,12 +62,6 @@ public class BlockHeader extends MonieoDataObject{
 		
 	}
 
-	@Override
-	boolean testValidity() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-	
 	public String hash() {
 		
 		return Monieo.sha256d(serialize());

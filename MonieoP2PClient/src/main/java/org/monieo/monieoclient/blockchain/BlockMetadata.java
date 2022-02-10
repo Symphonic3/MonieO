@@ -69,7 +69,7 @@ public class BlockMetadata {
 				String[] s = da.split(" ");
 				if (s.length < 2) throw new IllegalStateException("Detected invalid balance field in block metadata! " + blockmetafile.getPath());
 				
-				if (s[0].equalsIgnoreCase(wa.adress)) {
+				if (s[0].equals(wa.adress)) {
 					
 					return getTXCS(da);
 					

@@ -12,7 +12,7 @@ public class NetworkCommand {
 		REQUEST_TIME,
 		SEND_TRANSACTION,
 		SEND_BLOCK,
-		SEND_ADRESSES,
+		SEND_NODES,
 		SEND_TIME
 			
 	}
