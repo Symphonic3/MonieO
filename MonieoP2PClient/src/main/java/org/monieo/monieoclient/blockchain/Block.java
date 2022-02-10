@@ -129,6 +129,8 @@ public class Block extends MonieoDataObject{
 	@Override
 	boolean testValidity() {
 
+		if (this.equals(Monieo.genesis())) return true;
+		
 		if (transactions.length == 0) return false;
 		if (!merkle().equals(header.merkleRoot)) return false;
 		if (header == null) return false;
@@ -136,6 +138,7 @@ public class Block extends MonieoDataObject{
 		Block prev = getPrevious();
 		
 		if (prev == null) return false;
+		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv}))
 		if (header.height != prev.header.height+1) return false;
 		if (!calculateDifficulty().equals(header.diff)) return false;
 		if (new BigInteger(hash().getBytes()).compareTo(header.diff) == 0-1) return false;
@@ -155,11 +158,21 @@ public class Block extends MonieoDataObject{
 				
 			} else if (t instanceof Transaction) {
 				
-				if (!((Transaction) t).testValidityWithEffectiveMeta(prev.getMetadata(), header.timestamp)) return false;
+				Transaction at = (Transaction) t;
+				
+				if (!at.testValidityWithBlock(prev) || !at.testValidityWithTime(header.timestamp)) return false;
 				
 			}
 			
-			return false;
+			int co = 0;
+			
+			for (AbstractTransaction t1 : transactions) {
+				
+				if (t1.equals(t)) co++;
+				
+			}
+			
+			if (co != 1) return false;
 			
 			//if (t.expired()) return false;
 			

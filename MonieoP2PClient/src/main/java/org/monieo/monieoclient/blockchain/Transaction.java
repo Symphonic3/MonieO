@@ -99,11 +99,11 @@ public class Transaction extends AbstractTransaction {
 		
 	}
 	
-	public boolean testValidityWithEffectiveMeta(BlockMetadata m, long timetest) {
+	public boolean testValidityWithBlock(Block b) {
 		
-		if (!testValidityWithTime(timetest)) return false;
+		if (!validate()) return false;
 		
-		return d.testValidityWithEffectiveMeta(m, timetest);
+		return d.testValidityWithBlock(b);
 		
 	}
 	

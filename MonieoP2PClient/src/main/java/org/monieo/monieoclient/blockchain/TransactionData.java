@@ -69,17 +69,19 @@ public class TransactionData extends MonieoDataObject{
 		
 	}
 	
-	public boolean testValidityWithEffectiveMeta(BlockMetadata m, long timetest) {
+	public boolean testValidityWithBlock(Block b) {
 		
-		if (!testValidityWithTime(timetest)) return false;
+		if (!validate()) return false;
+		
+		BlockMetadata m = b.getMetadata();
 		
 		BigDecimal bal = BlockMetadata.getSpendableBalance(m.getFullTransactions(from));
 		
 		if (amount.add(fee).compareTo(bal) == 1) return false;
 		
-		Block b = m.getBlock();
+		Block ba = b;
 		
-		while (b != null) {
+		while (ba != null) {
 			
 			for (AbstractTransaction at : Arrays.asList(b.transactions)) {
 				
@@ -91,9 +93,9 @@ public class TransactionData extends MonieoDataObject{
 				
 			}
 			
-			b = b.getPrevious();
+			ba = b.getPrevious();
 			
-			if (b.header.timestamp < timestamp-7200000) break;
+			if (ba.header.timestamp < timestamp-7200000) break;
 			
 		}
 		
