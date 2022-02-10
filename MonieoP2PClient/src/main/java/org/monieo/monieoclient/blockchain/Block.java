@@ -142,6 +142,8 @@ public class Block extends MonieoDataObject{
 		if (prev.header.timestamp >= header.timestamp) return false;
 		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
 		
+		int cb = 0;
+		
 		for (AbstractTransaction t : transactions) {
 			
 			if (t == null) return false;
@@ -149,6 +151,7 @@ public class Block extends MonieoDataObject{
 			if (t instanceof CoinbaseTransaction) {
 				
 				if (!((CoinbaseTransaction) t).validate(this)) return false;
+				cb++;
 				
 			} else if (t instanceof Transaction) {
 				
@@ -161,6 +164,8 @@ public class Block extends MonieoDataObject{
 			//if (t.expired()) return false;
 			
 		}
+		
+		if (cb != 1) return false;
 		
 		if (serialize().getBytes().length > 1024*1024) return false;
 		
@@ -236,6 +241,7 @@ public class Block extends MonieoDataObject{
 		
 	}
 	
+	//WARNING! WITH THIS CURRENT TERRIBLE CODE, THE MINER MUST PLACE THEIR COINBASE TRANSACTION AT THE END OF THE BLOCK IF THEY WISH TO RECIEVE ALL FEES.
 	public void generateMetadata() {
 		
 		//This method is full of horrible code.
@@ -245,7 +251,7 @@ public class Block extends MonieoDataObject{
 			
 			File blockmetafile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + hash() + ".blkmeta");
 			
-			if (!blockmetafile.exists() || this.equals(Monieo.genesis())) {
+			if (!blockmetafile.exists()) {
 				
 				try {
 					blockmetafile.createNewFile();
@@ -259,7 +265,9 @@ public class Block extends MonieoDataObject{
 
 				List<AbstractTransaction> txclone = new ArrayList<AbstractTransaction>(Arrays.asList(transactions.clone()));
 				
-				try (FileWriter fw = new FileWriter(blockmetafile)) {
+				BigDecimal fees = BigDecimal.ZERO;
+				
+				try (FileWriter fw = new FileWriter(blockmetafile, false)) {
 					
 					if (!this.equals(Monieo.genesis())) {
 						
@@ -312,12 +320,13 @@ public class Block extends MonieoDataObject{
 										boolean cb = (t instanceof CoinbaseTransaction);
 										int ampe = cb ? Monieo.CONFIRMATIONS_BLOCK_SENSITIVE : Monieo.CONFIRMATIONS;
 										actual.add(new PendingFunds(t.getAmount(), ampe));
+										actual.add(new PendingFunds(fees, Monieo.CONFIRMATIONS));
 										txclone.remove(i);
 										i--;
 										
 									} else if (t instanceof Transaction && ((Transaction)t).getSource().equals(wa)) {
 										
-										spendable = spendable.subtract(t.getAmount());
+										spendable = spendable.subtract(t.getAmount()).subtract(((Transaction)t).d.fee);
 										txclone.remove(i);
 										i--;
 										

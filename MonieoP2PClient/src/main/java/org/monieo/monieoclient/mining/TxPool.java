@@ -5,7 +5,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
+import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.Transaction;
+import org.monieo.monieoclient.networking.NetworkCommand;
+import org.monieo.monieoclient.networking.Node;
+import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 
 public class TxPool {
 
@@ -56,9 +60,14 @@ public class TxPool {
 		
 		if (t == null || !t.validate()) throw new RuntimeException("Attempted to add invalid/null block to txpool!");
 		
+		if (transactions.contains(t)) return;
+		
 		int size = t.serialize().getBytes().length;
 		
 		if (size > MAX_TRANSACTION_SIZE) return;
+
+		//completely optional. find a way to reward this with the protocol.
+		Node.propagateAll(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_TRANSACTION, t.serialize()), null);
 		
 		transactions.add(t);
 		

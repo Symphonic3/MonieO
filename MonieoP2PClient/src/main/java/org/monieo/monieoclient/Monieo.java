@@ -32,6 +32,8 @@ import org.monieo.monieoclient.gui.UI;
 import org.monieo.monieoclient.mining.TxPool;
 import org.monieo.monieoclient.networking.ConnectionHandler;
 import org.monieo.monieoclient.networking.NetAdressHolder;
+import org.monieo.monieoclient.networking.NetworkCommand;
+import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
 
@@ -278,6 +280,14 @@ public class Monieo {
 			
 		}, 1000);
 		
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		Node.propagateAll(new NetworkCommand(MAGIC_NUMBERS, PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, getHighestBlock().hash()), null);
+		
 	}
 	
 	public void setHighestBlock(Block b) {
@@ -316,6 +326,12 @@ public class Monieo {
 		
 		if (!blockfile.exists()) {
 			
+			try {
+				blockfile.createNewFile();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			
 			try (FileWriter fw = new FileWriter(blockfile)) {
 				
 				fw.write(b.serialize());
@@ -324,15 +340,17 @@ public class Monieo {
 				e.printStackTrace();
 			}
 			
-		}
-		
-		if (getHighestBlock() == null || b.header.height > getHighestBlock().header.height) {
+			if (getHighestBlock() == null || b.header.height > getHighestBlock().header.height) {
+				
+				setHighestBlock(b);
+				
+			}
 			
-			setHighestBlock(b);
+			b.generateMetadata();
+			
+			Node.propagateAll(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
 			
 		}
-		
-		b.generateMetadata();
 		
 	}
 	

@@ -2,15 +2,15 @@ package org.monieo.monieoclient.mining;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.function.Consumer;
 
 import org.monieo.monieoclient.Monieo;
 
-public interface AbstractMiner {
+public interface AbstractMiner extends Runnable {
 	
-	public void begin(Monieo m);
+	public void begin(Monieo m, Consumer<MiningStatistics> supervisor);
 	public void stop();
 	public Monieo getMonieoInstance();
-	public MiningStatistics retrieveMiningStatistics();
 	public String getMiningName();
 	
 	public class MiningStatistics {
