@@ -88,11 +88,11 @@ public class Block extends MonieoDataObject{
 		
 	}
 	
-	public BigInteger calculateDifficulty() {
+	public BigInteger calculateNextDifficulty() {
 		
 		List<Block> blocksToAverage = new ArrayList<Block>();
 		
-		Block b = getPrevious();
+		Block b = this;
 
 		BigInteger diffbef = b.header.diff; //already validated so we can use this value
 		
@@ -132,7 +132,7 @@ public class Block extends MonieoDataObject{
 		if (this.equals(Monieo.genesis())) return true;
 		
 		if (transactions.length == 0) return false;
-		if (!merkle().equals(header.merkleRoot)) return false;
+		if (!merkle(transactions).equals(header.merkleRoot)) return false;
 		if (header == null) return false;
 		
 		Block prev = getPrevious();
@@ -140,8 +140,8 @@ public class Block extends MonieoDataObject{
 		if (prev == null) return false;
 		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv}))
 		if (header.height != prev.header.height+1) return false;
-		if (!calculateDifficulty().equals(header.diff)) return false;
-		if (new BigInteger(hash().getBytes()).compareTo(header.diff) == 0-1) return false;
+		if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
+		if (new BigInteger(hash().getBytes()).compareTo(header.diff) == -1) return false;
 		if (prev.header.timestamp >= header.timestamp) return false;
 		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
 		
@@ -186,7 +186,7 @@ public class Block extends MonieoDataObject{
 		
 	}
 	
-	public String merkle() {
+	public static String merkle(AbstractTransaction[] transactions) {
 		
 		List<String> hashes = new ArrayList<String>();
 		
@@ -220,11 +220,11 @@ public class Block extends MonieoDataObject{
 		
 	}
 	
-	public BigDecimal getMaxCoinbase() {
+	public static BigDecimal getMaxCoinbase(long h) {
 		
 		BigDecimal defaultAmount = new BigDecimal("10");
 		
-		int halvings = (int)(header.height/525600);
+		int halvings = (int)(h/525600);
 		
 		for (int i = 0; i < halvings; i++) {
 			

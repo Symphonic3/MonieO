@@ -287,7 +287,7 @@ public class Node implements Runnable{
 				
 				Transaction t = Transaction.deserialize(nc.data);
 
-				if (t == null || !t.testValidityWithBlock(hb) || !t.testValidityWithTime(hb.header.timestamp)) return false;
+				if (t == null || !t.testValidityWithBlock(hb) || !t.testValidityWithTime(Monieo.INSTANCE.getNetAdjustedTime())) return false;
 				
 				Monieo.INSTANCE.txp.add(t);
 				

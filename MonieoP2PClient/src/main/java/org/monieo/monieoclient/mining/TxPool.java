@@ -1,11 +1,14 @@
 package org.monieo.monieoclient.mining;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
+import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.networking.NetworkCommand;
 import org.monieo.monieoclient.networking.Node;
@@ -24,6 +27,15 @@ public class TxPool {
 	
 	public void sort() {
 
+		transactions.removeIf(new Predicate<Transaction>() {
+
+			@Override
+			public boolean test(Transaction t) {
+				return !t.testValidityWithTime(Monieo.INSTANCE.getNetAdjustedTime());
+			}
+			
+		});
+		
 		transactions.sort(new Comparator<Transaction>() {
 
 			@Override
@@ -48,11 +60,48 @@ public class TxPool {
 		
 	}
 	
-	public List<Transaction> get() {
+	public List<AbstractTransaction> get() {
 		
 		sort();
 		
-		return transactions;
+		return new ArrayList<AbstractTransaction>(transactions);
+		
+	}
+	
+	public List<AbstractTransaction> get(int maxsize) {
+		
+		List<AbstractTransaction> lt = get();
+		
+		List<AbstractTransaction> ret = new ArrayList<AbstractTransaction>();
+		
+		int i = 0;
+		
+		while (true) {
+			
+			ret.add(lt.get(i));
+			
+			i++;
+			
+			if (lt.size() == i) break;
+			
+			int b = 0;
+			
+			for (AbstractTransaction t : ret) {
+				
+				b += t.serialize().getBytes().length;
+				
+			}
+			
+			if (b > maxsize) {
+				
+				ret.remove(ret.size()-1);
+				break;
+				
+			}
+			
+		}
+		
+		return ret;
 		
 	}
 	

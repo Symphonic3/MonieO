@@ -12,7 +12,7 @@ public class BlockHeader{
 	public final String preHash;
 	public final String merkleRoot;
 	public final long timestamp;
-	public final BigInteger nonce;
+	public BigInteger nonce;
 	public final int amntTransactions;
 	public final long height;
 	public final BigInteger diff;

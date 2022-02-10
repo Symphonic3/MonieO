@@ -15,19 +15,19 @@ public interface AbstractMiner extends Runnable {
 	
 	public class MiningStatistics {
 
-		public final long hashes;
-		public final BigInteger blockTarget;
-		public final int prob;
-		public final int blocks;
-		public final BigDecimal total;
+		public BigInteger hashes;
+		public BigInteger blockTarget;
+		public int blocks;
+		public BigDecimal total;
+		public final long beginTime;
 		
-		public MiningStatistics(long h, BigInteger blockTarget, int prob, int blocks, BigDecimal total) {
+		public MiningStatistics(BigInteger h, BigInteger blockTarget, int blocks, BigDecimal total, long beginTime) {
 			
 			this.hashes = h;
 			this.blockTarget = blockTarget;
-			this.prob = prob;
 			this.blocks = blocks;
 			this.total = total;
+			this.beginTime = beginTime;
 			
 		}
 		

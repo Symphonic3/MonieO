@@ -32,7 +32,7 @@ public class CoinbaseTransaction extends AbstractTransaction{
 		
 		if (amount.signum() != 1 || amount.scale() > 8) return false;
 		
-		if (amount.compareTo(b.getMaxCoinbase()) != 1) return true;
+		if (amount.compareTo(Block.getMaxCoinbase(b.header.height)) != 1) return true;
 		
 		return false;
 		
