@@ -342,7 +342,7 @@ public class Monieo {
 		
 		String bh = sha256d(ct.serialize());
 		
-		return new Block(new BlockHeader(MAGIC_NUMBERS, PROTOCOL_VERSION, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1, 0), ct);
+		return new Block(new BlockHeader(MAGIC_NUMBERS, PROTOCOL_VERSION, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1, 0, BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)), ct);
 		
 	}
 	

@@ -2,6 +2,8 @@ package org.monieo.monieoclient.blockchain;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TransactionData extends MonieoDataObject{
 	
@@ -74,6 +76,26 @@ public class TransactionData extends MonieoDataObject{
 		BigDecimal bal = BlockMetadata.getSpendableBalance(m.getFullTransactions(from));
 		
 		if (amount.add(fee).compareTo(bal) == 1) return false;
+		
+		Block b = m.getBlock();
+		
+		while (b != null) {
+			
+			for (AbstractTransaction at : Arrays.asList(b.transactions)) {
+				
+				if (at instanceof Transaction) {
+					
+					if (((Transaction) at).d.equals(this)) return false;
+					
+				}
+				
+			}
+			
+			b = b.getPrevious();
+			
+			if (b.header.timestamp < timestamp-7200000) break;
+			
+		}
 		
 		return true;
 		
