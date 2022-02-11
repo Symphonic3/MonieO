@@ -168,7 +168,11 @@ public class Block extends MonieoDataObject{
 			
 			for (AbstractTransaction t1 : transactions) {
 				
-				if (t1.equals(t)) co++;
+				if (t1 instanceof Transaction && t instanceof Transaction) {
+					
+					if (((Transaction) t1).getSource().equals(((Transaction) t).getSource())) co++;
+					
+				}
 				
 			}
 			

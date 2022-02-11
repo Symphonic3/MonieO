@@ -77,13 +77,25 @@ public class TxPool {
 		
 		int i = 0;
 		
-		while (true) {
+		outer: while (true) {
 			
-			if (((Transaction) lt.get(i)).testValidityWithBlock(bl)) ret.add(lt.get(i));
+			if (((Transaction) lt.get(i)).testValidityWithBlock(bl)) {
+				
+				for (AbstractTransaction at : ret) {
+					
+					if (((Transaction)at).getSource().equals(((Transaction)lt.get(i)).getSource())) {
+						
+						i++;
+						continue outer;
+						
+					}
+					
+				}
+				
+				ret.add(lt.get(i));
+			}
 			
 			i++;
-			
-			if (lt.size() == i) break;
 			
 			int b = 0;
 			
@@ -98,7 +110,9 @@ public class TxPool {
 				ret.remove(ret.size()-1);
 				break;
 				
-			}
+			}	
+			
+			if (lt.size() == i) break;
 			
 		}
 		

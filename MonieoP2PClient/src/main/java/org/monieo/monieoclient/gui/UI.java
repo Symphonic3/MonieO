@@ -274,17 +274,23 @@ public class UI {
 						return;
 						
 					}
-					
-					//TODO this
 
-					JOptionPane.showInputDialog(frame, 
+					String res = JOptionPane.showInputDialog(frame, 
 							"WARNING: YOU ARE ABOUT TO SEND A MONIEO TRANSACTION.\nTHIS ACTION IS IRREVERSIBLE AND CANNOT BE UNDONE.\n\n"
 							+ "To: " + newTransaction.d.to.adress
 							+ "\nAmount: " + newTransaction.d.amount
 							+ "\nFee: " + newTransaction.d.fee
 							+ "\n\nPlease type \"confirm\" below to confirm.", "Confirmation", 2);
-		
-					refresh();
+					
+					if (res == null) return;
+					
+					if (res.equals("confirm")) {
+						
+						Monieo.INSTANCE.txp.add(newTransaction);
+						
+						refresh();
+						
+					}
 					
 				} catch (Exception e2) {
 					notifyInvalid();
