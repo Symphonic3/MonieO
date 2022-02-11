@@ -17,8 +17,6 @@ public class DefaultMinerImpl implements AbstractMiner{
 	
 	private boolean stop = false;
 	
-	Monieo m;
-	
 	Consumer<MiningStatistics> supervisor = null;
 	
 	MiningStatistics curr = null;
@@ -28,9 +26,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 	public DefaultMinerImpl() {};
 	
 	@Override
-	public void begin(Monieo m, Consumer<MiningStatistics> sup) {
-		
-		this.m = m;
+	public void begin(Consumer<MiningStatistics> sup) {
 		this.supervisor = sup;
 		
 		curr = new MiningStatistics(BigInteger.valueOf(0), BigInteger.valueOf(0), 0, BigDecimal.valueOf(0), System.currentTimeMillis());
@@ -48,11 +44,6 @@ public class DefaultMinerImpl implements AbstractMiner{
 	}
 
 	@Override
-	public Monieo getMonieoInstance() {
-		return m;
-	}
-
-	@Override
 	public String getMiningName() {
 		return "DefaultCPUMiner";
 	}
@@ -65,7 +56,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 		while (true) {
 						if (stop) return;
 			
-			Block h = getMonieoInstance().getHighestBlock();
+			Block h = Monieo.INSTANCE.getHighestBlock();
 			long hei = h.header.height + 1;
 			
 			BigInteger diff = h.calculateNextDifficulty();
@@ -73,10 +64,10 @@ public class DefaultMinerImpl implements AbstractMiner{
 			curr.blockTarget = diff;
 
 			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*750, h); //750 is completely arbitrary. This should be optimized later.
-			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, getMonieoInstance().getWalletByNick("MININGWALLET").getAsWalletAdress(), Block.getMaxCoinbase(hei));
+			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick("MININGWALLET").getAsWalletAdress(), Block.getMaxCoinbase(hei));
 			tx.add(ct);
 			
-			long nettime = getMonieoInstance().getNetAdjustedTime();
+			long nettime = Monieo.INSTANCE.getNetAdjustedTime();
 			
 			Block b = new Block(new BlockHeader(Monieo.MAGIC_NUMBERS,
 					Monieo.PROTOCOL_VERSION,
@@ -97,7 +88,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 					
 					if (b.validate()) {
 						
-						getMonieoInstance().handleBlock(b);
+						Monieo.INSTANCE.handleBlock(b);
 						System.out.println("Handled valid block!");
 						nonce = BigInteger.ZERO;
 						curr.blocks++;

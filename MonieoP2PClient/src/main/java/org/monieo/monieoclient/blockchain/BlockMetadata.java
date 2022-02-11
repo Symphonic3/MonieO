@@ -65,7 +65,7 @@ public class BlockMetadata {
 			
 			while (c.hasNextLine()) {
 				
-				String da = c.next();
+				String da = c.nextLine();
 				String[] s = da.split(" ");
 				if (s.length < 2) throw new IllegalStateException("Detected invalid balance field in block metadata! " + blockmetafile.getPath());
 				

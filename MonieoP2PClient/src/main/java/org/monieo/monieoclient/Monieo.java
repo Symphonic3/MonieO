@@ -17,6 +17,7 @@ import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.regex.Pattern;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -26,6 +27,8 @@ import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
 import org.monieo.monieoclient.blockchain.WalletAdress;
 import org.monieo.monieoclient.gui.UI;
+import org.monieo.monieoclient.mining.AbstractMiner;
+import org.monieo.monieoclient.mining.DefaultMinerImpl;
 import org.monieo.monieoclient.mining.TxPool;
 import org.monieo.monieoclient.networking.ConnectionHandler;
 import org.monieo.monieoclient.networking.NetAdressHolder;
@@ -160,6 +163,8 @@ public class Monieo {
 	
 	public ConnectionHandler ch;
 	
+	public AbstractMiner miner;
+	
 	public Monieo() {
 		
 		INSTANCE = this;
@@ -219,7 +224,9 @@ public class Monieo {
 			}
 			
 		}
-
+		
+		miner = new DefaultMinerImpl();
+		
         ui = new UI();
         ui.initialize();
         
@@ -340,6 +347,7 @@ public class Monieo {
 			if (getHighestBlock() == null || b.header.height > getHighestBlock().header.height) {
 				
 				setHighestBlock(b);
+				ui.refresh(false);
 				
 			}
 			
@@ -611,7 +619,7 @@ public class Monieo {
     	
     	if (f == null || !f.exists()) return null;
     	
-    	try (Scanner c = new Scanner(f)) {
+    	try (Scanner c = new Scanner(f).useDelimiter(Pattern.compile("\\Z"))) {
     		
     		String ret = "";
     		

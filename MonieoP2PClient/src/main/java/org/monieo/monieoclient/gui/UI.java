@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Consumer;
+
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -25,11 +27,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneLayout;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.blockchain.BlockMetadata;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.blockchain.WalletAdress;
+import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.wallet.Wallet;
 import javax.swing.JTextField;
 
@@ -62,9 +67,11 @@ public class UI {
 	JLabel lblFee;
 	JButton BtnNEWADDRESS;
 	JLabel lblToggleExperimentalMining;
-	JLabel lblTotalBalance;
+	JLabel lblTotalBalancelabel;
 	JLabel lbltotalBalance;
 	JButton TgBtnTOGGLEMINING;
+	
+	public boolean mining;
 	
 	public boolean modeToggleStatus;
 	
@@ -90,7 +97,89 @@ public class UI {
 		
 		TgBtnTOGGLEMINING = new JButton("Off");
 		TgBtnTOGGLEMINING.setBounds(799, 417, 76, 23);
-		//TgBtnTOGGLEMINING.addActionListener(new ActionListener() {
+		TgBtnTOGGLEMINING.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JDialog jd = new JDialog(frame);
+				
+				jd.setTitle("Mining " + Monieo.VERSION);
+				jd.setBounds(100, 100, 250, 350);
+				jd.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				
+				jd.getContentPane().setLayout(null);
+
+				String text;
+				
+				if (mining) {
+					
+					text = "On";
+					
+				} else {
+					
+					text = "Off";
+					
+				}
+				
+				JButton btnNewButton = new JButton(text);
+				btnNewButton.setBounds(10, 30, 205, 23);
+				jd.getContentPane().add(btnNewButton);
+				
+				JLabel lblNewLabel = new JLabel("Toggle mining:");
+				lblNewLabel.setBounds(10, 11, 172, 14);
+				jd.getContentPane().add(lblNewLabel);
+				
+				JLabel miningstats = new JLabel("Mining statistics", SwingConstants.CENTER);
+				miningstats.setBounds(10, 64, 205, 190);
+				jd.getContentPane().add(miningstats);
+				
+				btnNewButton.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						mining = !mining;
+						
+						String text;
+						
+						if (mining) {
+							
+							Monieo.INSTANCE.miner.begin(new Consumer<MiningStatistics>() {
+								
+								@Override
+								public void accept(MiningStatistics t) {
+									
+									miningstats.setText("Began mining: " + t.beginTime
+											+ "\nHashes: " + t.hashes.toString()
+											+ "\nBlock target: " + t.blockTarget.toString()
+											+ "\nBlocks mined: " + t.blocks
+											+ "\nTotal earned: " + t.total.toPlainString());
+									
+								}
+
+							});
+							text = "On";
+							
+						} else {
+							
+							Monieo.INSTANCE.miner.stop();
+							text = "Off";
+							
+						}
+						
+						btnNewButton.setText(text);
+						TgBtnTOGGLEMINING.setText(text);
+						
+					}
+					
+				});
+				
+				jd.setVisible(true);
+				
+			}
+			
+		});
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
 			
@@ -185,7 +274,7 @@ public class UI {
 						File newWalletFolder = new File((oldWalletFolder.getParentFile().getPath() + "/" + newNick));
 						oldWalletFolder.renameTo(newWalletFolder);
 						Monieo.INSTANCE.getWalletByNick(selectedWal.nickname).nickname = newNick;
-						refresh();
+						refresh(true);
 					}
 				}
 			}
@@ -202,7 +291,7 @@ public class UI {
 					String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
 					if (confirmation.equals(walletInQuestion.nickname)) {
 						Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
-						refresh();
+						refresh(true);
 					}
 				}
 			}
@@ -218,7 +307,7 @@ public class UI {
 		list.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				refresh();
+				if (!e.getValueIsAdjusting()) refresh(false);
 			}
 			
 		});
@@ -286,7 +375,7 @@ public class UI {
 						
 						Monieo.INSTANCE.txp.add(newTransaction);
 						
-						refresh();
+						refresh(false);
 						
 					}
 					
@@ -351,7 +440,7 @@ public class UI {
 			    	String resp = Monieo.INSTANCE.createWallet(result.toString());
 			    	JOptionPane.showMessageDialog(frame, resp, "Info", 1);
 			    	
-			    	refresh();
+			    	refresh(true);
 			    }
 			}
 		});
@@ -362,10 +451,10 @@ public class UI {
 		lblToggleExperimentalMining.setBounds(756, 414, 76, 29);
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
-		lblTotalBalance = new JLabel("Total balance:");
+		lblTotalBalancelabel = new JLabel("Total balance:");
 		
-		lblTotalBalance.setBounds(440, 406, 76, 44);
-		frame.getContentPane().add(lblTotalBalance);
+		lblTotalBalancelabel.setBounds(440, 406, 86, 44);
+		frame.getContentPane().add(lblTotalBalancelabel);
 		
 		lbltotalBalance = new JLabel("(total balance)");
 		lbltotalBalance.setBounds(526, 406, 109, 44);
@@ -377,23 +466,26 @@ public class UI {
 		
 		setColors(new Color(222, 222, 222), new Color(255, 255, 255), new Color(0, 0, 0));
 		
-		refresh();
+		refresh(true);
 		
 		frame.setVisible(true);
 		
 	}
 	
-	void refresh() { //TODO this
+	public void refresh(boolean updlist) {
 		
-    	walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
-    	
-    	for (int i = 0; i < walletNicks.length; i++) {
+    	if (updlist) {
     		
-    		walletNicks[i] = Monieo.INSTANCE.myWallets.get(i).nickname;
+    		walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
+        	for (int i = 0; i < walletNicks.length; i++) {
+        		
+        		walletNicks[i] = Monieo.INSTANCE.myWallets.get(i).nickname;
+        		
+        	}
+        	list.setListData(walletNicks);
+        	LblADDRESSES.setText(Integer.toString(walletNicks.length));
     		
     	}
-    	list.setListData(walletNicks);
-    	LblADDRESSES.setText(Integer.toString(walletNicks.length));
     	
     	if (list.getSelectedIndex() == -1) {
     		
@@ -403,9 +495,29 @@ public class UI {
     		
     	} else {
     		
-    		Wallet w = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
-    		addressLabel.setText(w.getAsWalletAdress().adress);
-    		nickLabel.setText(w.nickname);
+    		BlockMetadata m = Monieo.INSTANCE.getHighestBlock().getMetadata();
+    		
+    		BigDecimal tot = BigDecimal.ZERO;
+    		
+    		for (String s : walletNicks) {
+    			
+    			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
+    			
+    			BigDecimal n = BlockMetadata.getSpendableBalance(m.getFullTransactions(w.getAsWalletAdress()));
+    			
+    			tot = tot.add(n);
+    			
+    			if (s.equals(list.getSelectedValue())) {
+    				
+    	    		addressLabel.setText(w.getAsWalletAdress().adress);
+    	    		nickLabel.setText(w.nickname);
+    				INDIVbalanceLabel.setText(n.toPlainString());
+    				
+    			}
+    			
+    		}
+    		
+    		lbltotalBalance.setText(tot.toPlainString());
     		
     		btnChangeWalName.setVisible(true);
     		btnDelWal.setVisible(true);
@@ -433,7 +545,7 @@ public class UI {
 	
 	void setColors(Color main, Color highlight, Color text) {
 		
-		//main components
+		/*//main components
 		frame.getContentPane().setBackground(main);
 		panel.setBackground(main);
 		panel_1.setBackground(main);
@@ -446,7 +558,7 @@ public class UI {
 		LblADDRESSES.setForeground(text);
 		lblFee.setForeground(text);
 		lblNewLabel_1.setForeground(text);
-		lblTotalBalance.setForeground(text);
+		lblTotalBalancelabel.setForeground(text);
 		lblToggleExperimentalMining.setForeground(text);
 		lblTransactionAmount.setForeground(text);
 		label_1.setForeground(text);

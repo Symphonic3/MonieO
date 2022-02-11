@@ -79,6 +79,8 @@ public class TxPool {
 		
 		outer: while (true) {
 			
+			if (lt.size() == i) break;
+			
 			if (((Transaction) lt.get(i)).testValidityWithBlock(bl)) {
 				
 				for (AbstractTransaction at : ret) {
@@ -110,9 +112,7 @@ public class TxPool {
 				ret.remove(ret.size()-1);
 				break;
 				
-			}	
-			
-			if (lt.size() == i) break;
+			}
 			
 		}
 		

@@ -8,9 +8,8 @@ import org.monieo.monieoclient.Monieo;
 
 public interface AbstractMiner extends Runnable {
 	
-	public void begin(Monieo m, Consumer<MiningStatistics> supervisor);
+	public void begin(Consumer<MiningStatistics> supervisor);
 	public void stop();
-	public Monieo getMonieoInstance();
 	public String getMiningName();
 	
 	public class MiningStatistics {

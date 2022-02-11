@@ -34,4 +34,15 @@ public abstract class MonieoDataObject {
 	abstract boolean testValidity();
 	public abstract String serialize();
 	
+	@Override
+	public boolean equals(Object other) {
+		
+		if (other instanceof MonieoDataObject) {
+			
+			return serialize().equals(((MonieoDataObject) other).serialize());
+			
+		} else return false;
+		
+	}
+	
 }
