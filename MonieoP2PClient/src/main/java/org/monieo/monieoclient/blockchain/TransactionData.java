@@ -2,7 +2,6 @@ package org.monieo.monieoclient.blockchain;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TransactionData extends MonieoDataObject{

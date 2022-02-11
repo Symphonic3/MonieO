@@ -1,7 +1,5 @@
 package org.monieo.monieoclient.blockchain;
 
-import java.math.BigDecimal;
-
 public class WalletAdress {
 	
 	public final String adress;

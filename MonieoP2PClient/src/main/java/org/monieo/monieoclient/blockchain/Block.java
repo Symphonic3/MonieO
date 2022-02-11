@@ -1,7 +1,6 @@
 package org.monieo.monieoclient.blockchain;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -12,8 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-import java.util.function.Predicate;
-
 import org.monieo.monieoclient.Monieo;
 
 public class Block extends MonieoDataObject{

@@ -1,6 +1,5 @@
 package org.monieo.monieoclient.wallet;
 
-import java.nio.charset.Charset;
 import java.security.KeyPair;
 import java.security.Signature;
 import java.util.Base64;

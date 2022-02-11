@@ -2,8 +2,6 @@ package org.monieo.monieoclient.blockchain;
 
 import java.math.BigDecimal;
 
-import org.monieo.monieoclient.Monieo;
-
 public class PendingFunds {
 	
 	//If a transaction is > 100 confirmations, it is combined at 100 confirmations with any others

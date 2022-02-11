@@ -3,7 +3,6 @@ package org.monieo.monieoclient.blockchain;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.PublicKey;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.monieo.monieoclient.Monieo;

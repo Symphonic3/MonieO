@@ -87,7 +87,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 					tx.size(),
 					hei,
 					diff)
-					);
+			);
 			
 			in: for (int i = 0; i < HASHES_BEFORE_RECHECK; i++) {
 				

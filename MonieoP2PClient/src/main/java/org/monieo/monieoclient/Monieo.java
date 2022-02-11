@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
@@ -19,8 +18,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 import java.security.*;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 

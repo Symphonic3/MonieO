@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.monieo.monieoclient.Monieo;
-
 public class BlockMetadata {
 
 	File blockmetafile;

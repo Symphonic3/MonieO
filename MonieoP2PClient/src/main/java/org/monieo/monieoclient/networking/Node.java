@@ -2,16 +2,12 @@ package org.monieo.monieoclient.networking;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.Transaction;
@@ -133,7 +129,7 @@ public class Node implements Runnable{
 		try {
 
 			InputStream in = socket.getInputStream();
-			OutputStream out = socket.getOutputStream();
+			//OutputStream out = socket.getOutputStream();
 			
 			while (true) {
 				
@@ -247,7 +243,7 @@ public class Node implements Runnable{
 				for (String s : hashes) {
 					
 					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, 
-							Block.getByHash(wantedHash).serialize()), null);
+							Block.getByHash(s).serialize()), null);
 					
 				}
 				
