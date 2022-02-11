@@ -63,11 +63,11 @@ public class Block extends MonieoDataObject{
 			
 			AbstractTransaction[] transactions = new AbstractTransaction[data.length-1];
 			
-			transactions[0] = CoinbaseTransaction.deserialize(data[1]);
+			transactions[transactions.length-1] = CoinbaseTransaction.deserialize(data[1]);
 			
-			for (int i = 1; i < transactions.length; i++) {
+			for (int i = 0; i < transactions.length-1; i++) {
 				
-				transactions[i] = Transaction.deserialize(data[i+1]);
+				transactions[i] = Transaction.deserialize(data[i]);
 				
 			}
 			
