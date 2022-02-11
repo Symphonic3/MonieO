@@ -24,7 +24,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JToggleButton;
 import javax.swing.ScrollPaneLayout;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -65,10 +64,9 @@ public class UI {
 	JLabel lblToggleExperimentalMining;
 	JLabel lblTotalBalance;
 	JLabel lbltotalBalance;
-	JToggleButton TgBtnTOGGLEMINING;
+	JButton TgBtnTOGGLEMINING;
 	
 	public boolean modeToggleStatus;
-	private JTextField textField_3;
 	
 	public UI() {
 	}
@@ -90,7 +88,7 @@ public class UI {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		TgBtnTOGGLEMINING = new JToggleButton("Off");
+		TgBtnTOGGLEMINING = new JButton("Off");
 		TgBtnTOGGLEMINING.setBounds(799, 417, 76, 23);
 		//TgBtnTOGGLEMINING.addActionListener(new ActionListener() {
 
@@ -341,14 +339,9 @@ public class UI {
 		label_5_1.setBounds(10, 100, 133, 29);
 		panel_1.add(label_5_1);
 		
-		textField_3 = new JTextField("(address balance)");
-		textField_3.setOpaque(false);
-		textField_3.setForeground(Color.BLACK);
-		textField_3.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		textField_3.setEditable(false);
-		textField_3.setBorder(null);
-		textField_3.setBounds(144, 100, 331, 29);
-		panel_1.add(textField_3);
+		JButton btnNewButton_1 = new JButton("Click to view");
+		btnNewButton_1.setBounds(144, 102, 116, 23);
+		panel_1.add(btnNewButton_1);
 		
 		BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
