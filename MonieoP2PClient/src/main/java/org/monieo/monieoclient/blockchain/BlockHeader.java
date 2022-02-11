@@ -68,4 +68,10 @@ public class BlockHeader{
 		
 	}
 	
+	public byte[] rawHash() {
+		
+		return Monieo.sha256dRaw(serialize());
+		
+	}
+	
 }

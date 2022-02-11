@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
@@ -64,10 +66,12 @@ public class Block extends MonieoDataObject{
 			AbstractTransaction[] transactions = new AbstractTransaction[data.length-1];
 			
 			transactions[transactions.length-1] = CoinbaseTransaction.deserialize(data[1]);
+			if (transactions[0] == null) return null;
 			
 			for (int i = 0; i < transactions.length-1; i++) {
 				
 				transactions[i] = Transaction.deserialize(data[i]);
+				if (transactions[i] == null) return null;
 				
 			}
 			
@@ -90,8 +94,6 @@ public class Block extends MonieoDataObject{
 		List<Block> blocksToAverage = new ArrayList<Block>();
 		
 		Block b = this;
-
-		BigInteger diffbef = b.header.diff; //already validated so we can use this value
 		
 		while (b != null) {
 			
@@ -103,9 +105,15 @@ public class Block extends MonieoDataObject{
 			
 		}
 		
-		if (blocksToAverage.size() < 2) return BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE);
+		if (blocksToAverage.size() < 2) return Monieo.MAXIMUM_HASH_VALUE;
+		
+		Collections.reverse(blocksToAverage);
 		
 		long sum = 0;
+		
+		BigInteger sumdiff = BigInteger.ZERO;
+		
+		BigInteger diffbef = header.diff; //already validated so we can use this value
 		
 		for (int i = 1; i < blocksToAverage.size(); i++) {
 			
@@ -113,33 +121,45 @@ public class Block extends MonieoDataObject{
 			
 			sum += bz.header.timestamp - blocksToAverage.get(i-1).header.timestamp;
 			
+			sumdiff = sumdiff.add(blocksToAverage.get(i-1).header.diff);
+			
 		}
 		
-		BigDecimal av = new BigDecimal(sum).divide(new BigDecimal(blocksToAverage.size()));
+		sumdiff = sumdiff.divide(BigInteger.valueOf(blocksToAverage.size()-1));
 		
-		BigDecimal discrepancy = new BigDecimal(120000).divide(av); //2min
+		BigDecimal av = new BigDecimal(sum).divide(new BigDecimal(blocksToAverage.size()-1), 100, RoundingMode.HALF_UP);
 		
-		return diffbef.multiply(discrepancy.round(new MathContext(0)).toBigIntegerExact());
+		BigDecimal discrepancy = av.divide(new BigDecimal(120000), 100, RoundingMode.HALF_UP); //2min
+		
+		return new BigDecimal(diffbef).multiply(discrepancy).setScale(0, RoundingMode.HALF_UP).min(new BigDecimal(Monieo.MAXIMUM_HASH_VALUE)).toBigIntegerExact();
 		
 	}
 
 	@Override
 	boolean testValidity() {
-
+		
 		if (this.equals(Monieo.genesis())) return true;
 		
 		if (transactions.length == 0) return false;
+		
 		if (!merkle(transactions).equals(header.merkleRoot)) return false;
+		
 		if (header == null) return false;
 		
 		Block prev = getPrevious();
 		
 		if (prev == null) return false;
-		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv}))
+		
+		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
+			
 		if (header.height != prev.header.height+1) return false;
+		
 		if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
-		if (new BigInteger(hash().getBytes()).compareTo(header.diff) == -1) return false;
+		
+		if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
+		
 		if (prev.header.timestamp >= header.timestamp) return false;
+		
 		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
 		
 		int cb = 0;
@@ -151,6 +171,7 @@ public class Block extends MonieoDataObject{
 			if (t instanceof CoinbaseTransaction) {
 				
 				if (!((CoinbaseTransaction) t).validate(this)) return false;
+				
 				cb++;
 				
 			} else if (t instanceof Transaction) {
@@ -173,7 +194,7 @@ public class Block extends MonieoDataObject{
 				
 			}
 			
-			if (co != 1) return false;
+			if (co > 1) return false; //takes into account coinbasetransactions
 			
 			//if (t.expired()) return false;
 			
@@ -240,6 +261,12 @@ public class Block extends MonieoDataObject{
 	public String hash() {
 		
 		return header.hash();
+		
+	}
+	
+	public byte[] rawHash() {
+		
+		return header.rawHash();
 		
 	}
 	

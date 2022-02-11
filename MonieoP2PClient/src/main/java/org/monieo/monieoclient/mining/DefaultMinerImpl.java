@@ -21,12 +21,17 @@ public class DefaultMinerImpl implements AbstractMiner{
 	
 	MiningStatistics curr = null;
 	
-	public static final int HASHES_BEFORE_RECHECK = 1000;
+	public static final int HASHES_BEFORE_RECHECK = 100000;
 	
 	public DefaultMinerImpl() {};
 	
 	@Override
 	public void begin(Consumer<MiningStatistics> sup) {
+		
+		while (t != null) {};
+		
+		stop = false;
+		
 		this.supervisor = sup;
 		
 		curr = new MiningStatistics(BigInteger.valueOf(0), BigInteger.valueOf(0), 0, BigDecimal.valueOf(0), System.currentTimeMillis());
@@ -39,7 +44,6 @@ public class DefaultMinerImpl implements AbstractMiner{
 	@Override
 	public void stop() {
 		stop = true;
-		supervisor.accept(new MiningStatistics(BigInteger.valueOf(0), BigInteger.valueOf(0), 0, BigDecimal.valueOf(0), 0));
 		
 	}
 
@@ -54,7 +58,12 @@ public class DefaultMinerImpl implements AbstractMiner{
 		BigInteger nonce = BigInteger.ZERO; //this should be reset in a more reliable way when a new block is started
 		
 		while (true) {
-						if (stop) return;
+						if (stop) {
+				
+				t = null;
+				return;
+				
+			}
 			
 			Block h = Monieo.INSTANCE.getHighestBlock();
 			long hei = h.header.height + 1;
@@ -67,29 +76,30 @@ public class DefaultMinerImpl implements AbstractMiner{
 			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick("MININGWALLET").getAsWalletAdress(), Block.getMaxCoinbase(hei));
 			tx.add(ct);
 			
+			AbstractTransaction[] txr = tx.toArray(new AbstractTransaction[tx.size()]);
+			
 			long nettime = Monieo.INSTANCE.getNetAdjustedTime();
 			
 			Block b = new Block(new BlockHeader(Monieo.MAGIC_NUMBERS,
 					Monieo.PROTOCOL_VERSION,
 					Monieo.INSTANCE.getHighestBlock().hash(),
-					Block.merkle(tx.toArray(new AbstractTransaction[tx.size()])),
+					Block.merkle(txr),
 					nettime,
 					BigInteger.ZERO,
-					tx.size(),
+					txr.length,
 					hei,
-					diff)
+					diff), txr
 			);
 			
 			in: for (int i = 0; i < HASHES_BEFORE_RECHECK; i++) {
 				
-				if (new BigInteger(b.hash().getBytes()).compareTo(b.header.diff) == -1) {
-					
-					System.out.println("Found valid block!");
+				if (new BigInteger(1, b.rawHash()).compareTo(b.header.diff) == -1) {
 					
 					if (b.validate()) {
 						
+						System.out.println("Found valid block!");
+						
 						Monieo.INSTANCE.handleBlock(b);
-						System.out.println("Handled valid block!");
 						nonce = BigInteger.ZERO;
 						curr.blocks++;
 						curr.total = curr.total.add(ct.getAmount());
@@ -97,11 +107,15 @@ public class DefaultMinerImpl implements AbstractMiner{
 						
 					}
 					
+					throw new IllegalStateException("Found valid block but block could not be validated!");
+					
 				}
 
 				nonce = nonce.add(BigInteger.ONE);
 				
 				b.header.nonce = nonce;
+				
+				//System.out.println(new BigInteger(1, b.rawHash()));
 				
 			}
 			

@@ -26,6 +26,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
@@ -72,6 +73,7 @@ public class UI {
 	JButton TgBtnTOGGLEMINING;
 	
 	public boolean mining;
+	JTextArea miningstats;
 	
 	public boolean modeToggleStatus;
 	
@@ -83,6 +85,13 @@ public class UI {
 	  * @wbp.parser.entryPoint
 	  */
 	public void initialize() {
+		
+		miningstats = new JTextArea("Mining statistics");
+		miningstats.setEditable(false);
+		miningstats.setOpaque(false); //this is the same as a JLabel
+		miningstats.setBorder(null); //remove the border
+		miningstats.setBounds(10, 64, 205, 190);
+		miningstats.setLineWrap(true);
 		
 		frame = new JFrame();
 		try {
@@ -130,8 +139,6 @@ public class UI {
 				lblNewLabel.setBounds(10, 11, 172, 14);
 				jd.getContentPane().add(lblNewLabel);
 				
-				JLabel miningstats = new JLabel("Mining statistics", SwingConstants.CENTER);
-				miningstats.setBounds(10, 64, 205, 190);
 				jd.getContentPane().add(miningstats);
 				
 				btnNewButton.addActionListener(new ActionListener() {
@@ -150,11 +157,13 @@ public class UI {
 								@Override
 								public void accept(MiningStatistics t) {
 									
-									miningstats.setText("Began mining: " + t.beginTime
+									String txt = "Began mining: " + t.beginTime
 											+ "\nHashes: " + t.hashes.toString()
 											+ "\nBlock target: " + t.blockTarget.toString()
 											+ "\nBlocks mined: " + t.blocks
-											+ "\nTotal earned: " + t.total.toPlainString());
+											+ "\nTotal earned: " + t.total.toPlainString();
+									
+									miningstats.setText(txt);
 									
 								}
 

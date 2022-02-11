@@ -52,6 +52,8 @@ public class Monieo {
 	
 	public static Monieo INSTANCE;
 	
+	public static final BigInteger MAXIMUM_HASH_VALUE = BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE);
+	
 	public static void main(String[] args) {
 		
 		final Properties properties = new Properties();
@@ -365,7 +367,7 @@ public class Monieo {
 		
 		String bh = sha256d(ct.serialize());
 		
-		return new Block(new BlockHeader(MAGIC_NUMBERS, PROTOCOL_VERSION, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1, 0, BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)), ct);
+		return new Block(new BlockHeader(MAGIC_NUMBERS, PROTOCOL_VERSION, "0", sha256d(bh + bh), 0, BigInteger.ZERO, 1, 0, MAXIMUM_HASH_VALUE), ct);
 		
 	}
 	
@@ -639,7 +641,7 @@ public class Monieo {
     	
     }
 
-	private static byte[] sha256dRaw(String s) {
+	public static byte[] sha256dRaw(String s) {
 		
 		MessageDigest digest = null;
 		try {
@@ -661,7 +663,7 @@ public class Monieo {
 		
 	}
 	
-	public static String bytesToHex(byte[] hash) {
+	private static String bytesToHex(byte[] hash) {
 	    StringBuilder hexString = new StringBuilder(2 * hash.length);
 	    for (int i = 0; i < hash.length; i++) {
 	        String hex = Integer.toHexString(0xff & hash[i]);
