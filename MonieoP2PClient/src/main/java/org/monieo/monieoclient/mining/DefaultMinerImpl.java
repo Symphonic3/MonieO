@@ -72,7 +72,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			
 			curr.blockTarget = diff;
 
-			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*750); //750 is completely arbitrary. This should be optimized later.
+			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*750, h); //750 is completely arbitrary. This should be optimized later.
 			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, getMonieoInstance().getWalletByNick("MININGWALLET").getAsWalletAdress(), Block.getMaxCoinbase(hei));
 			tx.add(ct);
 			
@@ -115,6 +115,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			}
 			
 			curr.hashes = curr.hashes.add(BigInteger.valueOf(HASHES_BEFORE_RECHECK));
+			supervisor.accept(curr);
 			
 		}
 		

@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.AbstractTransaction;
+import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.networking.NetworkCommand;
 import org.monieo.monieoclient.networking.Node;
@@ -68,7 +69,7 @@ public class TxPool {
 		
 	}
 	
-	public List<AbstractTransaction> get(int maxsize) {
+	public List<AbstractTransaction> get(int maxsize, Block bl) {
 		
 		List<AbstractTransaction> lt = get();
 		
@@ -78,7 +79,7 @@ public class TxPool {
 		
 		while (true) {
 			
-			ret.add(lt.get(i));
+			if (((Transaction) lt.get(i)).testValidityWithBlock(bl)) ret.add(lt.get(i));
 			
 			i++;
 			
@@ -107,7 +108,7 @@ public class TxPool {
 	
 	public void add(Transaction t) {
 		
-		if (t == null || !t.validate()) throw new RuntimeException("Attempted to add invalid/null block to txpool!");
+		if (t == null || !t.validate()) throw new RuntimeException("Attempted to add invalid/null transaction to txpool!");
 		
 		if (transactions.contains(t)) return;
 		
