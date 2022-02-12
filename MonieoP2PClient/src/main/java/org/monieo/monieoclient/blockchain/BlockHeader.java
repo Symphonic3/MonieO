@@ -32,7 +32,7 @@ public class BlockHeader{
 
 	public String serialize() {
 
-		return String.join(" ", Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION,
+		return String.join(" ", mn, pv,
 				preHash, merkleRoot, String.valueOf(timestamp), nonce.toString(), String.valueOf(amntTransactions), String.valueOf(height), diff.toString());
 		
 	}

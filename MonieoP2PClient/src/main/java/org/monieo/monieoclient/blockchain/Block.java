@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,13 +66,17 @@ public class Block extends MonieoDataObject{
 			
 			AbstractTransaction[] transactions = new AbstractTransaction[data.length-1];
 			
-			transactions[transactions.length-1] = CoinbaseTransaction.deserialize(data[1]);
-			if (transactions[0] == null) return null;
+			CoinbaseTransaction ct = CoinbaseTransaction.deserialize(data[data.length-1]);
+			if (ct == null) return null;
+			
+			transactions[transactions.length-1] = ct;
 			
 			for (int i = 0; i < transactions.length-1; i++) {
 				
-				transactions[i] = Transaction.deserialize(data[i]);
-				if (transactions[i] == null) return null;
+				Transaction t = Transaction.deserialize(data[i+1]);;
+				if (t == null) return null;
+
+				transactions[i] = t;
 				
 			}
 			
@@ -84,6 +87,7 @@ public class Block extends MonieoDataObject{
 			
 		} catch (Exception e) {
 			
+			e.printStackTrace();
 			//invalid data (great code)
 			return null;
 			
@@ -180,7 +184,7 @@ public class Block extends MonieoDataObject{
 				
 				Transaction at = (Transaction) t;
 				
-				if (!at.testValidityWithBlock(prev) || !at.testValidityWithTime(header.timestamp)) return false;
+				if (!at.testHasAmount(prev) || at.tooFarInFuture(header.timestamp) || at.expired(header.timestamp)) return false;
 				
 			}
 			

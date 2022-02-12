@@ -28,7 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
-import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.monieo.monieoclient.Monieo;
@@ -365,11 +364,7 @@ public class UI {
 
 					Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new WalletAdress(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
 					
-					System.out.println(newTransaction == null);
-					System.out.println(newTransaction.testValidityWithTime(Monieo.INSTANCE.getNetAdjustedTime()));
-					System.out.println(newTransaction.testValidityWithBlock(Monieo.INSTANCE.getHighestBlock()));
-					
-					if (newTransaction == null || !newTransaction.testValidityWithTime(Monieo.INSTANCE.getNetAdjustedTime()) || !newTransaction.testValidityWithBlock(Monieo.INSTANCE.getHighestBlock())) {
+					if (newTransaction == null || !newTransaction.validate()) {
 
 						notifyInvalid();
 						return;
@@ -391,9 +386,19 @@ public class UI {
 						
 						Monieo.INSTANCE.txp.add(newTransaction);
 						
+						textField.setText(null);
+						textField_1.setText(null);
+						textField_2.setText(null);
+						
+						JOptionPane.showMessageDialog(frame, "Transaction sent!");
+						
 						refresh(false);
 						
+						return;
+						
 					}
+					
+					notifyInvalid();
 					
 				} catch (Exception e2) {
 					e2.printStackTrace();

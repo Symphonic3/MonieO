@@ -3,6 +3,7 @@ package org.monieo.monieoclient.blockchain;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.monieo.monieoclient.Monieo;
@@ -15,7 +16,7 @@ public class Transaction extends AbstractTransaction {
 	public final String signature;
 	 
 	public Transaction(TransactionData d, String pubkey, String signature) {
-		 super(d.magicn, d.ver);
+		 super(d.mn, d.pv);
 		 this.d = d;
 		 this.pubkey = pubkey;
 		 this.signature = signature;
@@ -26,6 +27,7 @@ public class Transaction extends AbstractTransaction {
 		
 		BigInteger nonce = new BigInteger(String.valueOf(System.currentTimeMillis()) + String.valueOf(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE)));
 		
+		//should we use net adjusted time here?
 		TransactionData td = new TransactionData(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, fundsOwner.getAsWalletAdress(), to, amount, fee, Monieo.INSTANCE.getNetAdjustedTime(), nonce);
 		
 		String sig = fundsOwner.sign(td.serialize());
@@ -78,7 +80,13 @@ public class Transaction extends AbstractTransaction {
 	boolean testValidity() {
 
 		if (d == null) return false;
-		if (!d.validate()) return false;
+		
+		if (!Monieo.assertSupportedProtocol(new String[]{d.mn,d.pv})) return false;
+		
+		if (!d.from.isValid() || !d.to.isValid()) return false;
+		
+		if (d.amount.signum() != 1 || d.amount.scale() > 8) return false;
+		if (d.fee.signum() == -1 || d.fee.scale() > 8) return false;
 		
 		if (!Monieo.sha256d(pubkey).equals(d.from.adress)) return false;
 		
@@ -98,19 +106,51 @@ public class Transaction extends AbstractTransaction {
 		
 	}
 	
-	public boolean testValidityWithBlock(Block b) {
+	public boolean testHasAmount(Block b) {
 		
-		if (!validate()) return false;
+		BlockMetadata m = b.getMetadata();
 		
-		return d.testValidityWithBlock(b);
+		BigDecimal bal = BlockMetadata.getSpendableBalance(m.getFullTransactions(d.from));
+		
+		if (d.amount.add(d.fee).compareTo(bal) == 1) return false;
+		
+		Block ba = b;
+		
+		while (ba != null) {
+			
+			for (AbstractTransaction at : Arrays.asList(b.transactions)) {
+				
+				if (at instanceof Transaction) {
+					
+					if (((Transaction) at).d.equals(this.d)) return false;
+					
+				}
+				
+			}
+			
+			ba = ba.getPrevious();
+			
+			if (ba.header.timestamp < d.timestamp-7200000) break;
+			
+		}
+		
+		return true;
 		
 	}
 	
-	public boolean testValidityWithTime(long timetest) {
+	public boolean expired(long timetest) {
 		
-		if (!validate()) return false;
+		if (timetest > d.timestamp + 86400000) return true; //1d
 		
-		return d.testValidityWithTime(timetest);
+		return false;
+		
+	}
+	
+	public boolean tooFarInFuture(long timetest) {
+		
+		if (timetest + 7200000 < d.timestamp) return true; //2h
+		
+		return false;
 		
 	}
 	

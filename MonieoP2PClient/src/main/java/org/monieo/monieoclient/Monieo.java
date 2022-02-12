@@ -228,9 +228,6 @@ public class Monieo {
 		}
 		
 		miner = new DefaultMinerImpl();
-		
-        ui = new UI();
-        ui.initialize();
         
         blocksFolder = new File(workingFolder.getPath() + "/blocks");
         blocksFolder.mkdir();
@@ -251,6 +248,9 @@ public class Monieo {
 			handleBlock(genesis());
 			
 		}
+		
+        ui = new UI();
+        ui.initialize();
 		
 		txp = new TxPool();
 		

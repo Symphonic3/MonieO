@@ -71,14 +71,14 @@ public class DefaultMinerImpl implements AbstractMiner{
 			BigInteger diff = h.calculateNextDifficulty();
 			
 			curr.blockTarget = diff;
+			
+			long nettime = Monieo.INSTANCE.getNetAdjustedTime();
 
-			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*750, h); //750 is completely arbitrary. This should be optimized later.
+			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*750, h, nettime); //750 is completely arbitrary. This should be optimized later.
 			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick("MININGWALLET").getAsWalletAdress(), Block.getMaxCoinbase(hei));
 			tx.add(ct);
 			
 			AbstractTransaction[] txr = tx.toArray(new AbstractTransaction[tx.size()]);
-			
-			long nettime = Monieo.INSTANCE.getNetAdjustedTime();
 			
 			Block b = new Block(new BlockHeader(Monieo.MAGIC_NUMBERS,
 					Monieo.PROTOCOL_VERSION,

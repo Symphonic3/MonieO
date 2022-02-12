@@ -279,11 +279,9 @@ public class Node implements Runnable{
 				
 			} else if (nc.cmd == NetworkCommandType.SEND_TRANSACTION) {
 				
-				Block hb = Monieo.INSTANCE.getHighestBlock();
-				
 				Transaction t = Transaction.deserialize(nc.data);
 
-				if (t == null || !t.testValidityWithBlock(hb) || !t.testValidityWithTime(Monieo.INSTANCE.getNetAdjustedTime())) return false;
+				if (t == null || !t.validate()) return false;
 				
 				Monieo.INSTANCE.txp.add(t);
 				

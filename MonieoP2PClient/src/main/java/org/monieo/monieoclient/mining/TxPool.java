@@ -32,7 +32,7 @@ public class TxPool {
 
 			@Override
 			public boolean test(Transaction t) {
-				return !t.testValidityWithTime(Monieo.INSTANCE.getNetAdjustedTime());
+				return t.expired(Monieo.INSTANCE.getNetAdjustedTime());
 			}
 			
 		});
@@ -69,25 +69,22 @@ public class TxPool {
 		
 	}
 	
-	public List<AbstractTransaction> get(int maxsize, Block bl) {
+	public List<AbstractTransaction> get(int maxsize, Block bl, long timest) {
 		
 		List<AbstractTransaction> lt = get();
 		
 		List<AbstractTransaction> ret = new ArrayList<AbstractTransaction>();
 		
-		int i = 0;
-		
-		outer: while (true) {
+		outer: for (int i = 0; i < lt.size(); i++) {
 			
-			if (lt.size() == i) break;
+			Transaction tr = (Transaction) lt.get(i);
 			
-			if (((Transaction) lt.get(i)).testValidityWithBlock(bl)) {
+			if (tr.testHasAmount(bl) && !tr.tooFarInFuture(timest)) {
 				
 				for (AbstractTransaction at : ret) {
 					
-					if (((Transaction)at).getSource().equals(((Transaction)lt.get(i)).getSource())) {
-						
-						i++;
+					if (((Transaction)at).getSource().equals(tr.getSource())) {
+
 						continue outer;
 						
 					}
@@ -95,9 +92,8 @@ public class TxPool {
 				}
 				
 				ret.add(lt.get(i));
+				
 			}
-			
-			i++;
 			
 			int b = 0;
 			
