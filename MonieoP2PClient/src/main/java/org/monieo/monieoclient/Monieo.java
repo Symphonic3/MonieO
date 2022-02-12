@@ -346,14 +346,14 @@ public class Monieo {
 				e.printStackTrace();
 			}
 			
+			b.generateMetadata();
+			
 			if (getHighestBlock() == null || b.header.height > getHighestBlock().header.height) {
 				
 				setHighestBlock(b);
 				ui.refresh(false);
 				
 			}
-			
-			b.generateMetadata();
 			
 			Node.propagateAll(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
 			

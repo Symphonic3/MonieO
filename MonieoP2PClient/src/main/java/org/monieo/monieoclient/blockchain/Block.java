@@ -111,9 +111,7 @@ public class Block extends MonieoDataObject{
 		
 		long sum = 0;
 		
-		BigInteger sumdiff = BigInteger.ZERO;
-		
-		BigInteger diffbef = header.diff; //already validated so we can use this value
+		BigDecimal sumdiff = BigDecimal.ZERO;
 		
 		for (int i = 1; i < blocksToAverage.size(); i++) {
 			
@@ -121,17 +119,19 @@ public class Block extends MonieoDataObject{
 			
 			sum += bz.header.timestamp - blocksToAverage.get(i-1).header.timestamp;
 			
-			sumdiff = sumdiff.add(blocksToAverage.get(i-1).header.diff);
+			sumdiff = sumdiff.add(new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(new BigDecimal(blocksToAverage.get(i-1).header.diff), 100, RoundingMode.HALF_UP));
 			
 		}
 		
-		sumdiff = sumdiff.divide(BigInteger.valueOf(blocksToAverage.size()-1));
+		sumdiff = sumdiff.divide(BigDecimal.valueOf(blocksToAverage.size()-1), 100, RoundingMode.HALF_UP);
 		
 		BigDecimal av = new BigDecimal(sum).divide(new BigDecimal(blocksToAverage.size()-1), 100, RoundingMode.HALF_UP);
 		
-		BigDecimal discrepancy = av.divide(new BigDecimal(120000), 100, RoundingMode.HALF_UP); //2min
+		BigDecimal f = sumdiff.divide(av, 100, RoundingMode.HALF_UP);
 		
-		return new BigDecimal(diffbef).multiply(discrepancy).setScale(0, RoundingMode.HALF_UP).min(new BigDecimal(Monieo.MAXIMUM_HASH_VALUE)).toBigIntegerExact();
+		BigDecimal discrepancy = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(f.multiply(new BigDecimal(120000)), 100, RoundingMode.HALF_UP); //2min
+		
+		return discrepancy.setScale(0, RoundingMode.HALF_UP).toBigIntegerExact();
 		
 	}
 
