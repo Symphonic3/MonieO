@@ -298,9 +298,14 @@ public class Monieo {
 	
 	public void setHighestBlock(Block b) {
 		
-		try (FileWriter fw = new FileWriter(blkhighest, false)) {
+		FileWriter fw;
+		
+		try {
 			
+			fw = new FileWriter(blkhighest, false);
 			fw.write(b.hash());
+			fw.flush();
+			fw.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -31,7 +31,9 @@ public class Block extends MonieoDataObject{
 		
 		File f = new File(Monieo.INSTANCE.blocksFolder.getPath() + "/" + hash + ".blk");
 		
-		return Block.deserialize(Monieo.readFileData(f));
+		Block r = Block.deserialize(Monieo.readFileData(f));
+		
+		return r;
 		
 	}
 	
@@ -356,7 +358,7 @@ public class Block extends MonieoDataObject{
 									
 									AbstractTransaction t = txclone.get(i);
 									
-									if (t.getDestination().equals(wa)) {
+									if (t.getDestination().adress.equals(wa.adress)) {
 		
 										boolean cb = (t instanceof CoinbaseTransaction);
 										int ampe = cb ? Monieo.CONFIRMATIONS_BLOCK_SENSITIVE : Monieo.CONFIRMATIONS;

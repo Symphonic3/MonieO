@@ -24,7 +24,7 @@ public class Transaction extends AbstractTransaction {
 	
 	public static Transaction createNewTransaction(Wallet fundsOwner, WalletAdress to, BigDecimal amount, BigDecimal fee) {
 		
-		BigInteger nonce = new BigInteger(String.valueOf(System.currentTimeMillis()) + String.valueOf(ThreadLocalRandom.current().nextInt()));
+		BigInteger nonce = new BigInteger(String.valueOf(System.currentTimeMillis()) + String.valueOf(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE)));
 		
 		TransactionData td = new TransactionData(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, fundsOwner.getAsWalletAdress(), to, amount, fee, Monieo.INSTANCE.getNetAdjustedTime(), nonce);
 		

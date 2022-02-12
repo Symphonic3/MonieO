@@ -114,8 +114,9 @@ public class UI {
 				JDialog jd = new JDialog(frame);
 				
 				jd.setTitle("Mining " + Monieo.VERSION);
-				jd.setBounds(100, 100, 250, 350);
+				jd.setBounds(150, 150, 242, 350);
 				jd.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				jd.setResizable(false);
 				
 				jd.getContentPane().setLayout(null);
 
@@ -362,7 +363,13 @@ public class UI {
 						
 					}
 					
+					
+					System.out.println("z");
 					Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new WalletAdress(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
+					
+					System.out.println(newTransaction == null);
+					System.out.println(newTransaction.testValidityWithTime(Monieo.INSTANCE.getNetAdjustedTime()));
+					System.out.println(newTransaction.testValidityWithBlock(Monieo.INSTANCE.getHighestBlock()));
 					
 					if (newTransaction == null || !newTransaction.testValidityWithTime(Monieo.INSTANCE.getNetAdjustedTime()) || !newTransaction.testValidityWithBlock(Monieo.INSTANCE.getHighestBlock())) {
 
@@ -371,6 +378,8 @@ public class UI {
 						
 					}
 
+					System.out.println("r");
+					
 					String res = JOptionPane.showInputDialog(frame, 
 							"WARNING: YOU ARE ABOUT TO SEND A MONIEO TRANSACTION.\nTHIS ACTION IS IRREVERSIBLE AND CANNOT BE UNDONE.\n\n"
 							+ "To: " + newTransaction.d.to.adress
@@ -389,6 +398,7 @@ public class UI {
 					}
 					
 				} catch (Exception e2) {
+					e2.printStackTrace();
 					notifyInvalid();
 				}
 			}
