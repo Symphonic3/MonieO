@@ -362,9 +362,7 @@ public class UI {
 						return;
 						
 					}
-					
-					
-					System.out.println("z");
+
 					Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new WalletAdress(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
 					
 					System.out.println(newTransaction == null);
