@@ -183,6 +183,11 @@ public class Node implements Runnable{
 	
 	public boolean handle(NetworkCommand nc) {
 		
+		System.out.println("rec'd network command!");
+		System.out.println("==BEGIN NETWORK COMMAND==");
+		System.out.println(nc.data);
+		System.out.println("==END NETWORK COMMAND==");
+		
 		for (PacketCommitment pc : packetCommitments) {
 			
 			if (pc.attemptFillShouldBanNode(nc)) { //disconnects node instead of banning, as this is only indicitive that the node is disconnected, not nessecarily that it is uncooperative

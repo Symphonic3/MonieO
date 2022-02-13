@@ -24,7 +24,6 @@ public class ConnectionHandler implements Runnable{
 		while (true) {
 			
 			try {
-				System.out.println("large");
 				Socket clientSocket = serverSocket.accept();
 				nodeDo(clientSocket, true);
 			} catch (IOException e) {
@@ -44,10 +43,7 @@ public class ConnectionHandler implements Runnable{
 		}
 		
 		try {
-			System.out.println("sadsda fat");
-			System.out.println("BB" + inet);
 			Socket s = new Socket(inet, Monieo.PORT);
-			System.out.println("the big cheese");
 			nodeDo(s, false);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -57,7 +53,7 @@ public class ConnectionHandler implements Runnable{
 	
 	private void nodeDo(Socket s, boolean server) {
 		
-		System.out.println(s.getInetAddress().getHostAddress());
+		System.out.println("Connected to: " + s.getInetAddress().getHostAddress());
 		
 		Node n = new Node(s, server);
 		n.sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_VER, null),

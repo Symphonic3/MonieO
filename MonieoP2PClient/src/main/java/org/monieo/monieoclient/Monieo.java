@@ -250,27 +250,16 @@ public class Monieo {
 		
         ui = new UI();
         ui.initialize();
-		
-		System.out.println("sys me");
         
 		txp = new TxPool();
 		
-		System.out.println("o1iu41u4p");
-		
-		ch = new ConnectionHandler();
-		
-		System.out.println("asd1k");
-		
+		ch = new ConnectionHandler();	
 		new Thread(ch).start();
-		
-		System.out.println("monkey");
 		
 		new Timer().schedule(new TimerTask() {
 			
 			@Override
 			public void run() {
-				
-				System.out.println("asd");
 				
 				int amntns = 0;
 				
@@ -284,13 +273,11 @@ public class Monieo {
 					
 					List<String> rn = getValidNodesRightNow();
 					
-					System.out.println(rn.size());
-					
 					for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
 						
 						if (rn.size() <= i) return; 
 						
-						System.out.println("connect me");
+						System.out.println("attempting to connect to a node!");
 						ch.connect(rn.get(i));
 						
 					}
@@ -300,11 +287,7 @@ public class Monieo {
 			}
 			
 		}, 1000);
-		
-		System.out.println("large");
-		
-		System.out.flush();
-		
+
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
