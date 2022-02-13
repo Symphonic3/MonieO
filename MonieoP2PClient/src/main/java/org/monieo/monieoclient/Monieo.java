@@ -251,10 +251,17 @@ public class Monieo {
         ui = new UI();
         ui.initialize();
 		
+		System.out.println("sys me");
+        
 		txp = new TxPool();
 		
+		System.out.println("o1iu41u4p");
+		
 		ch = new ConnectionHandler();
-		new Thread(ch).run();
+		
+		System.out.println("asd1k");
+		
+		new Thread(ch).start();
 		
 		System.out.println("monkey");
 		

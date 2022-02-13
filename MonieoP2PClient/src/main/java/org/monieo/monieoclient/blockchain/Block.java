@@ -89,7 +89,7 @@ public class Block extends MonieoDataObject{
 			
 		} catch (Exception e) {
 			
-			e.printStackTrace();
+			//e.printStackTrace();
 			//invalid data (great code)
 			return null;
 			
