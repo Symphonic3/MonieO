@@ -10,7 +10,7 @@ public abstract class AbstractTransaction extends MonieoDataObject{
 		super(m, v);
 	}
 
-	public abstract WalletAdress getDestination();
+	public abstract String getDestination();
 	public abstract BigDecimal getAmount();
 	
 	public abstract String serialize();

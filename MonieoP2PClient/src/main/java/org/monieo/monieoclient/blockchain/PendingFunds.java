@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class PendingFunds {
 	
-	//If a transaction is > 100 confirmations, it is combined at 100 confirmations with any others
+	//If a transaction is > CONFIRMATIONS_BLOCK_SENSITIVE, it is combined with no confirmations field with any others
 
 	long confRemain;
 	BigDecimal amount;

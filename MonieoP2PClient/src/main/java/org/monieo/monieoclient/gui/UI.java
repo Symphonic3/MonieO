@@ -33,7 +33,6 @@ import javax.swing.event.ListSelectionListener;
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.BlockMetadata;
 import org.monieo.monieoclient.blockchain.Transaction;
-import org.monieo.monieoclient.blockchain.WalletAdress;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.wallet.Wallet;
 import javax.swing.JTextField;
@@ -98,7 +97,7 @@ public class UI {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		frame.setTitle("Monieo Client Version " + Monieo.VERSION);
+		frame.setTitle("MonieO Client Version " + Monieo.VERSION);
 		frame.setBounds(100, 100, 901, 485);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
@@ -362,7 +361,7 @@ public class UI {
 						
 					}
 
-					Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new WalletAdress(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
+					Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new String(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
 					
 					if (newTransaction == null || !newTransaction.validate()) {
 
@@ -370,12 +369,10 @@ public class UI {
 						return;
 						
 					}
-
-					System.out.println("r");
 					
 					String res = JOptionPane.showInputDialog(frame, 
 							"WARNING: YOU ARE ABOUT TO SEND A MONIEO TRANSACTION.\nTHIS ACTION IS IRREVERSIBLE AND CANNOT BE UNDONE.\n\n"
-							+ "To: " + newTransaction.d.to.adress
+							+ "To: " + newTransaction.d.to
 							+ "\nAmount: " + newTransaction.d.amount
 							+ "\nFee: " + newTransaction.d.fee
 							+ "\n\nPlease type \"confirm\" below to confirm.", "Confirmation", 2);
@@ -525,13 +522,13 @@ public class UI {
     			
     			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
     			
-    			BigDecimal n = BlockMetadata.getSpendableBalance(m.getFullTransactions(w.getAsWalletAdress()));
+    			BigDecimal n = BlockMetadata.getSpendableBalance(m.getFullTransactions(w.getAsString()));
     			
     			tot = tot.add(n);
     			
     			if (s.equals(list.getSelectedValue())) {
     				
-    	    		addressLabel.setText(w.getAsWalletAdress().adress);
+    	    		addressLabel.setText(w.getAsString());
     	    		nickLabel.setText(w.nickname);
     				INDIVbalanceLabel.setText(n.toPlainString());
     				

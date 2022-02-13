@@ -25,7 +25,6 @@ import java.security.spec.X509EncodedKeySpec;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
-import org.monieo.monieoclient.blockchain.WalletAdress;
 import org.monieo.monieoclient.gui.UI;
 import org.monieo.monieoclient.mining.AbstractMiner;
 import org.monieo.monieoclient.mining.DefaultMinerImpl;
@@ -368,7 +367,7 @@ public class Monieo {
 	
 	public static Block genesis() {
 		
-		CoinbaseTransaction ct = new CoinbaseTransaction(MAGIC_NUMBERS, PROTOCOL_VERSION, new WalletAdress("faa69b10d8d1a8c427e71839a0141e4e83a99c443b5c16e7f7e1cdaca96054de"), new BigDecimal(0));
+		CoinbaseTransaction ct = new CoinbaseTransaction(MAGIC_NUMBERS, PROTOCOL_VERSION, new String("faa69b10d8d1a8c427e71839a0141e4e83a99c443b5c16e7f7e1cdaca96054de"), new BigDecimal(0));
 		
 		String bh = sha256d(ct.serialize());
 		

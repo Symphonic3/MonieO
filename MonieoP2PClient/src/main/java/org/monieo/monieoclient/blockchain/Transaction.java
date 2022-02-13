@@ -23,12 +23,12 @@ public class Transaction extends AbstractTransaction {
 		 
 	}
 	
-	public static Transaction createNewTransaction(Wallet fundsOwner, WalletAdress to, BigDecimal amount, BigDecimal fee) {
+	public static Transaction createNewTransaction(Wallet fundsOwner, String to, BigDecimal amount, BigDecimal fee) {
 		
 		BigInteger nonce = new BigInteger(String.valueOf(System.currentTimeMillis()) + String.valueOf(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE)));
 		
 		//should we use net adjusted time here?
-		TransactionData td = new TransactionData(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, fundsOwner.getAsWalletAdress(), to, amount, fee, Monieo.INSTANCE.getNetAdjustedTime(), nonce);
+		TransactionData td = new TransactionData(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, fundsOwner.getAsString(), to, amount, fee, Monieo.INSTANCE.getNetAdjustedTime(), nonce);
 		
 		String sig = fundsOwner.sign(td.serialize());
 		
@@ -63,11 +63,11 @@ public class Transaction extends AbstractTransaction {
 	}
 	
 	@Override
-	public WalletAdress getDestination() {
+	public String getDestination() {
 		return d.to;
 	}
 	
-	public WalletAdress getSource() {
+	public String getSource() {
 		return d.from;
 	}
 
@@ -83,12 +83,12 @@ public class Transaction extends AbstractTransaction {
 		
 		if (!Monieo.assertSupportedProtocol(new String[]{d.mn,d.pv})) return false;
 		
-		if (!d.from.isValid() || !d.to.isValid()) return false;
+		if (d.from.length() != 64 || d.to.length() != 64) return false;
 		
 		if (d.amount.signum() != 1 || d.amount.scale() > 8) return false;
 		if (d.fee.signum() == -1 || d.fee.scale() > 8) return false;
 		
-		if (!Monieo.sha256d(pubkey).equals(d.from.adress)) return false;
+		if (!Monieo.sha256d(pubkey).equals(d.from)) return false;
 		
 		PublicKey pk = Monieo.deserializePublicKey(pubkey);
 		
@@ -118,11 +118,11 @@ public class Transaction extends AbstractTransaction {
 		
 		while (ba != null) {
 			
-			for (AbstractTransaction at : Arrays.asList(b.transactions)) {
+			for (AbstractTransaction at : Arrays.asList(ba.transactions)) {
 				
 				if (at instanceof Transaction) {
 					
-					if (((Transaction) at).d.equals(this.d)) return false;
+					if (((Transaction) at).equals(this)) return false;
 					
 				}
 				

@@ -59,7 +59,7 @@ public class BlockMetadata {
 		
 	}
 	
-	public List<PendingFunds> getFullTransactions(WalletAdress wa) {
+	public List<PendingFunds> getFullTransactions(String wa) {
 		
 		try (Scanner c = new Scanner(blockmetafile)) {
 			
@@ -69,7 +69,7 @@ public class BlockMetadata {
 				String[] s = da.split(" ");
 				if (s.length < 2) throw new IllegalStateException("Detected invalid balance field in block metadata! " + blockmetafile.getPath());
 				
-				if (s[0].equals(wa.adress)) {
+				if (s[0].equals(wa)) {
 					
 					return getTXCS(da);
 					

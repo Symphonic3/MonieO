@@ -148,41 +148,35 @@ public class Block extends MonieoDataObject{
 		
 		if (this.equals(Monieo.genesis())) return true;
 		
-		System.out.println("a");
-		
 		if (transactions.length == 0) return false;
-		System.out.println("b");
+
 		if (!merkle(transactions).equals(header.merkleRoot)) return false;
-		System.out.println("c");
+
 		if (header == null) return false;
-		System.out.println("d");
+
 		Block prev = getPrevious();
-		System.out.println("e");
+
 		if (prev == null) return false;
-		System.out.println("f");
+
 		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
-		System.out.println("g");
+
 		if (header.height != prev.header.height+1) return false;
-		System.out.println("h");
+
 		if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
-		System.out.println("i");
+
 		if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
-		System.out.println("j");
+
 		if (prev.header.timestamp >= header.timestamp) return false;
-		System.out.println("k");
+
 		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
-		System.out.println("l");
+
 		int cb = 0;
 		
 		for (AbstractTransaction t : transactions) {
 			
 			if (t == null) return false;
 			
-			System.out.println("rho");
-			
 			if (t instanceof CoinbaseTransaction) {
-				
-				System.out.println("pi");
 				
 				if (!((CoinbaseTransaction) t).validate(this)) return false;
 				
@@ -191,8 +185,6 @@ public class Block extends MonieoDataObject{
 			} else if (t instanceof Transaction) {
 				
 				Transaction at = (Transaction) t;
-				
-				System.out.println("lambda");
 				
 				if (!at.testHasAmount(prev) || at.tooFarInFuture(header.timestamp) || at.expired(header.timestamp)) return false;
 				
@@ -203,8 +195,6 @@ public class Block extends MonieoDataObject{
 			for (AbstractTransaction t1 : transactions) {
 				
 				if (t1 instanceof Transaction && t instanceof Transaction) {
-					
-					System.out.println("epsilon");
 					
 					if (((Transaction) t1).equals(((Transaction) t))) count++;
 					
@@ -218,11 +208,7 @@ public class Block extends MonieoDataObject{
 			
 		}
 		
-		System.out.println("m");
-		
 		if (cb != 1) return false;
-		
-		System.out.println("n");
 		
 		if (serialize().getBytes().length > 1024*1024) return false;
 		
@@ -338,38 +324,32 @@ public class Block extends MonieoDataObject{
 				
 			}
 			
-			HashMap<WalletAdress, List<PendingFunds>> pfToAdd = new HashMap<WalletAdress, List<PendingFunds>>();
+			HashMap<String, List<PendingFunds>> pfToAdd = new HashMap<String, List<PendingFunds>>();
 			
 			for (AbstractTransaction t : txclone) {
 				
-				WalletAdress w = t.getDestination();
+				boolean cb = (t instanceof CoinbaseTransaction); //assume that if it is not a coinbasetransaction it is a transaction
+				
+				String w = t.getDestination();
 				
 				if (!pfToAdd.containsKey(w)) pfToAdd.put(w, new ArrayList<PendingFunds>());
 				
-				boolean cb = (t instanceof CoinbaseTransaction);
-				
-				if (t.getDestination().equals(w)) {
+				if (cb) {
 					
-					if (cb) {
-						
-						pfToAdd.get(w).add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS_BLOCK_SENSITIVE));
-						pfToAdd.get(w).add(new PendingFunds(fees, Monieo.CONFIRMATIONS));
-						
-					} else {
-						
-						pfToAdd.get(w).add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS));
-						
-					}
+					pfToAdd.get(w).add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS_BLOCK_SENSITIVE));
+					pfToAdd.get(w).add(new PendingFunds(fees, Monieo.CONFIRMATIONS));
 					
-				} else if (t instanceof Transaction) { //is this unnecessary? probably.
+				} else {
 					
-					Transaction tr = (Transaction) t;
+					pfToAdd.get(w).add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS));
 					
-					if (tr.getSource().equals(w)) {
-						
-						pfToAdd.get(w).add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
-						
-					}
+					Transaction tr = ((Transaction) t);
+					
+					String w2 = tr.getSource();
+					
+					if (!pfToAdd.containsKey(w2)) pfToAdd.put(w2, new ArrayList<PendingFunds>());
+					
+					pfToAdd.get(w2).add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
 					
 				}
 				
@@ -397,7 +377,7 @@ public class Block extends MonieoDataObject{
 							
 							if (l.equals(" ") || l.equals("\n")) continue;
 							
-							WalletAdress wa = new WalletAdress(l.split(" ")[0]);
+							String wa = new String(l.split(" ")[0]);
 							
 							List<PendingFunds> tcs = BlockMetadata.getTXCS(l);
 							BigDecimal spendable = BigDecimal.ZERO;
@@ -439,14 +419,14 @@ public class Block extends MonieoDataObject{
 								
 							}
 							
-							String lnwrite = wa.adress + " " + spendable;
+							String lnwrite = wa + " " + spendable;
 							
 							for (PendingFunds pf : tcs) {
 								
 								lnwrite = lnwrite + " " + pf.serialize();
 								
 							}
-							
+
 							fw.write(lnwrite + "\n");
 							
 						}
@@ -457,16 +437,16 @@ public class Block extends MonieoDataObject{
 					
 				}
 
-				for (WalletAdress w : pfToAdd.keySet()) {
+				for (String w : pfToAdd.keySet()) {
 					
-					String lnwrite = w.adress;
+					String lnwrite = w;
 					
 					for (PendingFunds pf : pfToAdd.get(w)) {
 						
 						lnwrite = lnwrite + " " + pf.serialize();
 						
 					}
-					
+
 					fw.write(lnwrite + "\n");
 					
 				}

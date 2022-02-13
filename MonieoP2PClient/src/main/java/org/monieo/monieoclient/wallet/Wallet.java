@@ -5,7 +5,6 @@ import java.security.Signature;
 import java.util.Base64;
 
 import org.monieo.monieoclient.Monieo;
-import org.monieo.monieoclient.blockchain.WalletAdress;
 
 public class Wallet {
 
@@ -52,9 +51,9 @@ public class Wallet {
     	
     }
     
-    public WalletAdress getAsWalletAdress() {
+    public String getAsString() {
     	
-    	return new WalletAdress(address);
+    	return address;
     	
     }
     

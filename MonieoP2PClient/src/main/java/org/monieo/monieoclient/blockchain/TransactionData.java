@@ -5,8 +5,8 @@ import java.math.BigInteger;
 
 public class TransactionData {
 	
-	public final WalletAdress from;
-	public final WalletAdress to;
+	public final String from;
+	public final String to;
 	public final BigDecimal amount;
 	public final BigDecimal fee;
 	public final long timestamp;
@@ -15,7 +15,7 @@ public class TransactionData {
 	public String mn;
 	public String pv;
 	
-	public TransactionData(String magicn, String ver, WalletAdress from, WalletAdress to, BigDecimal amount, BigDecimal fee, long timestamp, BigInteger nonce) {
+	public TransactionData(String magicn, String ver, String from, String to, BigDecimal amount, BigDecimal fee, long timestamp, BigInteger nonce) {
 		this.mn = magicn;
 		this.pv = ver;
 		this.from = from;
@@ -29,7 +29,7 @@ public class TransactionData {
 	
 	public String serialize() {
 
-		return String.join(" ", mn, pv, from.adress, to.adress, amount.toPlainString(), fee.toPlainString(), String.valueOf(timestamp), String.valueOf(nonce));
+		return String.join(" ", mn, pv, from, to, amount.toPlainString(), fee.toPlainString(), String.valueOf(timestamp), String.valueOf(nonce));
 		
 	}
 	
@@ -43,8 +43,8 @@ public class TransactionData {
 			//This should be checked afterwards!
 			
 			return new TransactionData(data[0], data[1], 
-					new WalletAdress(data[2]),
-					new WalletAdress(data[3]),
+					new String(data[2]),
+					new String(data[3]),
 					new BigDecimal(data[4]),
 					new BigDecimal(data[5]),
 					Long.valueOf(data[6]),
