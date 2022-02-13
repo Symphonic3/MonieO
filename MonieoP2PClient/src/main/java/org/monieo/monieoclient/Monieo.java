@@ -288,6 +288,8 @@ public class Monieo {
 					
 					for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
 						
+						if (rn.size() <= i) return; 
+						
 						System.out.println("connect me");
 						ch.connect(rn.get(i));
 						
