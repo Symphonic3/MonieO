@@ -273,8 +273,11 @@ public class Monieo {
 					
 					List<String> rn = getValidNodesRightNow();
 					
+					System.out.println(rn.size());
+					
 					for (int i = 0; i < amntns; i++) {
 						
+						System.out.println("connect me");
 						ch.connect(rn.get(i));
 						
 					}

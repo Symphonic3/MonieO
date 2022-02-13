@@ -14,7 +14,13 @@ public class ConnectionHandler implements Runnable{
 	
 	@Override
 	public void run() {
-
+		
+        try {
+			serverSocket = new ServerSocket(Monieo.PORT);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
 		while (true) {
 			
 			try {
@@ -46,6 +52,8 @@ public class ConnectionHandler implements Runnable{
 	}
 	
 	private void nodeDo(Socket s, boolean server) {
+		
+		System.out.println(s.getInetAddress().getHostAddress());
 		
 		Node n = new Node(s, server);
 		n.sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_VER, null),
