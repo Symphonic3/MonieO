@@ -43,7 +43,10 @@ public class ConnectionHandler implements Runnable{
 		}
 		
 		try {
+			System.out.println("sadsda fat");
+			System.out.println("BB" + inet);
 			Socket s = new Socket(inet, Monieo.PORT);
+			System.out.println("the big cheese");
 			nodeDo(s, false);
 		} catch (IOException e) {
 			e.printStackTrace();
