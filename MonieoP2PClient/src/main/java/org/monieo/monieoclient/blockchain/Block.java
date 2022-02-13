@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Predicate;
+
 import org.monieo.monieoclient.Monieo;
 
 public class Block extends MonieoDataObject{
@@ -146,35 +148,41 @@ public class Block extends MonieoDataObject{
 		
 		if (this.equals(Monieo.genesis())) return true;
 		
+		System.out.println("a");
+		
 		if (transactions.length == 0) return false;
-		
+		System.out.println("b");
 		if (!merkle(transactions).equals(header.merkleRoot)) return false;
-		
+		System.out.println("c");
 		if (header == null) return false;
-		
+		System.out.println("d");
 		Block prev = getPrevious();
-		
+		System.out.println("e");
 		if (prev == null) return false;
-		
+		System.out.println("f");
 		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
-			
+		System.out.println("g");
 		if (header.height != prev.header.height+1) return false;
-		
+		System.out.println("h");
 		if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
-		
+		System.out.println("i");
 		if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
-		
+		System.out.println("j");
 		if (prev.header.timestamp >= header.timestamp) return false;
-		
+		System.out.println("k");
 		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
-		
+		System.out.println("l");
 		int cb = 0;
 		
 		for (AbstractTransaction t : transactions) {
 			
 			if (t == null) return false;
 			
+			System.out.println("rho");
+			
 			if (t instanceof CoinbaseTransaction) {
+				
+				System.out.println("pi");
 				
 				if (!((CoinbaseTransaction) t).validate(this)) return false;
 				
@@ -184,29 +192,37 @@ public class Block extends MonieoDataObject{
 				
 				Transaction at = (Transaction) t;
 				
+				System.out.println("lambda");
+				
 				if (!at.testHasAmount(prev) || at.tooFarInFuture(header.timestamp) || at.expired(header.timestamp)) return false;
 				
 			}
 			
-			int co = 0;
+			int count = 0;
 			
 			for (AbstractTransaction t1 : transactions) {
 				
 				if (t1 instanceof Transaction && t instanceof Transaction) {
 					
-					if (((Transaction) t1).getSource().equals(((Transaction) t).getSource())) co++;
+					System.out.println("epsilon");
+					
+					if (((Transaction) t1).equals(((Transaction) t))) count++;
 					
 				}
 				
 			}
 			
-			if (co > 1) return false; //takes into account coinbasetransactions
+			if (count > 1) return false;
 			
 			//if (t.expired()) return false;
 			
 		}
 		
+		System.out.println("m");
+		
 		if (cb != 1) return false;
+		
+		System.out.println("n");
 		
 		if (serialize().getBytes().length > 1024*1024) return false;
 		
@@ -287,8 +303,8 @@ public class Block extends MonieoDataObject{
 		return new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + hash() + ".blkmeta").exists();
 		
 	}
-	
-	//WARNING! WITH THIS CURRENT TERRIBLE CODE, THE MINER MUST PLACE THEIR COINBASE TRANSACTION AT THE END OF THE BLOCK IF THEY WISH TO RECIEVE ALL FEES.
+
+	//coinbase transaction is at end of block!!!
 	public void generateMetadata() {
 		
 		//This method is full of horrible code.
@@ -297,162 +313,168 @@ public class Block extends MonieoDataObject{
 		if (!hasMetadata()) {
 			
 			File blockmetafile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + hash() + ".blkmeta");
+			try {
+				blockmetafile.createNewFile();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			
-			if (!blockmetafile.exists()) {
+			String ph = header.preHash;
+			File prevBlockMetaFile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + ph + ".blkmeta");
+
+			List<AbstractTransaction> txclone = new ArrayList<AbstractTransaction>(Arrays.asList(transactions.clone()));
+			
+			BigDecimal fees = BigDecimal.ZERO;
+			
+			for (AbstractTransaction t : txclone) {
 				
-				try {
-					blockmetafile.createNewFile();
-				} catch (IOException e1) {
-					e1.printStackTrace();
+				if (t instanceof Transaction) {
+					
+					Transaction tr = ((Transaction) t);
+					
+					fees = fees.add(tr.d.fee);
+					
 				}
 				
-				String ph = header.preHash;
+			}
+			
+			HashMap<WalletAdress, List<PendingFunds>> pfToAdd = new HashMap<WalletAdress, List<PendingFunds>>();
+			
+			for (AbstractTransaction t : txclone) {
 				
-				File prevBlockMetaFile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + ph + ".blkmeta");
-
-				List<AbstractTransaction> txclone = new ArrayList<AbstractTransaction>(Arrays.asList(transactions.clone()));
+				WalletAdress w = t.getDestination();
 				
-				BigDecimal fees = BigDecimal.ZERO;
+				if (!pfToAdd.containsKey(w)) pfToAdd.put(w, new ArrayList<PendingFunds>());
 				
-				try (FileWriter fw = new FileWriter(blockmetafile, false)) {
+				boolean cb = (t instanceof CoinbaseTransaction);
+				
+				if (t.getDestination().equals(w)) {
 					
-					if (!this.equals(Monieo.genesis())) {
+					if (cb) {
 						
-						if (!prevBlockMetaFile.exists()) {
-							
-							//we should request this so-called previous block, possibly, at some point
-							//can't be bothered to implement this right now.
-							//TODO fix this, at some point
-							
-							return;
-							
-						}
+						pfToAdd.get(w).add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS_BLOCK_SENSITIVE));
+						pfToAdd.get(w).add(new PendingFunds(fees, Monieo.CONFIRMATIONS));
 						
-						try (Scanner c = new Scanner(prevBlockMetaFile)) {
+					} else {
+						
+						pfToAdd.get(w).add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS));
+						
+					}
+					
+				} else if (t instanceof Transaction) { //is this unnecessary? probably.
+					
+					Transaction tr = (Transaction) t;
+					
+					if (tr.getSource().equals(w)) {
+						
+						pfToAdd.get(w).add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
+						
+					}
+					
+				}
+				
+			}
+			
+			try (FileWriter fw = new FileWriter(blockmetafile, false)) {
+				
+				if (!this.equals(Monieo.genesis())) {
+					
+					if (!prevBlockMetaFile.exists()) {
+						
+						//we should request this so-called previous block, possibly, at some point
+						//can't be bothered to implement this right now.
+						//TODO fix this, at some point
+						
+						return;
+						
+					}
+					
+					try (Scanner c = new Scanner(prevBlockMetaFile)) {
+						
+						while (c.hasNextLine()) {
 							
-							while (c.hasNextLine()) {
+							String l = c.nextLine();
+							
+							if (l.equals(" ") || l.equals("\n")) continue;
+							
+							WalletAdress wa = new WalletAdress(l.split(" ")[0]);
+							
+							List<PendingFunds> tcs = BlockMetadata.getTXCS(l);
+							BigDecimal spendable = BigDecimal.ZERO;
+							
+							for (int i = 0; i < tcs.size(); i++) {
 								
-								String l = c.nextLine();
+								PendingFunds t = tcs.get(i);
 								
-								if (l.equals(" ") || l.equals("\n")) continue;
+								t.confRemain--;
 								
-								WalletAdress wa = new WalletAdress(l.split(" ")[0]);
-								List<PendingFunds> tcs = BlockMetadata.getTXCS(l);
-								
-								BigDecimal spendable = BigDecimal.ZERO;
-								List<PendingFunds> actual = new ArrayList<PendingFunds>();
-								
-								for (PendingFunds p : tcs) {
+								if (t.spendable()) {
 									
-									p.confRemain--;
+									spendable = spendable.add(t.amount);
 									
-									if (p.spendable()) {
-										
-										spendable = spendable.add(p.amount);
-										
-									} else {
-										
-										actual.add(p);
-										
-									}
+									tcs.remove(i);
+									i--;
 									
 								}
-								
-								for (int i = 0; i < txclone.size(); i++) {
-									
-									AbstractTransaction t = txclone.get(i);
-									
-									if (t.getDestination().adress.equals(wa.adress)) {
-		
-										boolean cb = (t instanceof CoinbaseTransaction);
-										int ampe = cb ? Monieo.CONFIRMATIONS_BLOCK_SENSITIVE : Monieo.CONFIRMATIONS;
-										actual.add(new PendingFunds(t.getAmount(), ampe));
-										actual.add(new PendingFunds(fees, Monieo.CONFIRMATIONS));
-										txclone.remove(i);
-										i--;
-										
-									} else if (t instanceof Transaction && ((Transaction)t).getSource().equals(wa)) {
-										
-										spendable = spendable.subtract(t.getAmount()).subtract(((Transaction)t).d.fee);
-										txclone.remove(i);
-										i--;
-										
-									}
-									
-								}
-								
-								String lnwrite = wa.adress + " " + spendable;
-								
-								for (PendingFunds pf : actual) {
-									
-									lnwrite = lnwrite + " " + pf.serialize();
-									
-								}
-								
-								fw.write(lnwrite + "\n");
 								
 							}
 							
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						
-					}
-					
-					HashMap<WalletAdress, List<PendingFunds>> wpf = new HashMap<WalletAdress, List<PendingFunds>>();
-					
-					for (AbstractTransaction at : txclone) {
-						
-						if (!wpf.containsKey(at.getDestination())) {
+							if (pfToAdd.containsKey(wa)) {
+								
+								for (PendingFunds pf : pfToAdd.get(wa)) {
+									
+									if (pf.spendable()) {
+										
+										spendable = spendable.add(pf.amount);
+										
+									} else {
+										
+										tcs.add(pf);
+										
+									}
+									
+								}
+								
+								pfToAdd.remove(wa);
+								
+							}
 							
-							wpf.put(at.getDestination(), new ArrayList<PendingFunds>());
+							String lnwrite = wa.adress + " " + spendable;
 							
-						}
-						
-					}
-					
-					for (AbstractTransaction at : txclone) {
-						
-						PendingFunds pf;
-						
-						if (at instanceof CoinbaseTransaction) {
+							for (PendingFunds pf : tcs) {
+								
+								lnwrite = lnwrite + " " + pf.serialize();
+								
+							}
 							
-							pf = new PendingFunds(at.getAmount(), Monieo.CONFIRMATIONS_BLOCK_SENSITIVE);
-							
-						} else {
-							
-							pf = new PendingFunds(at.getAmount(), Monieo.CONFIRMATIONS);
-							
-						}
-						
-						List<PendingFunds> lpf = wpf.get(at.getDestination());
-						
-						lpf.add(pf);
-						
-						wpf.put(at.getDestination(), lpf);
-						
-					}
-					
-					for (WalletAdress w : wpf.keySet()) {
-						
-						String lnwrite = w.adress;
-						
-						for (PendingFunds pf : wpf.get(w)) {
-							
-							lnwrite = lnwrite + " " + pf.serialize();
+							fw.write(lnwrite + "\n");
 							
 						}
 						
-						fw.write(lnwrite + "\n");
-						
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-					
-				} catch (IOException e) {
-					
-					e.printStackTrace();
-					return;
 					
 				}
+
+				for (WalletAdress w : pfToAdd.keySet()) {
+					
+					String lnwrite = w.adress;
+					
+					for (PendingFunds pf : pfToAdd.get(w)) {
+						
+						lnwrite = lnwrite + " " + pf.serialize();
+						
+					}
+					
+					fw.write(lnwrite + "\n");
+					
+				}
+				
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+				return;
 				
 			}
 			

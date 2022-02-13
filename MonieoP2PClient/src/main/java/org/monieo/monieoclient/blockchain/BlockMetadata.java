@@ -94,7 +94,15 @@ public class BlockMetadata {
 		
 		for (int i = 1; i < s.length; i++) {
 			
-			tcs.add(PendingFunds.deserialize(s[i]));
+			PendingFunds pf = PendingFunds.deserialize(s[i]);
+			
+			if (pf.amount.signum() != 1) {
+				
+				continue;
+				
+			}
+			
+			tcs.add(pf);
 			
 		}
 		

@@ -83,7 +83,7 @@ public class TxPool {
 				
 				for (AbstractTransaction at : ret) {
 					
-					if (((Transaction)at).getSource().equals(tr.getSource())) {
+					if (((Transaction)at).equals(tr)) {
 
 						continue outer;
 						
