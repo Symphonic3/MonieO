@@ -24,6 +24,7 @@ public class ConnectionHandler implements Runnable{
 		while (true) {
 			
 			try {
+				System.out.println("large");
 				Socket clientSocket = serverSocket.accept();
 				nodeDo(clientSocket, true);
 			} catch (IOException e) {
