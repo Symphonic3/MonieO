@@ -314,7 +314,11 @@ public class Monieo {
 	
 	public Block getHighestBlock() {
 		
-		return Block.deserialize(readFileData(new File(blocksFolder.getPath() + "/" + readFileData(blkhighest) + ".blk")));
+		String d = readFileData(new File(blocksFolder.getPath() + "/" + readFileData(blkhighest) + ".blk"));
+		
+		if (d == null) return null;
+		
+		return Block.deserialize(d);
 		
 	}
 
