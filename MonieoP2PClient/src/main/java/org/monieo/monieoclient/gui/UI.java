@@ -373,8 +373,8 @@ public class UI {
 					String res = JOptionPane.showInputDialog(frame, 
 							"WARNING: YOU ARE ABOUT TO SEND A MONIEO TRANSACTION.\nTHIS ACTION IS IRREVERSIBLE AND CANNOT BE UNDONE.\n\n"
 							+ "To: " + newTransaction.d.to
-							+ "\nAmount: " + newTransaction.d.amount
-							+ "\nFee: " + newTransaction.d.fee
+							+ "\nAmount: " + newTransaction.d.amount.toPlainString() + "MNO"
+							+ "\nFee: " + newTransaction.d.fee.toPlainString() + " MNO"
 							+ "\n\nPlease type \"confirm\" below to confirm.", "Confirmation", 2);
 					
 					if (res == null) return;
