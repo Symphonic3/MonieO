@@ -256,6 +256,8 @@ public class Monieo {
 		ch = new ConnectionHandler();
 		new Thread(ch).run();
 		
+		System.out.println("monkey");
+		
 		new Timer().schedule(new TimerTask() {
 			
 			@Override
@@ -289,6 +291,10 @@ public class Monieo {
 			}
 			
 		}, 1000);
+		
+		System.out.println("large");
+		
+		System.out.flush();
 		
 		try {
 			Thread.sleep(10000);
