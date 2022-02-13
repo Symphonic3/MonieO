@@ -261,6 +261,8 @@ public class Monieo {
 			@Override
 			public void run() {
 				
+				System.out.println("asd");
+				
 				int amntns = 0;
 				
 				for (Node n : nodes) {
