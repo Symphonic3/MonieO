@@ -1,8 +1,12 @@
 package org.monieo.monieoclient.networking;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -21,6 +25,8 @@ public class Node implements Runnable{
 	private boolean localAcknowledgedRemote = false;
 	public static long MIN_RESPONSE_TIME = 15000;
 	
+	public static String TERM = "EOM";
+	
 	public volatile boolean busy = false;
 	public Vector<PacketCommitment> packetCommitments = new Vector<PacketCommitment>();
 	
@@ -29,6 +35,9 @@ public class Node implements Runnable{
 	public Vector<Consumer<Node>> queue = new Vector<Consumer<Node>>();
 	
 	private boolean server;
+	
+	PrintWriter pw;
+	BufferedReader br;
 	
 	public Node(Socket s, boolean server) {
 		
@@ -107,11 +116,10 @@ public class Node implements Runnable{
 			@Override
 			public void accept(Node t) {
 				
-				try {
-					t.getSocket().getOutputStream().write(nc.serialize().getBytes());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				pw.print(nc.serialize());
+				pw.println();
+				pw.print(TERM);
+				pw.flush();
 				
 			}
 			
@@ -128,8 +136,8 @@ public class Node implements Runnable{
 
 		try {
 
-			InputStream in = socket.getInputStream();
-			//OutputStream out = socket.getOutputStream();
+			pw = new PrintWriter(socket.getOutputStream(), false, Charset.forName("UTF8"));
+			br = new BufferedReader(new InputStreamReader(socket.getInputStream(), Charset.forName("UTF8")));
 			
 			while (true) {
 				
@@ -155,13 +163,23 @@ public class Node implements Runnable{
 				
 				NetworkCommand nc = null;
 				
-				if (in.available() == 0) continue;
+				if (!br.ready()) continue;
 				
-				String s = new String(in.readAllBytes(), "UTF8");
+				String s = "";
+				String t;
+				
+				inner: while ((t = br.readLine()) != null) {
+					
+					if (t.equals(TERM)) break inner;
+					s = s + t + "\n";
+					
+				}
+				
+				s = s.trim();
 				
 				if (s == null || s.equals("")) continue;
 				
-				System.out.println("recieved byte stream!");
+				System.out.println("recieved data!");
 				
 				nc = NetworkCommand.deserialize(s);
 
