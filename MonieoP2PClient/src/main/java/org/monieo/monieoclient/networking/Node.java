@@ -155,6 +155,8 @@ public class Node implements Runnable{
 				
 				NetworkCommand nc = null;
 				
+				if (in.available() == 0) continue;
+				
 				String s = new String(in.readAllBytes(), "UTF8");
 				
 				if (s == null || s.equals("")) continue;
