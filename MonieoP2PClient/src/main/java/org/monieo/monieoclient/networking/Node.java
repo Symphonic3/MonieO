@@ -133,6 +133,8 @@ public class Node implements Runnable{
 			
 			while (true) {
 				
+				System.out.println("loop");
+				
 				if (kill) return;
 				
 				if (!queue.isEmpty()) {
@@ -156,6 +158,8 @@ public class Node implements Runnable{
 				String s = new String(in.readAllBytes(), "UTF8");
 				
 				if (s == null || s.equals("")) continue;
+				
+				System.out.println("recieved byte stream!");
 				
 				nc = NetworkCommand.deserialize(s);
 
