@@ -119,6 +119,7 @@ public class Node implements Runnable{
 				pw.print(nc.serialize());
 				pw.println();
 				pw.print(TERM);
+				pw.println();
 				pw.flush();
 				
 			}
