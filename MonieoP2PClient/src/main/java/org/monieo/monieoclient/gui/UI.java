@@ -43,7 +43,6 @@ public class UI {
 	private String[] walletNicks;
 	
 	public JList<String> list;
-	public JLabel LblADDRESSES;
 	public JButton btnChangeWalName;
 	public JButton btnDelWal;
 	private JTextField textField;
@@ -51,8 +50,8 @@ public class UI {
 	private JTextField textField_2;
 	
 	JTextField lblNewLabel_1;
-	JPanel panel_1;
 	JPanel panel;
+	JPanel panelTransaction;
 	public JTextField addressLabel;
 	JTextField nickLabel;
 	JTextField INDIVbalanceLabel;
@@ -67,7 +66,6 @@ public class UI {
 	JButton BtnNEWADDRESS;
 	JLabel lblToggleExperimentalMining;
 	JLabel lblTotalBalancelabel;
-	JLabel lbltotalBalance;
 	JButton TgBtnTOGGLEMINING;
 	
 	public boolean mining;
@@ -191,17 +189,16 @@ public class UI {
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
 			
-		lblNewLabel_1 = new JTextField("Total addresses:");
+		lblNewLabel_1 = new JTextField("Address count:");
 		lblNewLabel_1.setEditable(false);
-		lblNewLabel_1.setOpaque(false); //this is the same as a JLabel
 		lblNewLabel_1.setBorder(null); //remove the border
-		lblNewLabel_1.setBounds(208, 411, 96, 34);
+		lblNewLabel_1.setBounds(208, 411, 109, 34);
 		frame.getContentPane().add(lblNewLabel_1);
 		
-		panel_1 = new JPanel();
-		panel_1.setLayout(null);
-		panel_1.setBounds(208, 0, 702, 400);
-		frame.getContentPane().add(panel_1);
+		panel = new JPanel();
+		panel.setLayout(null);
+		panel.setBounds(196, 0, 689, 400);
+		frame.getContentPane().add(panel);
 		
 		addressLabel = new JTextField("(address)");
 		addressLabel.setEditable(false);
@@ -246,7 +243,7 @@ public class UI {
 			
 		});
 		
-		panel_1.add(addressLabel);
+		panel.add(addressLabel);
 		
 		nickLabel = new JTextField("(address nickname)");
 		nickLabel.setEditable(false);
@@ -254,7 +251,7 @@ public class UI {
 		nickLabel.setBorder(null); //remove the border
 		nickLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		nickLabel.setBounds(144, 40, 331, 29);
-		panel_1.add(nickLabel);
+		panel.add(nickLabel);
 		
 		INDIVbalanceLabel = new JTextField("(address balance)");
 		INDIVbalanceLabel.setEditable(false);
@@ -262,16 +259,16 @@ public class UI {
 		INDIVbalanceLabel.setBorder(null); //remove the border
 		INDIVbalanceLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		INDIVbalanceLabel.setBounds(144, 70, 331, 29);
-		panel_1.add(INDIVbalanceLabel);
+		panel.add(INDIVbalanceLabel);
 		
-		panel = new JPanel();
-		panel.setBounds(10, 152, 663, 225);
-		panel_1.add(panel);
-		panel.setLayout(null);
+		panelTransaction = new JPanel();
+		panelTransaction.setBounds(10, 152, 663, 225);
+		panel.add(panelTransaction);
+		panelTransaction.setLayout(null);
 		
 		btnChangeWalName = new JButton("Change wallet name");
 		btnChangeWalName.setBounds(480, 60, 160, 29);
-		panel_1.add(btnChangeWalName);
+		panel.add(btnChangeWalName);
 		btnChangeWalName.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (list.getSelectedValue() != null) {
@@ -287,11 +284,10 @@ public class UI {
 				}
 			}
 		});
-		btnChangeWalName.setVisible(false);
 		
 		btnDelWal = new JButton("Delete selected wallet");
 		btnDelWal.setBounds(480, 97, 160, 29);
-		panel_1.add(btnDelWal);
+		panel.add(btnDelWal);
 		btnDelWal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
@@ -304,11 +300,6 @@ public class UI {
 				}
 			}
 		});
-		btnDelWal.setVisible(false);
-		
-		LblADDRESSES = new JLabel("(addresses #)");
-		LblADDRESSES.setBounds(304, 411, 86, 34);
-		frame.getContentPane().add(LblADDRESSES);
 		
 		list = new JList<String>();
 		list.setBounds(10, 11, 188, 429);
@@ -321,7 +312,7 @@ public class UI {
 		});
 		
 		scrollPane = new JScrollPane(list);
-		scrollPane.setBounds(10, 11, 186, 424);
+		scrollPane.setBounds(10, 11, 176, 396);
 		scrollPane.createVerticalScrollBar();
         scrollPane.setLayout(new ScrollPaneLayout());
 		frame.getContentPane().add(scrollPane);
@@ -329,22 +320,22 @@ public class UI {
 		label_1 = new JLabel("Selected address:");
 		label_1.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_1.setBounds(10, 10, 106, 29);
-		panel_1.add(label_1);
+		panel.add(label_1);
 		
 		label_3 = new JLabel("Address nickname:");
 		label_3.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_3.setBounds(10, 40, 133, 29);
-		panel_1.add(label_3);
+		panel.add(label_3);
 		
 		label_5 = new JLabel("Address balance:");
 		label_5.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_5.setBounds(10, 70, 133, 29);
-		panel_1.add(label_5);
+		panel.add(label_5);
 		
 		//what is a trnt and why is it already sent
 		sentTrnt = new JButton("Send transaction");
 		sentTrnt.setBounds(84, 191, 144, 23);
-		panel.add(sentTrnt);
+		panelTransaction.add(sentTrnt);
 		sentTrnt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -406,30 +397,30 @@ public class UI {
 		
 		textField = new JTextField();
 		textField.setBounds(84, 36, 491, 20);
-		panel.add(textField);
+		panelTransaction.add(textField);
 		textField.setColumns(10);
 		
 		lblNewLabel = new JLabel("Recipient address:");
 		lblNewLabel.setBounds(84, 11, 117, 14);
-		panel.add(lblNewLabel);
+		panelTransaction.add(lblNewLabel);
 		
 		lblTransactionAmount = new JLabel("Transaction amount:");
 		lblTransactionAmount.setBounds(84, 67, 117, 14);
-		panel.add(lblTransactionAmount);
+		panelTransaction.add(lblTransactionAmount);
 		
 		textField_1 = new JTextField();
 		textField_1.setColumns(10);
 		textField_1.setBounds(84, 92, 491, 20);
-		panel.add(textField_1);
+		panelTransaction.add(textField_1);
 		
 		lblFee = new JLabel("Fee:");
 		lblFee.setBounds(84, 120, 117, 14);
-		panel.add(lblFee);
+		panelTransaction.add(lblFee);
 		
 		textField_2 = new JTextField();
 		textField_2.setColumns(10);
 		textField_2.setBounds(84, 145, 491, 20);
-		panel.add(textField_2);
+		panelTransaction.add(textField_2);
 		
 		JButton btnNewButton = new JButton("New button");
 		btnNewButton.addActionListener(new ActionListener() {
@@ -438,18 +429,18 @@ public class UI {
 			}
 		});
 		
-		btnNewButton.setBounds(650, 4, 23, 23);
-		panel_1.add(btnNewButton);
+		btnNewButton.setBounds(663, 3, 23, 23);
+		panel.add(btnNewButton);
 		
 		JLabel label_5_1 = new JLabel("Pending funds:");
 		label_5_1.setForeground(Color.BLACK);
 		label_5_1.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_5_1.setBounds(10, 100, 133, 29);
-		panel_1.add(label_5_1);
+		panel.add(label_5_1);
 		
 		JButton btnNewButton_1 = new JButton("Click to view");
 		btnNewButton_1.setBounds(144, 102, 116, 23);
-		panel_1.add(btnNewButton_1);
+		panel.add(btnNewButton_1);
 		
 		BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
@@ -472,16 +463,18 @@ public class UI {
 		
 		lblTotalBalancelabel = new JLabel("Total balance:");
 		
-		lblTotalBalancelabel.setBounds(440, 406, 86, 44);
+		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
 		
-		lbltotalBalance = new JLabel("(total balance)");
-		lbltotalBalance.setBounds(526, 406, 109, 44);
-		frame.getContentPane().add(lbltotalBalance);
+		JButton btnNewButton_2 = new JButton("Overview");
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnNewButton_2.setBounds(10, 414, 176, 23);
+		frame.getContentPane().add(btnNewButton_2);
 				
 		frame.setResizable(false);
-		
-		panel.setVisible(false);
 		
 		setColors(new Color(222, 222, 222), new Color(255, 255, 255), new Color(0, 0, 0));
 		
@@ -502,14 +495,12 @@ public class UI {
         		
         	}
         	list.setListData(walletNicks);
-        	LblADDRESSES.setText(Integer.toString(walletNicks.length));
+        	lblNewLabel_1.setText("Address count: " + walletNicks.length);
     		
     	}
     	
     	if (list.getSelectedIndex() == -1) {
-    		
-    		btnDelWal.setVisible(false);
-    		btnChangeWalName.setVisible(false);
+
     		panel.setVisible(false);
     		
     	} else {
@@ -536,10 +527,8 @@ public class UI {
     			
     		}
     		
-    		lbltotalBalance.setText(tot.toPlainString());
-    		
-    		btnChangeWalName.setVisible(true);
-    		btnDelWal.setVisible(true);
+    		lblTotalBalancelabel.setText("Total balance: " + tot.toPlainString());
+
     		panel.setVisible(true);
     		
     	}
