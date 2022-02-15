@@ -147,10 +147,13 @@ public class Node implements Runnable{
 				
 				if (!queue.isEmpty()) {
 					
+					System.out.println("fat me");
+					
 					busy = true;
 					
 					for (Consumer<Node> a : queue) {
 						
+						System.out.println("debug me");
 						a.accept(this);
 						
 					}
@@ -163,12 +166,16 @@ public class Node implements Runnable{
 				
 				NetworkCommand nc = null;
 				
+				System.out.println("fart me");
+				
 				if (!br.ready()) continue;
 				
 				String s = "";
 				String t;
 				
 				inner: while ((t = br.readLine()) != null) {
+					
+					System.out.println("read me");
 					
 					if (t.equals(TERM)) break inner;
 					s = s + t + "\n";
