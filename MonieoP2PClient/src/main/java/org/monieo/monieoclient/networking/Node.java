@@ -269,6 +269,8 @@ public class Node implements Runnable{
 						
 					} else break;
 					
+					b = b.getPrevious();
+					
 				}
 				
 				for (String s : hashes) {
