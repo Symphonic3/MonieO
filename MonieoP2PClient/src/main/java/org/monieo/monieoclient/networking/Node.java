@@ -177,7 +177,11 @@ public class Node implements Runnable{
 					
 				}
 				
+				System.out.println(s);
+				
 				s = s.trim();
+				
+				System.out.println(s);
 				
 				if (s == null || s.equals("")) continue;
 				

@@ -50,7 +50,7 @@ public class NetworkCommand {
 			
 			try {
 				
-				data = s.substring(ind+2);
+				data = s.substring(ind+1);
 				
 			} catch (IndexOutOfBoundsException e) {
 				
