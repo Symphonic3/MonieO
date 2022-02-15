@@ -362,7 +362,7 @@ public class Monieo {
 			if (getHighestBlock() == null || b.header.height > getHighestBlock().header.height) {
 				
 				setHighestBlock(b);
-				ui.refresh(false);
+				if (ui != null) ui.refresh(false); //ui not initialized yet!
 				
 			}
 			
