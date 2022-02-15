@@ -225,6 +225,8 @@ public class Node implements Runnable{
 			
 		}
 		
+		System.out.println("andante");
+		
 		if (nc.cmd == NetworkCommandType.SEND_VER) {
 			
 			if (!localAcknowledgedRemote) {
@@ -311,6 +313,8 @@ public class Node implements Runnable{
 				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_TIME, String.valueOf(System.currentTimeMillis())), null);
 				
 			} else if (nc.cmd == NetworkCommandType.SEND_TRANSACTION) {
+				
+				System.out.println("adagio");
 				
 				Transaction t = Transaction.deserialize(nc.data);
 				
