@@ -177,12 +177,8 @@ public class Node implements Runnable{
 					
 				}
 				
-				System.out.println(s);
-				
 				s = s.trim();
-				
-				System.out.println(s);
-				
+
 				if (s == null || s.equals("")) continue;
 				
 				System.out.println("recieved data!");
@@ -213,7 +209,7 @@ public class Node implements Runnable{
 	
 	public boolean handle(NetworkCommand nc) {
 		
-		System.out.println("rec'd network command!");
+		System.out.println("rec'd network command!" + nc.cmd);
 		System.out.println("==BEGIN NETWORK COMMAND==");
 		System.out.println(nc.data);
 		System.out.println("==END NETWORK COMMAND==");
