@@ -214,17 +214,21 @@ public class Node implements Runnable{
 		System.out.println(nc.data);
 		System.out.println("==END NETWORK COMMAND==");
 		
-		for (PacketCommitment pc : packetCommitments) {
+		for (int i = 0; i < packetCommitments.size(); i++) {
 			
-			if (pc.attemptFillShouldBanNode(nc)) { //disconnects node instead of banning, as this is only indicitive that the node is disconnected, not nessecarily that it is uncooperative
+			if (packetCommitments.get(i).attemptFillShouldBanNode(nc)) { //disconnects node instead of banning, as this is only indicitive that the node is disconnected, not nessecarily that it is uncooperative
 
 				disconnect();
 				return true;
 				
+			} else {
+				
+				packetCommitments.remove(i);
+				i--;
+				
 			}
 			
 		}
-		
 		System.out.println("andante");
 		
 		if (nc.cmd == NetworkCommandType.SEND_VER) {
