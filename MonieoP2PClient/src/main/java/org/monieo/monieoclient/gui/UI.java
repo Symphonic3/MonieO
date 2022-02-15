@@ -35,6 +35,10 @@ import org.monieo.monieoclient.blockchain.BlockMetadata;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.wallet.Wallet;
+
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
+
 import javax.swing.JTextField;
 
 public class UI {
@@ -81,6 +85,8 @@ public class UI {
 	  * @wbp.parser.entryPoint
 	  */
 	public void initialize() {
+		
+		FlatLightLaf.setup();
 		
 		miningstats = new JTextArea("Mining statistics");
 		miningstats.setEditable(false);
@@ -204,7 +210,6 @@ public class UI {
 		addressLabel.setEditable(false);
 		addressLabel.setOpaque(false); //this is the same as a JLabel
 		addressLabel.setBorder(null); //remove the border
-		addressLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		addressLabel.setBounds(144, 10, 496, 29);
 		
 		addressLabel.addMouseListener(new MouseAdapter() {
@@ -249,7 +254,6 @@ public class UI {
 		nickLabel.setEditable(false);
 		nickLabel.setOpaque(false); //this is the same as a JLabel
 		nickLabel.setBorder(null); //remove the border
-		nickLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		nickLabel.setBounds(144, 40, 331, 29);
 		panel.add(nickLabel);
 		
@@ -257,7 +261,6 @@ public class UI {
 		INDIVbalanceLabel.setEditable(false);
 		INDIVbalanceLabel.setOpaque(false); //this is the same as a JLabel
 		INDIVbalanceLabel.setBorder(null); //remove the border
-		INDIVbalanceLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		INDIVbalanceLabel.setBounds(144, 70, 331, 29);
 		panel.add(INDIVbalanceLabel);
 		
@@ -286,18 +289,19 @@ public class UI {
 		});
 		
 		btnDelWal = new JButton("Delete selected wallet");
+		btnDelWal.setEnabled(false);
 		btnDelWal.setBounds(480, 97, 160, 29);
 		panel.add(btnDelWal);
 		btnDelWal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+				/*(Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
 				if (list.getSelectedValue() != null) {
 					String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
 					if (confirmation.equals(walletInQuestion.nickname)) {
 						Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
 						refresh(true);
 					}
-				}
+				}*/
 			}
 		});
 		
@@ -318,17 +322,14 @@ public class UI {
 		frame.getContentPane().add(scrollPane);
 		
 		label_1 = new JLabel("Selected address:");
-		label_1.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_1.setBounds(10, 10, 106, 29);
 		panel.add(label_1);
 		
 		label_3 = new JLabel("Address nickname:");
-		label_3.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_3.setBounds(10, 40, 133, 29);
 		panel.add(label_3);
 		
 		label_5 = new JLabel("Address balance:");
-		label_5.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_5.setBounds(10, 70, 133, 29);
 		panel.add(label_5);
 		
@@ -422,10 +423,10 @@ public class UI {
 		textField_2.setBounds(84, 145, 491, 20);
 		panelTransaction.add(textField_2);
 		
-		JButton btnNewButton = new JButton("New button");
+		JButton btnNewButton = new JButton("...");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				toggleDarkMode();
+
 			}
 		});
 		
@@ -433,8 +434,6 @@ public class UI {
 		panel.add(btnNewButton);
 		
 		JLabel label_5_1 = new JLabel("Pending funds:");
-		label_5_1.setForeground(Color.BLACK);
-		label_5_1.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		label_5_1.setBounds(10, 100, 133, 29);
 		panel.add(label_5_1);
 		
@@ -475,8 +474,6 @@ public class UI {
 		frame.getContentPane().add(btnNewButton_2);
 				
 		frame.setResizable(false);
-		
-		setColors(new Color(222, 222, 222), new Color(255, 255, 255), new Color(0, 0, 0));
 		
 		refresh(true);
 		
@@ -542,92 +539,4 @@ public class UI {
 		
 	}
 	
-	public void toggleDarkMode() {
-		if (!modeToggleStatus) {
-			setColors(new Color(54,57,63), new Color(64,68,75), new Color(255, 255, 255));
-		} else {
-            setColors(new Color(222, 222, 222), new Color(255, 255, 255), new Color(0, 0, 0));
-		}
-		modeToggleStatus = !modeToggleStatus;
-	}
-	
-	void setColors(Color main, Color highlight, Color text) {
-		
-		/*//main components
-		frame.getContentPane().setBackground(main);
-		panel.setBackground(main);
-		panel_1.setBackground(main);
-		scrollPane.setBackground(highlight);
-		list.setBackground(highlight);
-		list.setForeground(text);
-		
-		//text labels
-		lblNewLabel.setForeground(text);
-		LblADDRESSES.setForeground(text);
-		lblFee.setForeground(text);
-		lblNewLabel_1.setForeground(text);
-		lblTotalBalancelabel.setForeground(text);
-		lblToggleExperimentalMining.setForeground(text);
-		lblTransactionAmount.setForeground(text);
-		label_1.setForeground(text);
-		label_3.setForeground(text);
-		label_5.setForeground(text);
-		addressLabel.setForeground(text);
-		INDIVbalanceLabel.setForeground(text);
-		nickLabel.setForeground(text);
-		lbltotalBalance.setForeground(text);
-
-		//things
-		textField.setBackground(highlight);
-		textField_1.setBackground(highlight);
-		textField_2.setBackground(highlight);
-		textField.setForeground(text);
-		textField_1.setForeground(text);
-		textField_2.setForeground(text);
-		
-		//buttoibns
-		sentTrnt.setBackground(highlight);
-		sentTrnt.setForeground(text);
-		
-		btnChangeWalName.setBackground(highlight);
-		btnChangeWalName.setForeground(text);
-		
-		btnDelWal.setBackground(highlight);
-		btnDelWal.setForeground(text);
-		
-		BtnNEWADDRESS.setBackground(highlight);
-		BtnNEWADDRESS.setForeground(text);
-		
-		TgBtnTOGGLEMINING.setBackground(highlight);
-		TgBtnTOGGLEMINING.setForeground(text);
-		
-		scrollPane.getVerticalScrollBar().setBackground(highlight);
-		scrollPane.getVerticalScrollBar().setForeground(text);
-		
-		/*scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
-			
-			@Override
-			protected void configureScrollBarColors() {
-				this.trackColor = main;
-				this.thumbDarkShadowColor = highlight;
-				this.thumbHighlightColor = main;
-			}
-		});
-		
-		scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
-			
-			@Override
-			protected void configureScrollBarColors() {
-				this.trackColor = main;
-				this.thumbDarkShadowColor = highlight;
-				this.thumbHighlightColor = main;
-			}
-		});*/
-		
-		
-		
-		
-		
-		frame.repaint();
-	}
 }
