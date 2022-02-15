@@ -55,8 +55,6 @@ public class DefaultMinerImpl implements AbstractMiner{
 	@Override
 	public void run() {
 		
-		BigInteger nonce = BigInteger.ZERO; //this should be reset in a more reliable way when a new block is started
-		
 		while (true) {
 						if (stop) {
 				
@@ -90,6 +88,8 @@ public class DefaultMinerImpl implements AbstractMiner{
 					hei,
 					diff), txr
 			);
+			
+			BigInteger nonce = BigInteger.ZERO;
 			
 			in: for (int i = 0; i < HASHES_BEFORE_RECHECK; i++) {
 				
