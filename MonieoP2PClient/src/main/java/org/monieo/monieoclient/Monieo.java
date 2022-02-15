@@ -251,8 +251,6 @@ public class Monieo {
         ui = new UI();
         ui.initialize();
         
-        System.out.println("fat");
-        
 		txp = new TxPool();
 		
 		ch = new ConnectionHandler();	
@@ -263,8 +261,6 @@ public class Monieo {
 			@Override
 			public void run() {
 				
-		        System.out.println("check");
-				
 				int amntns = 0;
 				
 				for (Node n : nodes) {
@@ -273,19 +269,19 @@ public class Monieo {
 					
 				}
 				
-		        System.out.println("sdfdfs");
-				
 				if (amntns < MAX_OUTGOING_CONNECTIONS) {
 					
 					List<String> rn = getValidNodesRightNow();
 					
-			        System.out.println("qpq");
-					
 					for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
-						
-				        System.out.println("gog");
-						
+
 						if (rn.size() <= i) return; 
+						
+						for (Node n : Monieo.INSTANCE.nodes) {
+							
+							if (n.getAdress().equalsIgnoreCase(rn.get(i))) return;
+							
+						}
 						
 						System.out.println("attempting to connect to a node!");
 						ch.connect(rn.get(i));
