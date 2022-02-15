@@ -142,13 +142,9 @@ public class Node implements Runnable{
 			
 			while (true) {
 				
-				System.out.println("loop");
-				
 				if (kill) return;
 				
 				if (!queue.isEmpty()) {
-					
-					System.out.println("fat me");
 					
 					busy = true;
 					
@@ -166,8 +162,6 @@ public class Node implements Runnable{
 				queue.clear();
 				
 				NetworkCommand nc = null;
-				
-				System.out.println("fart me");
 				
 				if (!br.ready()) continue;
 				
