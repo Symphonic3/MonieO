@@ -313,8 +313,12 @@ public class Node implements Runnable{
 			} else if (nc.cmd == NetworkCommandType.SEND_TRANSACTION) {
 				
 				Transaction t = Transaction.deserialize(nc.data);
-
+				
+				System.out.println("largho");
+				
 				if (t == null || !t.validate()) return false;
+				
+				System.out.println("larghetto");
 				
 				Monieo.INSTANCE.txp.add(t);
 				
