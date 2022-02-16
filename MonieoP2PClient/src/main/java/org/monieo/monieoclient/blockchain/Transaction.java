@@ -42,10 +42,11 @@ public class Transaction extends AbstractTransaction {
 			//note that returning a transaction without throwing error does not mean the transaction is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
 			
-			return new Transaction(TransactionData.deserialize(s), data[8], data[9]);
+			return new Transaction(TransactionData.deserialize(s), data[7], data[8]);
 			
 		} catch (Exception e) {
 			
+			e.printStackTrace();
 			//invalid data (great code)
 			return null;
 			

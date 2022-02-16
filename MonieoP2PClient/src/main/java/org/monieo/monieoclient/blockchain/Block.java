@@ -73,7 +73,8 @@ public class Block extends MonieoDataObject{
 			
 			for (int i = 0; i < transactions.length-1; i++) {
 				
-				Transaction t = Transaction.deserialize(data[i+1]);;
+				Transaction t = Transaction.deserialize(data[i+1]);
+
 				if (t == null) return null;
 
 				transactions[i] = t;
@@ -82,12 +83,11 @@ public class Block extends MonieoDataObject{
 			
 			//note that returning a block without throwing error does not mean the block is valid and does not mean it does not have formatting issues.
 			//This should be checked afterwards!
-			
 			return new Block(BlockHeader.deserialize(data[0]), transactions);
 			
 		} catch (Exception e) {
 			
-			//e.printStackTrace();
+			e.printStackTrace();
 			//invalid data (great code)
 			return null;
 			
@@ -277,6 +277,8 @@ public class Block extends MonieoDataObject{
 	}
 	
 	public BlockMetadata getMetadata() {
+		
+		if (!hasMetadata()) generateMetadata();
 		
 		return new BlockMetadata(new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + hash() + ".blkmeta"));
 		
