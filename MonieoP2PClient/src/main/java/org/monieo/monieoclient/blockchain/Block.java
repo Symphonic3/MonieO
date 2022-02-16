@@ -361,11 +361,17 @@ public class Block extends MonieoDataObject{
 					
 					if (!prevBlockMetaFile.exists()) {
 						
+						Block p = getPrevious();
+						
+						if (p != null) {
+							
+							p.generateMetadata();
+							
+						} else return;
+						
 						//we should request this so-called previous block, possibly, at some point
 						//can't be bothered to implement this right now.
 						//TODO fix this, at some point
-						
-						return;
 						
 					}
 					
