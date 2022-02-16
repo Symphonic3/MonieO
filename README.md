@@ -1,4 +1,8 @@
-### MonieO
+MonieO
+=========
+
+![build](https://github.com/Symphonic3/MonieO/releases/latest)
+
 MonieO is an experimental cryptocurrency which aims to use a basic blockchain implementation and protocol to be easy to learn and build upon for beginners and enthusiasts alike. MonieO aims to show a working proof of a blockchain that is 100% functional and easy to understand.
 
 # Wiki
