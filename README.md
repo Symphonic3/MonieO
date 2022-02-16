@@ -1,4 +1,4 @@
-# Monieo
+# MonieO
 MonieO is an experimental cryptocurrency which aims to use a basic blockchain implementation to be easy to learn for beginners and enthusiasts alike.
 
 # Wiki
