@@ -428,7 +428,7 @@ public class Block extends MonieoDataObject{
 								
 							}
 							
-							String lnwrite = wa + " " + new BigInteger(l.split(" ")[1]).add(BigInteger.ONE).toString() + " " + spendable;
+							String lnwrite = wa + " " + new BigInteger(l.split(" ")[1]).add(pfToAdd.get(wa).nonce) + " " + spendable;
 							
 							for (PendingFunds pf : tcs) {
 								
