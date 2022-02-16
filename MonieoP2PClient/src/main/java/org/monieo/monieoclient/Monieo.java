@@ -260,8 +260,6 @@ public class Monieo {
 			
 			@Override
 			public void run() {
-
-				System.out.println("asd1");
 				
 				int amntns = 0;
 				
@@ -274,6 +272,8 @@ public class Monieo {
 				if (amntns < MAX_OUTGOING_CONNECTIONS) {
 					
 					List<String> rn = getValidNodesRightNow();
+					
+					System.out.println(rn.size());
 					
 					for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
 
