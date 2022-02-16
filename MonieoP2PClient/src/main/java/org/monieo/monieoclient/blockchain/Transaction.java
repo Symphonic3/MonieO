@@ -80,7 +80,7 @@ public class Transaction extends AbstractTransaction {
 		
 		if (!Monieo.assertSupportedProtocol(new String[]{d.mn,d.pv})) return false;
 		
-		if (d.from.length() != 64 || d.to.length() != 64) return false;
+		//if (d.from.length() != 64 || d.to.length() != 64) return false;
 		
 		if (d.amount.signum() != 1 || d.amount.scale() > 8) return false;
 		if (d.fee.signum() == -1 || d.fee.scale() > 8) return false;
