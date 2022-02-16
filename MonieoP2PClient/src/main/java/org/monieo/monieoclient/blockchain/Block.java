@@ -442,7 +442,7 @@ public class Block extends MonieoDataObject{
 
 				for (String w : pfToAdd.keySet()) {
 					
-					String lnwrite = w + " " + 0;
+					String lnwrite = w + " " + 0 + " " + 0;
 					
 					for (PendingFunds pf : pfToAdd.get(w).pf) {
 						
