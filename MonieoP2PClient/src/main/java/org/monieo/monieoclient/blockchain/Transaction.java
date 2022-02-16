@@ -45,8 +45,7 @@ public class Transaction extends AbstractTransaction {
 			return new Transaction(TransactionData.deserialize(s), data[7], data[8]);
 			
 		} catch (Exception e) {
-			
-			e.printStackTrace();
+
 			//invalid data (great code)
 			return null;
 			

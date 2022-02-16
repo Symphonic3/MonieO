@@ -277,6 +277,8 @@ public class Monieo {
 
 						if (rn.size() <= i) return; 
 						
+						System.out.println("asd");
+						
 						for (Node n : Monieo.INSTANCE.nodes) {
 							
 							if (n.getAdress().equalsIgnoreCase(rn.get(i))) return;

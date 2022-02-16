@@ -86,8 +86,7 @@ public class Block extends MonieoDataObject{
 			return new Block(BlockHeader.deserialize(data[0]), transactions);
 			
 		} catch (Exception e) {
-			
-			e.printStackTrace();
+
 			//invalid data (great code)
 			return null;
 			
