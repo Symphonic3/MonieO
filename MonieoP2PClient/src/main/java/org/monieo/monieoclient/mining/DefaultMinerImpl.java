@@ -64,6 +64,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			}
 			
 			Block h = Monieo.INSTANCE.getHighestBlock();
+			if (h == null) continue;
 			long hei = h.header.height + 1;
 			
 			BigInteger diff = h.calculateNextDifficulty();
