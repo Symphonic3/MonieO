@@ -33,18 +33,18 @@ public class Wallet {
     	
     	byte[] b = Monieo.sha256dRaw(pubkey);
     	
-    	return bytesToBase58(b);
+    	return getBase58(b);
     	
     }
     
-	private static String bytesToBase58(byte[] data) {
+	private static String getBase58(byte[] data) {
 		
 		String s = "";
 		BigInteger n = new BigInteger(1, data);
 		
-		BigInteger[] r = n.divideAndRemainder(BASE_58_LEN);
-		
 		while (n.signum() != 0) {
+			
+			BigInteger[] r = n.divideAndRemainder(BASE_58_LEN);
 			
 			s = s + BASE_58.charAt(r[1].intValue());
 			

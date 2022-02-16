@@ -253,7 +253,7 @@ public class Monieo {
         
 		txp = new TxPool();
 		
-		ch = new ConnectionHandler();	
+		ch = new ConnectionHandler();
 		new Thread(ch).start();
 		
 		new Timer().schedule(new TimerTask() {
@@ -439,7 +439,7 @@ public class Monieo {
 			return "Wallet creation error!";
 			
 		}
-		
+
 		myWallets.add(w);
 		
 		return "Wallet " + nick + " created!";
