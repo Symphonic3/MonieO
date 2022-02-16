@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -349,7 +350,7 @@ public class Block extends MonieoDataObject{
 					if (!pfToAdd.containsKey(w2)) pfToAdd.put(w2, new WalletData(w2, BigInteger.ZERO, new ArrayList<PendingFunds>()));
 					
 					pfToAdd.get(w2).pf.add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
-					pfToAdd.get(w2).nonce = pfToAdd.get(w2).nonce.add(BigInteger.ONE);
+					pfToAdd.get(w2).nonce = pfToAdd.get(w2).nonce.max(tr.d.nonce);
 					
 				}
 				
@@ -383,7 +384,7 @@ public class Block extends MonieoDataObject{
 									
 								} else {
 									
-									for (int i = genm.size()-1; i >= 0; i--) {
+									for (int i = genm.size(); i-- > 0; ) {
 										
 										genm.get(i).generateMetadata();
 										
@@ -395,10 +396,14 @@ public class Block extends MonieoDataObject{
 								
 							}
 
+							p = p.getPrevious();
 							
 						}
 						
 					}
+
+					//gotta love java!
+					while (!Files.exists(prevBlockMetaFile.toPath()) && !Files.notExists(prevBlockMetaFile.toPath())) {};
 					
 					try (Scanner c = new Scanner(prevBlockMetaFile)) {
 						
@@ -433,7 +438,7 @@ public class Block extends MonieoDataObject{
 							
 							if (pfToAdd.containsKey(wa)) {
 								
-								nonce = nonce.add(pfToAdd.get(wa).nonce);
+								nonce = nonce.max(pfToAdd.get(wa).nonce);
 								
 								for (PendingFunds pf : pfToAdd.get(wa).pf) {
 									
@@ -441,7 +446,7 @@ public class Block extends MonieoDataObject{
 										
 										spendable = spendable.add(pf.amount);
 										
-									} else {
+									} else if (!pf.junk()) {
 										
 										tcs.add(pf);
 										
@@ -449,11 +454,12 @@ public class Block extends MonieoDataObject{
 									
 								}
 								
-								pfToAdd.remove(wa);
-								
 							}
 							
-							String lnwrite = wa + " " + new BigInteger(l.split(" ")[1]).add(pfToAdd.get(wa).nonce) + " " + spendable;
+							//WalletData dat = pfToAdd.get(wa);
+							//BigInteger f = new BigInteger(l.split(" ")[1]);
+							
+							String lnwrite = wa + " " + nonce.add(BigInteger.ONE) + " " + spendable.toPlainString();
 							
 							for (PendingFunds pf : tcs) {
 								
@@ -462,6 +468,8 @@ public class Block extends MonieoDataObject{
 							}
 
 							fw.write(lnwrite + "\n");
+							
+							if (pfToAdd.containsKey(wa)) pfToAdd.remove(wa);
 							
 						}
 						

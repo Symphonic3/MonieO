@@ -55,5 +55,12 @@ public class PendingFunds {
 		return confRemain <= 0;
 		
 	}
+	
+	public boolean junk() {
+		
+		return amount.signum() != 1;
+		
+	}
+	
 
 }

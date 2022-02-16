@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.monieo.monieoclient.Monieo;
@@ -422,6 +423,7 @@ public class UI {
 		panelTransaction.add(textField_2);
 		
 		JButton btnNewButton = new JButton("...");
+		btnNewButton.putClientProperty("JButton.buttonType", "roundRect");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -499,6 +501,8 @@ public class UI {
         	lblNewLabel_1.setText("Address count: " + walletNicks.length);
     		
     	}
+		
+		BlockMetadata m = Monieo.INSTANCE.getHighestBlock().getMetadata();
     	
     	if (list.getSelectedIndex() == -1) {
 
@@ -506,17 +510,11 @@ public class UI {
     		
     	} else {
     		
-    		BlockMetadata m = Monieo.INSTANCE.getHighestBlock().getMetadata();
-    		
-    		BigDecimal tot = BigDecimal.ZERO;
-    		
     		for (String s : walletNicks) {
     			
     			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
     			
     			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf);
-    			
-    			tot = tot.add(n);
     			
     			if (s.equals(list.getSelectedValue())) {
     				
@@ -527,14 +525,25 @@ public class UI {
     			}
     			
     		}
-    		
-    		lblTotalBalancelabel.setText("Total balance: " + tot.toPlainString());
 
     		panel.setVisible(true);
     		
     	}
-
-
+    	
+		BigDecimal tot = BigDecimal.ZERO;
+		
+		for (String s : walletNicks) {
+			
+			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
+			
+			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf);
+			
+			tot = tot.add(n);
+			
+		}
+		
+		lblTotalBalancelabel.setText("Total balance: " + tot.toPlainString());
+		
 	}
 	
 	public void notifyInvalid() {
