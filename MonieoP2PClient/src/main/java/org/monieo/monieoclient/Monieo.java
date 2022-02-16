@@ -260,6 +260,8 @@ public class Monieo {
 			
 			@Override
 			public void run() {
+
+				System.out.println("asd1");
 				
 				int amntns = 0;
 				
