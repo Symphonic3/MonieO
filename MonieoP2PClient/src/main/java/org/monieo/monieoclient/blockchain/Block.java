@@ -12,8 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-import java.util.function.Predicate;
-
 import org.monieo.monieoclient.Monieo;
 
 public class Block extends MonieoDataObject{
@@ -137,7 +135,7 @@ public class Block extends MonieoDataObject{
 		
 		BigDecimal f = sumdiff.divide(av, 100, RoundingMode.HALF_UP);
 		
-		BigDecimal discrepancy = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(f.multiply(new BigDecimal(120000)), 100, RoundingMode.HALF_UP); //2min
+		BigDecimal discrepancy = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(f.multiply(new BigDecimal(60000)), 100, RoundingMode.HALF_UP); //2min
 		
 		return discrepancy.setScale(0, RoundingMode.HALF_UP).toBigIntegerExact();
 		
@@ -186,7 +184,7 @@ public class Block extends MonieoDataObject{
 				
 				Transaction at = (Transaction) t;
 				
-				if (!at.testHasAmount(prev) || at.tooFarInFuture(header.timestamp) || at.expired(header.timestamp)) return false;
+				if (!at.testHasAmount(prev)) return false;
 				
 			}
 			
@@ -252,13 +250,13 @@ public class Block extends MonieoDataObject{
 	
 	public static BigDecimal getMaxCoinbase(long h) {
 		
-		BigDecimal defaultAmount = new BigDecimal("10");
+		BigDecimal defaultAmount = BigDecimal.valueOf(5);
 		
-		int halvings = (int)(h/525600);
+		int halvings = (int)(h/1051200);
 		
 		for (int i = 0; i < halvings; i++) {
 			
-			defaultAmount = defaultAmount.divide(new BigDecimal("2"));
+			defaultAmount = defaultAmount.divide(BigDecimal.valueOf(2));
 			
 		}
 		
@@ -324,7 +322,7 @@ public class Block extends MonieoDataObject{
 				
 			}
 			
-			HashMap<String, List<PendingFunds>> pfToAdd = new HashMap<String, List<PendingFunds>>();
+			HashMap<String, WalletData> pfToAdd = new HashMap<String, WalletData>();
 			
 			for (AbstractTransaction t : txclone) {
 				
@@ -332,24 +330,25 @@ public class Block extends MonieoDataObject{
 				
 				String w = t.getDestination();
 				
-				if (!pfToAdd.containsKey(w)) pfToAdd.put(w, new ArrayList<PendingFunds>());
+				if (!pfToAdd.containsKey(w)) pfToAdd.put(w, new WalletData(w, BigInteger.ZERO, new ArrayList<PendingFunds>()));
 				
 				if (cb) {
 					
-					pfToAdd.get(w).add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS_BLOCK_SENSITIVE));
-					pfToAdd.get(w).add(new PendingFunds(fees, Monieo.CONFIRMATIONS));
+					pfToAdd.get(w).pf.add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS_BLOCK_SENSITIVE));
+					pfToAdd.get(w).pf.add(new PendingFunds(fees, Monieo.CONFIRMATIONS));
 					
 				} else {
 					
-					pfToAdd.get(w).add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS));
+					pfToAdd.get(w).pf.add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS));
 					
 					Transaction tr = ((Transaction) t);
 					
 					String w2 = tr.getSource();
 					
-					if (!pfToAdd.containsKey(w2)) pfToAdd.put(w2, new ArrayList<PendingFunds>());
+					if (!pfToAdd.containsKey(w2)) pfToAdd.put(w2, new WalletData(w2, BigInteger.ZERO, new ArrayList<PendingFunds>()));
 					
-					pfToAdd.get(w2).add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
+					pfToAdd.get(w2).pf.add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
+					pfToAdd.get(w2).nonce = pfToAdd.get(w2).nonce.add(BigInteger.ONE);
 					
 				}
 				
@@ -377,7 +376,8 @@ public class Block extends MonieoDataObject{
 							
 							if (l.equals(" ") || l.equals("\n")) continue;
 							
-							String wa = new String(l.split(" ")[0]);
+							String wa = l.split(" ")[0];
+							BigInteger nonce = new BigInteger(l.split(" ")[1]);
 							
 							List<PendingFunds> tcs = BlockMetadata.getTXCS(l);
 							BigDecimal spendable = BigDecimal.ZERO;
@@ -401,7 +401,9 @@ public class Block extends MonieoDataObject{
 							
 							if (pfToAdd.containsKey(wa)) {
 								
-								for (PendingFunds pf : pfToAdd.get(wa)) {
+								nonce = nonce.add(pfToAdd.get(wa).nonce);
+								
+								for (PendingFunds pf : pfToAdd.get(wa).pf) {
 									
 									if (pf.spendable()) {
 										
@@ -419,7 +421,7 @@ public class Block extends MonieoDataObject{
 								
 							}
 							
-							String lnwrite = wa + " " + spendable;
+							String lnwrite = wa + " " + new BigInteger(l.split(" ")[1]).add(BigInteger.ONE).toString() + " " + spendable;
 							
 							for (PendingFunds pf : tcs) {
 								
@@ -439,9 +441,9 @@ public class Block extends MonieoDataObject{
 
 				for (String w : pfToAdd.keySet()) {
 					
-					String lnwrite = w;
+					String lnwrite = w + " " + 0;
 					
-					for (PendingFunds pf : pfToAdd.get(w)) {
+					for (PendingFunds pf : pfToAdd.get(w).pf) {
 						
 						lnwrite = lnwrite + " " + pf.serialize();
 						

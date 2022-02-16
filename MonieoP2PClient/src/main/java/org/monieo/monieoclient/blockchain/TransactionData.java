@@ -9,27 +9,25 @@ public class TransactionData {
 	public final String to;
 	public final BigDecimal amount;
 	public final BigDecimal fee;
-	public final long timestamp;
 	public final BigInteger nonce;
 	
 	public String mn;
 	public String pv;
 	
-	public TransactionData(String magicn, String ver, String from, String to, BigDecimal amount, BigDecimal fee, long timestamp, BigInteger nonce) {
+	public TransactionData(String magicn, String ver, String from, String to, BigDecimal amount, BigDecimal fee, BigInteger nonce) {
 		this.mn = magicn;
 		this.pv = ver;
 		this.from = from;
 		this.to = to;
 		this.amount = amount;
 		this.fee = fee;
-		this.timestamp = timestamp;
 		this.nonce = nonce;
 		
 	}
 	
 	public String serialize() {
 
-		return String.join(" ", mn, pv, from, to, amount.toPlainString(), fee.toPlainString(), String.valueOf(timestamp), String.valueOf(nonce));
+		return String.join(" ", mn, pv, from, to, amount.toPlainString(), fee.toPlainString(), String.valueOf(nonce));
 		
 	}
 	
@@ -47,8 +45,7 @@ public class TransactionData {
 					new String(data[3]),
 					new BigDecimal(data[4]),
 					new BigDecimal(data[5]),
-					Long.valueOf(data[6]),
-					new BigInteger(data[7]));
+					new BigInteger(data[6]));
 			
 		} catch (Exception e) {
 			

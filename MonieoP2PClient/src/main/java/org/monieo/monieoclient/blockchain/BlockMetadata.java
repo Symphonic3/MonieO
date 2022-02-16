@@ -3,6 +3,7 @@ package org.monieo.monieoclient.blockchain;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -14,6 +15,32 @@ public class BlockMetadata {
 	public BlockMetadata(File f) {
 		
 		this.blockmetafile = f;
+		
+	}
+	
+	public WalletData getWalletData(String wa) {
+		
+		try (Scanner c = new Scanner(blockmetafile)) {
+			
+			while (c.hasNextLine()) {
+				
+				String da = c.nextLine();
+				String[] s = da.split(" ");
+				if (s.length < 2) throw new IllegalStateException("Detected invalid balance field in block metadata! " + blockmetafile.getPath());
+				
+				if (s[0].equals(wa)) {
+					
+					return new WalletData(wa, new BigInteger(s[1]), getTXCS(da));
+					
+				}
+				
+			}
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		return new WalletData(wa, BigInteger.valueOf(0), new ArrayList<PendingFunds>());
 		
 	}
 	
@@ -59,40 +86,14 @@ public class BlockMetadata {
 		
 	}
 	
-	public List<PendingFunds> getFullTransactions(String wa) {
-		
-		try (Scanner c = new Scanner(blockmetafile)) {
-			
-			while (c.hasNextLine()) {
-				
-				String da = c.nextLine();
-				String[] s = da.split(" ");
-				if (s.length < 2) throw new IllegalStateException("Detected invalid balance field in block metadata! " + blockmetafile.getPath());
-				
-				if (s[0].equals(wa)) {
-					
-					return getTXCS(da);
-					
-				}
-				
-			}
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		
-		return new ArrayList<PendingFunds>();
-		
-	}
-	
 	public static List<PendingFunds> getTXCS(String line) {
 		
 		List<PendingFunds> tcs = new ArrayList<PendingFunds>();
 		
 		String[] s = line.split(" ");
-		if (s.length < 2) throw new IllegalStateException("Detected invalid balance field in block metadata! (no file)");
+		if (s.length < 3) throw new IllegalStateException("Detected invalid balance field in block metadata! (no file)");
 		
-		for (int i = 1; i < s.length; i++) {
+		for (int i = 2; i < s.length; i++) {
 			
 			PendingFunds pf = PendingFunds.deserialize(s[i]);
 			

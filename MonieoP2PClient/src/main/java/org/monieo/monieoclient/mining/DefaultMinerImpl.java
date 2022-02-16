@@ -72,7 +72,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			
 			long nettime = Monieo.INSTANCE.getNetAdjustedTime();
 
-			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*750, h, nettime); //750 is completely arbitrary. This should be optimized later.
+			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*750, h); //750 is completely arbitrary. This should be optimized later.
 			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick("MININGWALLET").getAsString(), Block.getMaxCoinbase(hei));
 			tx.add(ct);
 			

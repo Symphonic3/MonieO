@@ -1,7 +1,9 @@
 package org.monieo.monieoclient.wallet;
 
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.Signature;
+import java.util.Arrays;
 import java.util.Base64;
 
 import org.monieo.monieoclient.Monieo;
@@ -11,11 +13,14 @@ public class Wallet {
     public String nickname;
     private final String address;
     private final KeyPair keyPair;
+    
+	public static final String BASE_58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";  // 0-9 and a-z except 0OIl
+	private static final BigInteger BASE_58_LEN = BigInteger.valueOf(BASE_58.length());
 
     public Wallet(String nick, KeyPair keyPair) {
         this.nickname = nick;
         this.keyPair = keyPair;
-        address = Monieo.sha256d(Monieo.serializeKeyPairPublic(keyPair));
+        address = getAddress(Monieo.serializeKeyPairPublic(keyPair));
     }
     
     public static Wallet newWallet(String nick) {
@@ -24,6 +29,32 @@ public class Wallet {
     	
     }
     
+    public static String getAddress(String pubkey) {
+    	
+    	byte[] b = Monieo.sha256dRaw(pubkey);
+    	
+    	return bytesToBase58(b);
+    	
+    }
+    
+	private static String bytesToBase58(byte[] data) {
+		
+		String s = "";
+		BigInteger n = new BigInteger(1, data);
+		
+		BigInteger[] r = n.divideAndRemainder(BASE_58_LEN);
+		
+		while (n.signum() != 0) {
+			
+			s = s + BASE_58.charAt(r[1].intValue());
+			
+			n = r[0];
+			
+		}
+		
+		return s;
+	}
+	
     public String sign(String msg) {
     	
     	try {

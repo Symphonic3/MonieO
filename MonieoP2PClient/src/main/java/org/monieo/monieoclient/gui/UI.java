@@ -1,7 +1,6 @@
  package org.monieo.monieoclient.gui;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Dialog.ModalityType;
 import java.awt.datatransfer.StringSelection;
@@ -36,7 +35,6 @@ import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.wallet.Wallet;
 
-import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.JTextField;
@@ -510,7 +508,7 @@ public class UI {
     			
     			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
     			
-    			BigDecimal n = BlockMetadata.getSpendableBalance(m.getFullTransactions(w.getAsString()));
+    			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf);
     			
     			tot = tot.add(n);
     			

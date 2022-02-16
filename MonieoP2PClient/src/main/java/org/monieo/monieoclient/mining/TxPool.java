@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
-import java.util.function.Predicate;
-
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Block;
@@ -28,14 +26,7 @@ public class TxPool {
 	
 	public void sort() {
 
-		transactions.removeIf(new Predicate<Transaction>() {
-
-			@Override
-			public boolean test(Transaction t) {
-				return t.expired(Monieo.INSTANCE.getNetAdjustedTime());
-			}
-			
-		});
+		//TODO remove transactions past like a week or so
 		
 		transactions.sort(new Comparator<Transaction>() {
 
@@ -69,7 +60,7 @@ public class TxPool {
 		
 	}
 	
-	public List<AbstractTransaction> get(int maxsize, Block bl, long timest) {
+	public List<AbstractTransaction> get(int maxsize, Block bl) {
 		
 		List<AbstractTransaction> lt = get();
 		
@@ -79,7 +70,7 @@ public class TxPool {
 			
 			Transaction tr = (Transaction) lt.get(i);
 			
-			if (tr.testHasAmount(bl) && !tr.tooFarInFuture(timest)) {
+			if (tr.testHasAmount(bl)) {
 				
 				for (AbstractTransaction at : ret) {
 					

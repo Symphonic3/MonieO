@@ -3,9 +3,6 @@ package org.monieo.monieoclient.blockchain;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.PublicKey;
-import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.wallet.Wallet;
 
@@ -25,10 +22,10 @@ public class Transaction extends AbstractTransaction {
 	
 	public static Transaction createNewTransaction(Wallet fundsOwner, String to, BigDecimal amount, BigDecimal fee) {
 		
-		BigInteger nonce = new BigInteger(String.valueOf(System.currentTimeMillis()) + String.valueOf(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE)));
+		BigInteger nonce = Monieo.INSTANCE.getHighestBlock().getMetadata().getWalletData(fundsOwner.getAsString()).nonce;
 		
 		//should we use net adjusted time here?
-		TransactionData td = new TransactionData(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, fundsOwner.getAsString(), to, amount, fee, Monieo.INSTANCE.getNetAdjustedTime(), nonce);
+		TransactionData td = new TransactionData(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, fundsOwner.getAsString(), to, amount, fee, nonce);
 		
 		String sig = fundsOwner.sign(td.serialize());
 		
@@ -88,7 +85,7 @@ public class Transaction extends AbstractTransaction {
 		if (d.amount.signum() != 1 || d.amount.scale() > 8) return false;
 		if (d.fee.signum() == -1 || d.fee.scale() > 8) return false;
 		
-		if (!Monieo.sha256d(pubkey).equals(d.from)) return false;
+		if (!Wallet.getAddress(pubkey).equals(d.from)) return false;
 		
 		PublicKey pk = Monieo.deserializePublicKey(pubkey);
 		
@@ -110,47 +107,15 @@ public class Transaction extends AbstractTransaction {
 		
 		BlockMetadata m = b.getMetadata();
 		
-		BigDecimal bal = BlockMetadata.getSpendableBalance(m.getFullTransactions(d.from));
+		WalletData wd = m.getWalletData(d.from);
+		
+		BigDecimal bal = BlockMetadata.getSpendableBalance(wd.pf);
 		
 		if (d.amount.add(d.fee).compareTo(bal) == 1) return false;
 		
-		Block ba = b;
-		
-		while (ba != null) {
-			
-			for (AbstractTransaction at : Arrays.asList(ba.transactions)) {
-				
-				if (at instanceof Transaction) {
-					
-					if (((Transaction) at).equals(this)) return false;
-					
-				}
-				
-			}
-			
-			ba = ba.getPrevious();
-			
-			if (ba.header.timestamp < d.timestamp-7200000) break;
-			
-		}
+		if (d.nonce.compareTo(wd.nonce) == -1) return false;
 		
 		return true;
-		
-	}
-	
-	public boolean expired(long timetest) {
-		
-		if (timetest > d.timestamp + 86400000) return true; //1d
-		
-		return false;
-		
-	}
-	
-	public boolean tooFarInFuture(long timetest) {
-		
-		if (timetest + 7200000 < d.timestamp) return true; //2h
-		
-		return false;
 		
 	}
 	
