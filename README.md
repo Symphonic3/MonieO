@@ -1,7 +1,7 @@
 MonieO
 =========
 
-![GitLab Release (latest by SemVer)](https://img.shields.io/gitlab/v/release/Symphonic3/MonieO?sort=semver)
+[![GitLab Release](https://img.shields.io/gitlab/v/release/Symphonic3/MonieO?sort=semver)](release/latest)
 
 MonieO is an experimental cryptocurrency which aims to use a basic blockchain implementation and protocol to be easy to learn and build upon for beginners and enthusiasts alike. MonieO aims to show a working proof of a blockchain that is 100% functional and easy to understand.
 
