@@ -235,6 +235,8 @@ public class Monieo {
 		blockMetadataFolder.mkdir();
 		
 		blkhighest = new File(workingFolder.getPath() + "/.blkhighest");
+
+		handleBlock(genesis());
 		
 		if (!blkhighest.exists()) {
 			
@@ -243,8 +245,6 @@ public class Monieo {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
-			handleBlock(genesis());
 			
 		}
 		
