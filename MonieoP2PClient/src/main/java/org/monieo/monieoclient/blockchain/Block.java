@@ -363,15 +363,40 @@ public class Block extends MonieoDataObject{
 						
 						Block p = getPrevious();
 						
-						if (p != null) {
-							
-							p.generateMetadata();
-							
-						} else return;
+						List<Block> genm = new ArrayList<Block>();
 						
-						//we should request this so-called previous block, possibly, at some point
-						//can't be bothered to implement this right now.
-						//TODO fix this, at some point
+						genmloop: while (true) {
+							
+							if (p == null) {
+								
+								//we should request this so-called previous block, possibly, at some point
+								//can't be bothered to implement this right now.
+								//TODO fix this, at some point
+								
+								return;
+								
+							} else {
+								
+								if (!p.hasMetadata()) {
+									
+									genm.add(p);
+									
+								} else {
+									
+									for (int i = genm.size()-1; i >= 0; i--) {
+										
+										genm.get(i).generateMetadata();
+										
+									}
+									
+									break genmloop;
+									
+								}
+								
+							}
+
+							
+						}
 						
 					}
 					
