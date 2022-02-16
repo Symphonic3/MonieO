@@ -272,14 +272,10 @@ public class Monieo {
 				if (amntns < MAX_OUTGOING_CONNECTIONS) {
 					
 					List<String> rn = getValidNodesRightNow();
-					
-					System.out.println(rn.size());
-					
+
 					for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
 
 						if (rn.size() <= i) return; 
-						
-						System.out.println("asd");
 						
 						for (Node n : Monieo.INSTANCE.nodes) {
 							
