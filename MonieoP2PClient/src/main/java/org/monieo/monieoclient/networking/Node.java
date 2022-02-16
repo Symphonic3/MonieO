@@ -261,18 +261,18 @@ public class Node implements Runnable{
 				
 				while(true) {
 					
+					if (!b.hash().equals(wantedHash)) {
+						
+						hashes.add(b.hash());
+						
+					} else break;
+					
 					if (b.equals(g)) {
 						
 						//don't have block, sorry
 						return true;
 						
 					}
-					
-					if (!b.hash().equals(wantedHash)) {
-						
-						hashes.add(b.hash());
-						
-					} else break;
 					
 					b = b.getPrevious();
 					
