@@ -269,8 +269,6 @@ public class Monieo {
 			public void run() {
 				
 				int amntns = 0;
-				
-				Node.propagateAll(new NetworkCommand(MAGIC_NUMBERS, PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, getHighestBlockHash()), null);
 
 				for (Node n : nodes) {
 					

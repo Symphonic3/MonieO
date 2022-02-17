@@ -92,6 +92,8 @@ public class ConnectionHandler implements Runnable{
 			
 		}
 		
+		n.sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, Monieo.INSTANCE.getHighestBlockHash()), null);
+		
 		new Thread(n).start();
 		
 	}
