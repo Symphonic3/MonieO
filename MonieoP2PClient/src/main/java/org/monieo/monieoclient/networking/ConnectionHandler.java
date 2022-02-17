@@ -30,11 +30,14 @@ public class ConnectionHandler implements Runnable{
 				
 				String inet = clientSocket.getInetAddress().getHostAddress();
 				
-				for (Node n : Monieo.INSTANCE.nodes) {
+				for (int k = 0; k < Monieo.INSTANCE.nodes.size(); k++) {
+					
+					Node n = Monieo.INSTANCE.nodes.get(k);
 					
 					if (n.getAdress().equalsIgnoreCase(inet)) {
 						
 						n.disconnect();
+						k--;
 						
 					}
 					

@@ -292,8 +292,7 @@ public class Monieo {
 							
 							if (n.getAdress().equalsIgnoreCase(rn.get(i))) {
 								
-								n.disconnect();
-								k--;
+								return;
 								
 							}
 							
