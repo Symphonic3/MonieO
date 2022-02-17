@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.Normalizer.Form;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
@@ -32,6 +33,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.BlockMetadata;
+import org.monieo.monieoclient.blockchain.PendingFunds;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.wallet.Wallet;
@@ -70,6 +72,7 @@ public class UI {
 	JLabel lblToggleExperimentalMining;
 	JLabel lblTotalBalancelabel;
 	JButton TgBtnTOGGLEMINING;
+	JLabel totAvailableFundsDisplay;
 	
 	public boolean mining;
 	JTextArea miningstats;
@@ -304,12 +307,33 @@ public class UI {
 			}
 		});
 		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBounds(190, 0, 663, 225);
+		frame.getContentPane().add(panel_1);
+		panel_1.setLayout(null);
+		panel_1.setVisible(false);
+		
+		JButton overviewBTN = new JButton("Overview");
+		overviewBTN.setBounds(10, 414, 176, 23);
+		overviewBTN.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel_1.setVisible(true);
+                panel.setVisible(false);
+			    }
+		});
+		frame.getContentPane().add(overviewBTN);
+		
 		list = new JList<String>();
 		list.setBounds(10, 11, 188, 429);
 		list.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()) refresh(false);
+				if (!e.getValueIsAdjusting()) {
+	                panel.setVisible(true);
+	                panel_1.setVisible(false);
+
+					refresh(false);
+				}
 			}
 			
 		});
@@ -422,6 +446,32 @@ public class UI {
 		textField_2.setBounds(84, 145, 491, 20);
 		panelTransaction.add(textField_2);
 		
+		JLabel lblNewLabel_2 = new JLabel("Total pending funds:");
+		lblNewLabel_2.setBounds(83, 11, 111, 14);
+		panel_1.add(lblNewLabel_2);
+		
+		JLabel totPendingFundsDisplay = new JLabel("0");
+		totPendingFundsDisplay.setBounds(209, 11, 74, 14);
+		panel_1.add(totPendingFundsDisplay);
+		
+		JLabel lblTotalAvailableFunds = new JLabel("Total available funds:");
+		lblTotalAvailableFunds.setBounds(83, 36, 111, 14);
+		panel_1.add(lblTotalAvailableFunds);
+		
+		totAvailableFundsDisplay = new JLabel("0");
+		totAvailableFundsDisplay.setBounds(203, 36, 80, 14);
+		panel_1.add(totAvailableFundsDisplay);
+		
+		JLabel lblTotalConnectedNodes = new JLabel("Total connected nodes:");
+		lblTotalConnectedNodes.setBounds(83, 63, 137, 14);
+		panel_1.add(lblTotalConnectedNodes);
+		
+		JLabel totConnectedNodesDisplay = new JLabel("0");
+		totConnectedNodesDisplay.setBounds(236, 63, 92, 14);
+		panel_1.add(totConnectedNodesDisplay);
+		
+		panel_1.setVisible(false);
+
 		JButton btnNewButton = new JButton("...");
 		btnNewButton.putClientProperty("JButton.buttonType", "roundRect");
 		btnNewButton.addActionListener(new ActionListener() {
@@ -467,28 +517,17 @@ public class UI {
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
 		lblTotalBalancelabel = new JLabel("Total balance:");
-		
 		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
 		
-		JButton btnNewButton_2 = new JButton("Overview");
-		btnNewButton_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		btnNewButton_2.setBounds(10, 414, 176, 23);
-		frame.getContentPane().add(btnNewButton_2);
-				
 		frame.setResizable(false);
-		
 		refresh(true);
-		
 		frame.setVisible(true);
-		
 	}
 	
 	public void refresh(boolean updlist) {
-		
+		lblTotalBalancelabel.setText("fat");
+
     	if (updlist) {
     		
     		walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
@@ -514,7 +553,10 @@ public class UI {
     			
     			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
     			
-    			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf);
+    			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf).setScale(8);
+    			
+    			totAvailableFundsDisplay.setText(n.toPlainString());
+    			
     			
     			if (s.equals(list.getSelectedValue())) {
     				
@@ -530,13 +572,13 @@ public class UI {
     		
     	}
     	
-		BigDecimal tot = BigDecimal.ZERO;
+		BigDecimal tot = BigDecimal.ZERO.setScale(8);
 		
 		for (String s : walletNicks) {
 			
 			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
 			
-			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf);
+			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf).setScale(8);
 			
 			tot = tot.add(n);
 			
@@ -551,5 +593,4 @@ public class UI {
 		JOptionPane.showMessageDialog(frame, "Invalid data entered!", "Error", 0);
 		
 	}
-	
 }
