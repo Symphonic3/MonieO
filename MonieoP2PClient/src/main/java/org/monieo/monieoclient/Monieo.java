@@ -286,11 +286,14 @@ public class Monieo {
 
 						if (rn.size() <= i) return; 
 						
-						for (Node n : Monieo.INSTANCE.nodes) {
+						for (int k = 0; k < nodes.size(); k++) {
+							
+							Node n = nodes.get(k);
 							
 							if (n.getAdress().equalsIgnoreCase(rn.get(i))) {
 								
 								n.disconnect();
+								k--;
 								
 							}
 							
