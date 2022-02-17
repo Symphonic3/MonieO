@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.blockchain.AbstractTransaction;
+import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
 
 public class ConnectionHandler implements Runnable{
@@ -25,6 +27,19 @@ public class ConnectionHandler implements Runnable{
 			
 			try {
 				Socket clientSocket = serverSocket.accept();
+				
+				String inet = clientSocket.getInetAddress().getHostAddress();
+				
+				for (Node n : Monieo.INSTANCE.nodes) {
+					
+					if (n.getAdress().equalsIgnoreCase(inet)) {
+						
+						n.disconnect();
+						
+					}
+					
+				}
+				
 				nodeDo(clientSocket, true);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -36,11 +51,11 @@ public class ConnectionHandler implements Runnable{
 	
 	public void connect(String inet) {
 		
-		for (Node n : Monieo.INSTANCE.nodes) {
+		/*for (Node n : Monieo.INSTANCE.nodes) {
 			
 			if (n.getAdress().equalsIgnoreCase(inet)) return;
 			
-		}
+		}*/
 		
 		try {
 			Socket s = new Socket(inet, Monieo.PORT);
@@ -65,7 +80,15 @@ public class ConnectionHandler implements Runnable{
 					}
 					
 				}));
+		
 		Monieo.INSTANCE.nodes.add(n);
+		
+		for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
+			
+			n.sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_TRANSACTION, t.serialize()), null);
+			
+		}
+		
 		new Thread(n).start();
 		
 	}

@@ -81,7 +81,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			
 			Block b = new Block(new BlockHeader(Monieo.MAGIC_NUMBERS,
 					Monieo.PROTOCOL_VERSION,
-					Monieo.INSTANCE.getHighestBlock().hash(),
+					Monieo.INSTANCE.getHighestBlockHash(),
 					Block.merkle(txr),
 					nettime,
 					BigInteger.ZERO,

@@ -43,6 +43,8 @@ public class Node implements Runnable{
 		this.socket = s;
 		this.server = server;
 		
+		Monieo.INSTANCE.attemptRememberNode(getAdress());
+		
 	}
 
 	public boolean isServer() {

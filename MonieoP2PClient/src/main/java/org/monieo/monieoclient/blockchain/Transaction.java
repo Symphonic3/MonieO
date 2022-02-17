@@ -113,7 +113,7 @@ public class Transaction extends AbstractTransaction {
 		
 		if (d.amount.add(d.fee).compareTo(bal) == 1) return false;
 		
-		if (d.nonce.compareTo(wd.nonce) == -1) return false;
+		if (!d.nonce.equals(wd.nonce)) return false;
 		
 		return true;
 		
