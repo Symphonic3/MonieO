@@ -43,8 +43,8 @@ public class Monieo {
 	public static final String PROTOCOL_VERSION = "1.0";
 	public static double VERSION;
 	
-	public static int MAX_OUTGOING_CONNECTIONS = 10;
-	public static int MAX_INCOMING_CONNECTIONS = 10;
+	public static int MAX_OUTGOING_CONNECTIONS = 15;
+	public static int MAX_INCOMING_CONNECTIONS = 15;
 	
 	public static int CONFIRMATIONS = 5;
 	public static int CONFIRMATIONS_BLOCK_SENSITIVE = 60; //TODO if we get a new block that attempts to extend the blockchain earlier than this point, discard it
@@ -153,6 +153,8 @@ public class Monieo {
 	
 	public File blkhighest;
 	
+	public File txlistFolder;
+	
 	List<Socket> connections = new ArrayList<Socket>();
 	List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
 	
@@ -234,9 +236,11 @@ public class Monieo {
 		blockMetadataFolder = new File(workingFolder.getPath() + "/blockmeta");
 		blockMetadataFolder.mkdir();
 		
+		txlistFolder = new File(workingFolder.getPath() + "/txlist");
+		txlistFolder.mkdir();
+		
 		blkhighest = new File(workingFolder.getPath() + "/.blkhighest");
 
-		handleBlock(genesis());
 		
 		if (!blkhighest.exists()) {
 			
@@ -248,14 +252,17 @@ public class Monieo {
 			
 		}
 		
+		handleBlock(genesis());
+
         ui = new UI();
         ui.initialize();
         
-		txp = new TxPool();
+		txp = new TxPool(txlistFolder);
 		
 		ch = new ConnectionHandler();
 		new Thread(ch).start();
 		
+		//main timer
 		new Timer().schedule(new TimerTask() {
 			
 			@Override
@@ -263,6 +270,8 @@ public class Monieo {
 				
 				int amntns = 0;
 				
+				Node.propagateAll(new NetworkCommand(MAGIC_NUMBERS, PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, getHighestBlockHash()), null);
+
 				for (Node n : nodes) {
 					
 					if (!n.isServer()) amntns++;
@@ -279,7 +288,11 @@ public class Monieo {
 						
 						for (Node n : Monieo.INSTANCE.nodes) {
 							
-							if (n.getAdress().equalsIgnoreCase(rn.get(i))) return;
+							if (n.getAdress().equalsIgnoreCase(rn.get(i))) {
+								
+								n.disconnect();
+								
+							}
 							
 						}
 						
@@ -293,14 +306,6 @@ public class Monieo {
 			}
 			
 		}, 0, 1000);
-
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		Node.propagateAll(new NetworkCommand(MAGIC_NUMBERS, PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, getHighestBlock().hash()), null);
 		
 	}
 	
@@ -318,6 +323,13 @@ public class Monieo {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+	}
+	
+	//shortcut method to save having to get the block and hash it
+	public String getHighestBlockHash() {
+		
+		return readFileData(blkhighest);
 		
 	}
 	
@@ -371,8 +383,6 @@ public class Monieo {
 				if (ui != null) ui.refresh(false); //ui not initialized yet!
 				
 			}
-			
-			Node.propagateAll(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
 			
 		}
 		

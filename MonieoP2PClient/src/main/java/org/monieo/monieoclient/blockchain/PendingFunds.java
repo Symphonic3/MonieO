@@ -13,7 +13,7 @@ public class PendingFunds {
 		
 		//the fields we get here are already validated, presumably
 
-		this.amount = transactionAmount;
+		this.amount = transactionAmount.stripTrailingZeros();
 		this.confRemain = confRemain;
 		
 	}

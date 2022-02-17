@@ -1,5 +1,8 @@
 package org.monieo.monieoclient.mining;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,13 +23,29 @@ public class TxPool {
 	private static int MAX_TRANSACTION_SIZE = 1000;
 	private static int MAX_TXPOOL_SIZE = 1000;
 	
-	public TxPool() {
+	File f;
+	
+	public TxPool(File f) {
+		
+		this.f = f;
+		
+		if (f.exists()) {
+			
+			for (File f2 : f.listFiles()) {
+				
+				transactions.add(Transaction.deserialize(Monieo.readFileData(f2)));
+				
+			}
+			
+			sort();
+			
+		}
 		
 	}
 	
 	public void sort() {
 
-		//TODO remove transactions past like a week or so
+		//TODO remove transactions past a week or so
 		
 		transactions.sort(new Comparator<Transaction>() {
 
@@ -43,6 +62,44 @@ public class TxPool {
 		});
 		
 		if (transactions.size() > MAX_TXPOOL_SIZE) transactions.subList(MAX_TXPOOL_SIZE, transactions.size()).clear();
+		
+		if (f.exists()) {
+			
+			for (File f2 : f.listFiles()) {
+				
+				if (!f2.getName().endsWith(".mnot")) throw new RuntimeException("Sanity check failed!");
+				
+			}
+			
+			for (File f2 : f.listFiles()) {
+				
+				f2.delete();
+				
+			}
+			
+			for (Transaction t : transactions) {
+				
+				File f2 = new File(f.getPath() + "/" + t.hash() + ".mnot");
+				
+				try {
+					f2.createNewFile();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
+				try (FileWriter fw = new FileWriter(f2, false)) {
+					
+					fw.write(t.serialize());
+					
+				} catch (Exception e) {
+					
+					e.printStackTrace();
+					
+				}
+				
+			}
+			
+		}
 		
 	}
 	
@@ -94,7 +151,7 @@ public class TxPool {
 				
 			}
 			
-			if (b > maxsize) {
+			if (maxsize > 0 && b > maxsize) {
 				
 				ret.remove(ret.size()-1);
 				break;

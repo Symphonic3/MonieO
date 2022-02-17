@@ -350,7 +350,7 @@ public class Block extends MonieoDataObject{
 					if (!pfToAdd.containsKey(w2)) pfToAdd.put(w2, new WalletData(w2, BigInteger.ZERO, new ArrayList<PendingFunds>()));
 					
 					pfToAdd.get(w2).pf.add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
-					pfToAdd.get(w2).nonce = pfToAdd.get(w2).nonce.max(tr.d.nonce);
+					pfToAdd.get(w2).nonce = pfToAdd.get(w2).nonce.max(tr.d.nonce.add(BigInteger.ONE));
 					
 				}
 				
@@ -438,8 +438,6 @@ public class Block extends MonieoDataObject{
 							
 							if (pfToAdd.containsKey(wa)) {
 								
-								nonce = nonce.max(pfToAdd.get(wa).nonce.add(BigInteger.ONE));
-								
 								for (PendingFunds pf : pfToAdd.get(wa).pf) {
 									
 									if (pf.spendable()) {
@@ -459,7 +457,7 @@ public class Block extends MonieoDataObject{
 							//WalletData dat = pfToAdd.get(wa);
 							//BigInteger f = new BigInteger(l.split(" ")[1]);
 							
-							String lnwrite = wa + " " + nonce + " " + spendable.toPlainString();
+							String lnwrite = wa + " " + (pfToAdd.containsKey(wa) ? nonce.add(pfToAdd.get(wa).nonce) : nonce) + " " + spendable.stripTrailingZeros().toPlainString();
 							
 							for (PendingFunds pf : tcs) {
 								
