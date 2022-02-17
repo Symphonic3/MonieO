@@ -12,6 +12,7 @@ import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
@@ -249,6 +250,22 @@ public class Node implements Runnable{
 				remoteAcknowledgedLocal = true;
 				
 			} else return false;
+			
+		} 
+		
+		if (nc.cmd == NetworkCommandType.ACK_VER || nc.cmd == NetworkCommandType.SEND_VER) {
+			
+			if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
+				
+				for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
+					
+					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_TRANSACTION, t.serialize()), null);
+					
+				}
+				
+				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, Monieo.INSTANCE.getHighestBlockHash()), null);
+				
+			}
 			
 		} else if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
 			
