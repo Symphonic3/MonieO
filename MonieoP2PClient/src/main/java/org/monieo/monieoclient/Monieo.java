@@ -386,6 +386,8 @@ public class Monieo {
 				
 			}
 			
+			Node.propagateAll(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
+			
 		}
 		
 	}
