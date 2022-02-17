@@ -559,7 +559,7 @@ public class UI {
     			
     			
     			if (s.equals(list.getSelectedValue())) {
-    				
+    				//pushy
     	    		addressLabel.setText(w.getAsString());
     	    		nickLabel.setText(w.nickname);
     				INDIVbalanceLabel.setText(n.toPlainString());
