@@ -142,9 +142,9 @@ public class Block extends MonieoDataObject{
 
 	@Override
 	boolean testValidity() {
-		
+
 		if (this.equals(Monieo.genesis())) return true;
-		
+
 		if (transactions.length == 0) return false;
 
 		if (!merkle(transactions).equals(header.merkleRoot)) return false;
@@ -166,7 +166,7 @@ public class Block extends MonieoDataObject{
 		if (prev.header.timestamp >= header.timestamp) return false;
 
 		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
-
+		
 		int cb = 0;
 		
 		for (AbstractTransaction t : transactions) {
@@ -174,15 +174,15 @@ public class Block extends MonieoDataObject{
 			if (t == null) return false;
 			
 			if (t instanceof CoinbaseTransaction) {
-				
+
 				if (!((CoinbaseTransaction) t).validate(this)) return false;
-				
+
 				cb++;
 				
 			} else if (t instanceof Transaction) {
 				
 				Transaction at = (Transaction) t;
-				
+
 				if (!at.testHasAmount(prev)) return false;
 				
 			}
@@ -198,17 +198,17 @@ public class Block extends MonieoDataObject{
 				}
 				
 			}
-			
+
 			if (count > 1) return false;
 			
 			//if (t.expired()) return false;
 			
 		}
-		
+
 		if (cb != 1) return false;
-		
+
 		if (serialize().getBytes().length > 1024*102) return false;
-		
+
 		return true;
 		
 	}
@@ -385,8 +385,7 @@ public class Block extends MonieoDataObject{
 								} else {
 									
 									for (int i = genm.size(); i-- > 0; ) {
-										
-										System.out.println("backpropagated generation");
+
 										genm.get(i).generateMetadata();
 										
 									}
