@@ -198,9 +198,8 @@ public class Node implements Runnable{
 			
 			//possibly infraction here?
 			System.out.println("DC BECAUSE OF EXCEPTION!");
-			disconnect();
-			
 			e.printStackTrace();
+			disconnect();			
 
 			return;
 			
