@@ -309,7 +309,7 @@ public class Monieo {
 					List<String> rn = getValidNodesRightNow();
 
 					for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
-
+						
 						if (rn.size() <= i) return; 
 						
 						for (int k = 0; k < nodes.size(); k++) {

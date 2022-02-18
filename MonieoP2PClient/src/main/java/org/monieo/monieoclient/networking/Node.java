@@ -152,7 +152,6 @@ public class Node implements Runnable{
 					
 					for (Consumer<Node> a : queue) {
 						
-						System.out.println("debug me");
 						a.accept(this);
 						
 					}
@@ -171,8 +170,6 @@ public class Node implements Runnable{
 				String t;
 				
 				inner: while ((t = br.readLine()) != null) {
-					
-					System.out.println("read me");
 					
 					if (t.equals(TERM)) break inner;
 					s = s + t + "\n";
@@ -231,7 +228,6 @@ public class Node implements Runnable{
 			}
 			
 		}
-		System.out.println("andante");
 		
 		if (nc.cmd == NetworkCommandType.SEND_VER) {
 			
@@ -377,16 +373,10 @@ public class Node implements Runnable{
 				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_TIME, String.valueOf(System.currentTimeMillis())), null);
 				
 			} else if (nc.cmd == NetworkCommandType.SEND_TRANSACTION) {
-				
-				System.out.println("adagio");
-				
+
 				Transaction t = Transaction.deserialize(nc.data);
 				
-				System.out.println("largho");
-				
 				if (t == null || !t.validate()) return false;
-				
-				System.out.println("larghetto");
 				
 				Monieo.INSTANCE.txp.add(t);
 				

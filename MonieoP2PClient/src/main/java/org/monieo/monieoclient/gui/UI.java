@@ -497,13 +497,9 @@ public class UI {
 			    Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
 			    if (result!= null) {
 			    	
-			    	System.out.println(":re23");
-			    	
 			    	String resp = Monieo.INSTANCE.createWallet(result.toString());
 			    	
 			    	JOptionPane.showMessageDialog(frame, resp, "Info", 1);
-			    	
-			    	System.out.println(":re");
 			    	
 			    	refresh(true);
 			    }
