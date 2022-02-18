@@ -370,10 +370,10 @@ public class Monieo {
 	}
 	
 	public void handleBlock(Block b) {
-		
-		if (b.header.height+(CONFIRMATIONS_BLOCK_SENSITIVE*2) < getHighestBlock().header.height) return;
 
 		if (b == null || !b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
+		
+		if (getHighestBlock() != null && b.header.height+(CONFIRMATIONS_BLOCK_SENSITIVE*2) < getHighestBlock().header.height) return;
 		
 		String blockname = b.hash();
 		
