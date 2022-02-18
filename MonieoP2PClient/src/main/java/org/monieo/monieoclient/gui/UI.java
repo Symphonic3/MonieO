@@ -3,6 +3,8 @@
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +22,7 @@ import java.util.function.Consumer;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -30,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -43,6 +47,8 @@ import org.monieo.monieoclient.wallet.Wallet;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.BoxLayout;
 
 public class UI {
 	private JFrame frame;
@@ -76,11 +82,14 @@ public class UI {
 	JButton TgBtnTOGGLEMINING;
 	JLabel totAvailableFundsDisplay;
 	
+	JPanel invalidWallet;
+	
 	public boolean mining;
 	JTextArea miningstats;
 	public boolean miningWindowOpen = false;
 	
 	public boolean modeToggleStatus;
+	private JLabel lblNewLabel_4;
 	
 	
 	public UI() {
@@ -214,7 +223,7 @@ public class UI {
 		});
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
-			
+		
 		lblNewLabel_1 = new JTextField("Address count:");
 		lblNewLabel_1.setEditable(false);
 		lblNewLabel_1.setBorder(null); //remove the border
@@ -532,13 +541,32 @@ public class UI {
 		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
 		
+		
+		invalidWallet = new JPanel();
+		invalidWallet.setBounds(10, 152, 663, 66);
+		invalidWallet.setBorder(BorderFactory.createLineBorder(new Color(237, 162, 0, 180), 4, true));
+		panel.add(invalidWallet);
+		invalidWallet.setLayout(new BoxLayout(invalidWallet, BoxLayout.X_AXIS));
+		
+		invalidWallet.add(Box.createRigidArea(new Dimension(20, 0)));
+		
+		lblNewLabel_4 = new JLabel(UIManager.getIcon("OptionPane.warningIcon"));
+		invalidWallet.add(lblNewLabel_4);
+		
+		invalidWallet.add(Box.createRigidArea(new Dimension(20, 0)));
+		
+		JLabel lblNewLabel_3 = new JLabel("Warning! This wallet has no associated private key, therefore the funds in it are not spendable!", SwingConstants.CENTER);
+		invalidWallet.add(lblNewLabel_3);
+		
+		invalidWallet.setVisible(false);
+		
 		frame.setResizable(false);
 		refresh(true);
 		frame.setVisible(true);
+		
 	}
 	
 	public void refresh(boolean updlist) {
-		lblTotalBalancelabel.setText("fat");
 
     	if (updlist) {
     		
@@ -569,19 +597,32 @@ public class UI {
     			
     			totAvailableFundsDisplay.setText(n.toPlainString());
     			
-    			
     			if (s.equals(list.getSelectedValue())) {
-    				//pushy
+    				
+    	    		panel.setVisible(true);
+					
     	    		addressLabel.setText(w.getAsString());
     	    		nickLabel.setText(w.nickname);
     				INDIVbalanceLabel.setText(n.toPlainString());
+    	    		
+    				if (w.hasSK) {
+        				
+        				invalidWallet.setVisible(false);
+        				panelTransaction.setVisible(true);
+    					
+    				} else {
+
+        				panelTransaction.setVisible(false);
+        				invalidWallet.setVisible(true);
+    					
+    				}
+    				
+    				break;
     				
     			}
     			
     		}
 
-    		panel.setVisible(true);
-    		
     	}
     	
 		BigDecimal tot = BigDecimal.ZERO.setScale(8);

@@ -19,8 +19,10 @@ import java.util.TimerTask;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.security.*;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.monieo.monieoclient.blockchain.Block;
@@ -680,7 +682,8 @@ public class Monieo {
 		try {
 			
 			KeyFactory kf = KeyFactory.getInstance("RSA");
-			return kf.generatePublic(new PKCS8EncodedKeySpec(priv.getEncoded()));
+			RSAPrivateCrtKey privk = ((RSAPrivateCrtKey) priv);
+			return kf.generatePublic(new RSAPublicKeySpec(privk.getModulus(), privk.getPublicExponent()));
 			
 		} catch (Exception e1) {
 			e1.printStackTrace();
