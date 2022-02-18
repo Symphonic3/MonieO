@@ -168,18 +168,9 @@ public class Monieo {
 	
 	public AbstractMiner miner;
 	
-	static MessageDigest digest = null;
-	
 	public Monieo() {
 		
 		INSTANCE = this;
-		
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
 		
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
@@ -706,13 +697,28 @@ public class Monieo {
 
 	public static byte[] sha256dRaw(String s) {
 		
-		digest.reset();
+		MessageDigest digest = null;
 		
-		byte[] n = digest.digest(s.getBytes(StandardCharsets.UTF_8));
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
-		digest.reset();
+		return sha256dRaw(s, digest);
 		
-		return digest.digest(n);
+	}
+	
+	public static byte[] sha256dRaw(String s, MessageDigest d) {
+		
+		d.reset();
+		
+		byte[] n = d.digest(s.getBytes(StandardCharsets.UTF_8));
+		
+		d.reset();
+
+		return d.digest(n);
 		
 	}
 	

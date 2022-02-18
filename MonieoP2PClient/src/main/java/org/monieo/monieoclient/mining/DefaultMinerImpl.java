@@ -2,6 +2,8 @@ package org.monieo.monieoclient.mining;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -55,6 +57,15 @@ public class DefaultMinerImpl implements AbstractMiner{
 	@Override
 	public void run() {
 		
+		MessageDigest digest = null;
+		
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
 		while (true) {
 						if (stop) {
 				
@@ -73,7 +84,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			
 			long nettime = Monieo.INSTANCE.getNetAdjustedTime();
 
-			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*750, h); //750 is completely arbitrary. This should be optimized later.
+			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*70, h); //750 is completely arbitrary. This should be optimized later.
 			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick("MININGWALLET").getAsString(), Block.getMaxCoinbase(hei));
 			tx.add(ct);
 			
@@ -95,7 +106,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			//This algorithm is really bad! Should be reimplemented in C, which would also make it easier to convert to OpenCL in the future.
 			in: for (int i = 0; i < HASHES_BEFORE_RECHECK; i++) {
 				
-				if (new BigInteger(1, b.rawHash()).compareTo(b.header.diff) == -1) {
+				if (new BigInteger(1, Monieo.sha256dRaw(b.serialize(), digest)).compareTo(b.header.diff) == -1) {
 					
 					if (b.validate()) {
 						
