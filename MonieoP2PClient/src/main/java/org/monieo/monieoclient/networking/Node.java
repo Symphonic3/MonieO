@@ -80,7 +80,7 @@ public class Node implements Runnable{
 	
 	public void infraction() {
 		
-		System.out.println("DC BECAUSE OF EXCEPTION!");
+		System.out.println("DC BECAUSE OF INFRACTION!");
 		Monieo.INSTANCE.fetchByAdress(getAdress()).ban();
 		disconnect();
 		
@@ -189,6 +189,11 @@ public class Node implements Runnable{
 					
 					infraction();
 					continue;
+					
+				} else {
+					
+					//packet success!
+					//TODO implement timer keepalive thing
 					
 				}
 				

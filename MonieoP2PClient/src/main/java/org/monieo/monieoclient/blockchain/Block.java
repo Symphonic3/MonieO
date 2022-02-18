@@ -158,8 +158,6 @@ public class Block extends MonieoDataObject{
 		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
 
 		if (header.height != prev.header.height+1) return false;
-		
-		if (header.height+(Monieo.CONFIRMATIONS_BLOCK_SENSITIVE*2) < Monieo.INSTANCE.getHighestBlock().header.height) return false;
 
 		if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
 
