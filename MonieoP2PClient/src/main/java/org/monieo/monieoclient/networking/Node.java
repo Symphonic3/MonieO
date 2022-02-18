@@ -80,6 +80,7 @@ public class Node implements Runnable{
 	
 	public void infraction() {
 		
+		System.out.println("DC BECAUSE OF EXCEPTION!");
 		Monieo.INSTANCE.fetchByAdress(getAdress()).ban();
 		disconnect();
 		
@@ -196,6 +197,7 @@ public class Node implements Runnable{
 		} catch (Exception e) {
 			
 			//possibly infraction here?
+			System.out.println("DC BECAUSE OF EXCEPTION!");
 			disconnect();
 			
 			e.printStackTrace();
@@ -217,6 +219,7 @@ public class Node implements Runnable{
 			
 			if (packetCommitments.get(i).attemptFillShouldBanNode(nc)) { //disconnects node instead of banning, as this is only indicitive that the node is disconnected, not nessecarily that it is uncooperative
 
+				System.out.println("DC BECAUSE OF COMMITMENT!");
 				disconnect();
 				return true;
 				
