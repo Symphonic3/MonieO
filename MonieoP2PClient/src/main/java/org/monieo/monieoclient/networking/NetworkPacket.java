@@ -1,8 +1,8 @@
 package org.monieo.monieoclient.networking;
 
-public class NetworkCommand {
+public class NetworkPacket {
 	
-	public enum NetworkCommandType {
+	public enum NetworkPacketType {
 		
 		SEND_VER,
 		ACK_VER,
@@ -19,10 +19,10 @@ public class NetworkCommand {
 	
 	String magicn;
 	String ver;
-	NetworkCommandType cmd;
+	NetworkPacketType cmd;
 	String data;
 	
-	public NetworkCommand(String m, String v, NetworkCommandType c, String d) {
+	public NetworkPacket(String m, String v, NetworkPacketType c, String d) {
 		
 		this.magicn = m;
 		this.ver = v;
@@ -37,7 +37,7 @@ public class NetworkCommand {
 		
 	}
 	
-	public static NetworkCommand deserialize(String s) {
+	public static NetworkPacket deserialize(String s) {
 		
 		try {
 			
@@ -58,9 +58,9 @@ public class NetworkCommand {
 				
 			}
 			
-			NetworkCommandType nct = NetworkCommandType.valueOf(netinfo[2]);
+			NetworkPacketType nct = NetworkPacketType.valueOf(netinfo[2]);
 			
-			return new NetworkCommand(netinfo[0], netinfo[1], nct, data);
+			return new NetworkPacket(netinfo[0], netinfo[1], nct, data);
 			
 		} catch (Exception e) {
 			

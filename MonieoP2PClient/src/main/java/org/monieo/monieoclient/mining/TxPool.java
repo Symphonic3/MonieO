@@ -12,9 +12,9 @@ import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.Transaction;
-import org.monieo.monieoclient.networking.NetworkCommand;
+import org.monieo.monieoclient.networking.NetworkPacket;
 import org.monieo.monieoclient.networking.Node;
-import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
+import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
 
 public class TxPool {
 
@@ -175,7 +175,7 @@ public class TxPool {
 		if (size > MAX_TRANSACTION_SIZE) return;
 
 		//completely optional. find a way to reward this with the protocol.
-		Node.propagateAll(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_TRANSACTION, t.serialize()), null);
+		Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()), null);
 		
 		transactions.add(t);
 		

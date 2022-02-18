@@ -8,6 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -76,8 +78,10 @@ public class UI {
 	
 	public boolean mining;
 	JTextArea miningstats;
+	public boolean miningWindowOpen = false;
 	
 	public boolean modeToggleStatus;
+	
 	
 	public UI() {
 	}
@@ -114,6 +118,8 @@ public class UI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
+				if (miningWindowOpen) return;
 				
 				JDialog jd = new JDialog(frame);
 				
@@ -188,6 +194,18 @@ public class UI {
 					}
 					
 				});
+				
+				miningWindowOpen = true;
+				
+				jd.addWindowListener(new WindowAdapter()
+		        {
+		            @Override
+		            public void windowClosing(WindowEvent e)
+		            {
+		                miningWindowOpen = false;
+		            }
+		            
+		        });
 				
 				jd.setVisible(true);
 				
@@ -308,7 +326,7 @@ public class UI {
 		});
 		
 		JPanel panel_1 = new JPanel();
-		panel_1.setBounds(190, 0, 663, 225);
+		panel_1.setBounds(196, 0, 689, 400);
 		frame.getContentPane().add(panel_1);
 		panel_1.setLayout(null);
 		panel_1.setVisible(false);
@@ -447,30 +465,28 @@ public class UI {
 		panelTransaction.add(textField_2);
 		
 		JLabel lblNewLabel_2 = new JLabel("Total pending funds:");
-		lblNewLabel_2.setBounds(83, 11, 111, 14);
+		lblNewLabel_2.setBounds(10, 10, 133, 29);
 		panel_1.add(lblNewLabel_2);
 		
 		JLabel totPendingFundsDisplay = new JLabel("0");
-		totPendingFundsDisplay.setBounds(209, 11, 74, 14);
+		totPendingFundsDisplay.setBounds(144, 10, 331, 29);
 		panel_1.add(totPendingFundsDisplay);
 		
 		JLabel lblTotalAvailableFunds = new JLabel("Total available funds:");
-		lblTotalAvailableFunds.setBounds(83, 36, 111, 14);
+		lblTotalAvailableFunds.setBounds(10, 40, 133, 29);
 		panel_1.add(lblTotalAvailableFunds);
 		
 		totAvailableFundsDisplay = new JLabel("0");
-		totAvailableFundsDisplay.setBounds(203, 36, 80, 14);
+		totAvailableFundsDisplay.setBounds(144, 40, 331, 29);
 		panel_1.add(totAvailableFundsDisplay);
 		
 		JLabel lblTotalConnectedNodes = new JLabel("Total connected nodes:");
-		lblTotalConnectedNodes.setBounds(83, 63, 137, 14);
+		lblTotalConnectedNodes.setBounds(10, 70, 133, 29);
 		panel_1.add(lblTotalConnectedNodes);
 		
 		JLabel totConnectedNodesDisplay = new JLabel("0");
-		totConnectedNodesDisplay.setBounds(236, 63, 92, 14);
+		totConnectedNodesDisplay.setBounds(144, 70, 331, 29);
 		panel_1.add(totConnectedNodesDisplay);
-		
-		panel_1.setVisible(false);
 
 		JButton btnNewButton = new JButton("...");
 		btnNewButton.putClientProperty("JButton.buttonType", "roundRect");

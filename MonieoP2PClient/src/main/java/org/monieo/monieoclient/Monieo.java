@@ -32,8 +32,8 @@ import org.monieo.monieoclient.mining.DefaultMinerImpl;
 import org.monieo.monieoclient.mining.TxPool;
 import org.monieo.monieoclient.networking.ConnectionHandler;
 import org.monieo.monieoclient.networking.NetAdressHolder;
-import org.monieo.monieoclient.networking.NetworkCommand;
-import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
+import org.monieo.monieoclient.networking.NetworkPacket;
+import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
 import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
 
@@ -291,7 +291,7 @@ public class Monieo {
 					
 					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
 
-					n.sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, b.hash()), null);
+					n.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()), null);
 					
 				}
 				
@@ -406,7 +406,7 @@ public class Monieo {
 				
 			}
 			
-			Node.propagateAll(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
+			Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()), null);
 			
 		}
 		

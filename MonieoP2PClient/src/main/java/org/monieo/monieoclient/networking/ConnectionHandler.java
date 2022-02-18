@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Transaction;
-import org.monieo.monieoclient.networking.NetworkCommand.NetworkCommandType;
+import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
 
 public class ConnectionHandler implements Runnable{
 
@@ -74,12 +74,12 @@ public class ConnectionHandler implements Runnable{
 		System.out.println("Connected to: " + s.getInetAddress().getHostAddress());
 		
 		Node n = new Node(s, server);
-		n.sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_VER, null),
-				new PacketCommitment(new Predicate<NetworkCommand>() {
+		n.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_VER, null),
+				new PacketCommitment(new Predicate<NetworkPacket>() {
 
 					@Override
-					public boolean test(NetworkCommand t) {
-						return (t.cmd == NetworkCommandType.ACK_VER);
+					public boolean test(NetworkPacket t) {
+						return (t.cmd == NetworkPacketType.ACK_VER);
 					}
 					
 				}));

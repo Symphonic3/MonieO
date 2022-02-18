@@ -7,16 +7,16 @@ public class PacketCommitment {
 	public boolean isFilled = false;
 	public long timeMax;
 	
-	Predicate<NetworkCommand> test;
+	Predicate<NetworkPacket> test;
 	
-	public PacketCommitment(Predicate<NetworkCommand> testResponse) {
+	public PacketCommitment(Predicate<NetworkPacket> testResponse) {
 		
 		timeMax = System.currentTimeMillis() + Node.MIN_RESPONSE_TIME;
 		this.test = testResponse;
 		
 	}
 	
-	public boolean attemptFillShouldBanNode(NetworkCommand nc) {
+	public boolean attemptFillShouldBanNode(NetworkPacket nc) {
 		
 		if (test.test(nc)) {
 			
