@@ -92,6 +92,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			
 			BigInteger nonce = BigInteger.ZERO;
 			
+			//This algorithm is really bad! Should be reimplemented in C, which would also make it easier to convert to OpenCL in the future.
 			in: for (int i = 0; i < HASHES_BEFORE_RECHECK; i++) {
 				
 				if (new BigInteger(1, b.rawHash()).compareTo(b.header.diff) == -1) {

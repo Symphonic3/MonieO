@@ -46,7 +46,7 @@ public class TxPool {
 	public void sort() {
 
 		//TODO remove transactions past a week or so
-		
+
 		transactions.sort(new Comparator<Transaction>() {
 
 			@Override
@@ -67,7 +67,7 @@ public class TxPool {
 			
 			for (File f2 : f.listFiles()) {
 				
-				if (!f2.getName().endsWith(".mnot")) throw new RuntimeException("Sanity check failed!");
+				if (!Monieo.INSTANCE.isMonieoFile(f) || !f2.getName().endsWith(".mnot")) throw new RuntimeException("Sanity check failed!");
 				
 			}
 			

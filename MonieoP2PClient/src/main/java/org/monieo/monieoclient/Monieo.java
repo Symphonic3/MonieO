@@ -47,7 +47,7 @@ public class Monieo {
 	public static int MAX_INCOMING_CONNECTIONS = 15;
 	
 	public static int CONFIRMATIONS = 5;
-	public static int CONFIRMATIONS_BLOCK_SENSITIVE = 60; //TODO if we get a new block that attempts to extend the blockchain earlier than this point, discard it
+	public static int CONFIRMATIONS_BLOCK_SENSITIVE = 100; //TODO if we get a new block that attempts to extend the blockchain earlier than this point*2, discard it
 	
 	public static Monieo INSTANCE;
 	
@@ -168,9 +168,18 @@ public class Monieo {
 	
 	public AbstractMiner miner;
 	
+	static MessageDigest digest = null;
+	
 	public Monieo() {
 		
 		INSTANCE = this;
+		
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
@@ -270,9 +279,28 @@ public class Monieo {
 				
 				int amntns = 0;
 
-				for (Node n : nodes) {
+				Block b = getHighestBlock();
+				Block g = genesis();
+				
+				for (int i = 0; i < CONFIRMATIONS*2; i++) {
 					
+					if (b.equals(g)) {
+						
+						break;
+						
+					}
+					
+					b = b.getPrevious();
+					
+				}
+				
+				for (Node n : nodes) {
+
 					if (!n.isServer()) amntns++;
+					
+					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
+
+					n.sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, b.hash()), null);
 					
 				}
 				
@@ -305,7 +333,7 @@ public class Monieo {
 				
 			}
 			
-		}, 0, 1000);
+		}, 0, 2500);
 		
 	}
 	
@@ -353,6 +381,7 @@ public class Monieo {
 	
 	public void handleBlock(Block b) {
 		
+		//TODO remove this line
 		System.out.println("handling " + b.hash());
 		
 		if (b == null || !b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
@@ -652,6 +681,9 @@ public class Monieo {
     	
     	if (f == null || !f.exists()) return null;
     	
+    	if (!Monieo.INSTANCE.isMonieoFile(f)) return null;
+    	
+    	//safe against injection of this pattern.
     	try (Scanner c = new Scanner(f).useDelimiter(Pattern.compile("\\Z"))) {
     		
     		String ret = "";
@@ -674,14 +706,10 @@ public class Monieo {
 
 	public static byte[] sha256dRaw(String s) {
 		
-		MessageDigest digest = null;
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return null;
-		}
+		digest.reset();
+		
 		byte[] n = digest.digest(s.getBytes(StandardCharsets.UTF_8));
+		
 		digest.reset();
 		
 		return digest.digest(n);
@@ -710,6 +738,17 @@ public class Monieo {
 		
 		return s[0].equals(MAGIC_NUMBERS) && s[1].equals(PROTOCOL_VERSION);
 		
+	}
+	
+	public boolean isMonieoFile(File f) {
+		
+	    while (f.getParentFile()!=null) {
+	       f = f.getParentFile();
+	       if (f.equals(workingFolder)) {
+	           return true;
+	       }
+	    }
+	    return false;
 	}
 	
 }

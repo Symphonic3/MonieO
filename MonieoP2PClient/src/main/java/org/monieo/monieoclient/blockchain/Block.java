@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -159,6 +158,8 @@ public class Block extends MonieoDataObject{
 		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
 
 		if (header.height != prev.header.height+1) return false;
+		
+		if (header.height+(Monieo.CONFIRMATIONS_BLOCK_SENSITIVE*2) < Monieo.INSTANCE.getHighestBlock().header.height) return false;
 
 		if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
 
@@ -296,6 +297,8 @@ public class Block extends MonieoDataObject{
 		//This method is full of horrible code.
 		//Deal with it, or refactor it yourself.
 		
+		if (!validate()) throw new IllegalStateException("Attempted to generate metadata for an invalid block!");
+		
 		if (!hasMetadata()) {
 			
 			File blockmetafile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + hash() + ".blkmeta");
@@ -370,9 +373,8 @@ public class Block extends MonieoDataObject{
 							
 							if (p == null) {
 								
-								//we should request this so-called previous block, possibly, at some point
-								//can't be bothered to implement this right now.
-								//TODO fix this, at some point
+								//This shouldn't happen in practice because blocks will check if they have a valid parent before passing validation.
+								//If a block like this is recieved, block synchronization will take care of getting the chain straight.
 								
 								return;
 								
@@ -401,9 +403,6 @@ public class Block extends MonieoDataObject{
 						}
 						
 					}
-
-					//gotta love java!
-					while (!Files.exists(prevBlockMetaFile.toPath()) && !Files.notExists(prevBlockMetaFile.toPath())) {};
 					
 					try (Scanner c = new Scanner(prevBlockMetaFile)) {
 						

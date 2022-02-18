@@ -21,8 +21,8 @@ public class Node implements Runnable{
 	
 	private Socket socket;
 	
-	private boolean remoteAcknowledgedLocal = false;
-	private boolean localAcknowledgedRemote = false;
+	public boolean remoteAcknowledgedLocal = false;
+	public boolean localAcknowledgedRemote = false;
 	public static long MIN_RESPONSE_TIME = 15000;
 	
 	public static String TERM = "EOM";
@@ -263,7 +263,22 @@ public class Node implements Runnable{
 					
 				}
 				
-				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, Monieo.INSTANCE.getHighestBlockHash()), null);
+				Block b = Monieo.INSTANCE.getHighestBlock();
+				Block g = Monieo.genesis();
+				
+				for (int i = 0; i < Monieo.CONFIRMATIONS_BLOCK_SENSITIVE*2; i++) {
+					
+					if (b.equals(g)) {
+						
+						break;
+						
+					}
+					
+					b = b.getPrevious();
+					
+				}
+				
+				sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.REQUEST_BLOCKS_AFTER, b.hash()), null);
 				
 			}
 			
@@ -306,14 +321,41 @@ public class Node implements Runnable{
 				
 			} else if (nc.cmd == NetworkCommandType.REQUEST_SINGLE_BLOCK) {
 				
-				Block b = Block.getByHash(nc.data);
+				//the previous method of doing this was unsafe.
+				//to avoid issues, we are using the algorithm for next blocks to ensure
+				//file path injection is impossible
+				//obviously there are better ways to do this, but this netcommand
+				//might be removed anyways.
 				
-				if (b != null && b.validate()) {
+				String wantedHash = nc.data;
+				
+				Block b = Monieo.INSTANCE.getHighestBlock();
+				Block g = Monieo.genesis();
+				
+				while(true) {
 					
-					sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
+					if (b.hash().equals(wantedHash)) {
+						
+						if (b != null && b.validate()) {
+							
+							sendNetworkCommand(new NetworkCommand(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkCommandType.SEND_BLOCK, b.serialize()), null);
+							break;
+							
+						}
+						
+					}
+					
+					if (b.equals(g)) {
+						
+						//don't have block, sorry
+						return true;
+						
+					}
+					
+					b = b.getPrevious();
 					
 				}
-				
+
 			} else if (nc.cmd == NetworkCommandType.REQUEST_NODES) {
 				
 				List<String> s = Monieo.INSTANCE.getValidNodesRightNow();
