@@ -241,7 +241,6 @@ public class Monieo {
 		
 		blkhighest = new File(workingFolder.getPath() + "/.blkhighest");
 
-		
 		if (!blkhighest.exists()) {
 			
 			try {
@@ -371,10 +370,7 @@ public class Monieo {
 	}
 	
 	public void handleBlock(Block b) {
-		
-		//TODO remove this line
-		System.out.println("handling " + b.hash());
-		
+
 		if (b == null || !b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
 		
 		String blockname = b.hash();
@@ -397,6 +393,7 @@ public class Monieo {
 				e.printStackTrace();
 			}
 			
+			System.out.println("generating metadata " + b.hash());
 			b.generateMetadata();
 			
 			if (getHighestBlock() == null || b.header.height > getHighestBlock().header.height) {

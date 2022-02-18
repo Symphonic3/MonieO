@@ -388,6 +388,7 @@ public class Block extends MonieoDataObject{
 									
 									for (int i = genm.size(); i-- > 0; ) {
 										
+										System.out.println("backpropagated generation");
 										genm.get(i).generateMetadata();
 										
 									}
