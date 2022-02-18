@@ -19,6 +19,7 @@ import java.util.TimerTask;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -221,9 +222,37 @@ public class Monieo {
 				File pub = new File(f.getPath() + "/public.key");
 				File priv = new File(f.getPath() + "/private.key");
 				
-				KeyPair kp = deserializeKeyPair(readFileData(pub), readFileData(priv));
-				
-				myWallets.add(new Wallet(f.getName(), kp));
+				if (priv.exists()) {
+					
+					PrivateKey privKey = deserializePrivateKey(readFileData(priv));
+					
+					if (!pub.exists()) {
+						
+						try {
+							
+							pub.createNewFile();
+							
+							try (FileWriter fw = new FileWriter(pub, false)) {
+								
+								fw.append(base64(generatePublic(privKey).getEncoded()));
+								
+							}
+							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+
+					}
+					
+					KeyPair kp = new KeyPair(deserializePublicKey(readFileData(pub)), privKey);
+					
+					myWallets.add(new Wallet(f.getName(), kp));
+					
+				} else {
+
+					myWallets.add(new Wallet(f.getName(), deserializePublicKey(readFileData(pub))));
+					
+				}
 				
 			}
 			
@@ -454,7 +483,7 @@ public class Monieo {
 		
 		try (FileWriter fw = new FileWriter(pub)) {
 			
-			fw.append(serializeKeyPairPublic(kp));
+			fw.append(base64(kp.getPublic().getEncoded()));
 			
 		} catch (IOException e) {
 			
@@ -465,7 +494,7 @@ public class Monieo {
 		
 		try (FileWriter fw = new FileWriter(priv)) {
 			
-			fw.append(serializeKeyPairPrivate(kp));
+			fw.append(base64(kp.getPrivate().getEncoded()));
 			
 		} catch (IOException e) {
 			
@@ -604,21 +633,9 @@ public class Monieo {
         return null;
     }
     
-    public static String serializeKeyPairPublic(KeyPair k) {
+    public static String base64(byte[] b) {
     	
-    	return Base64.getEncoder().encodeToString(k.getPublic().getEncoded());
-    	
-    }
-    
-    public static String serializeKeyPairPrivate(KeyPair k) {
-    	
-    	return Base64.getEncoder().encodeToString(k.getPrivate().getEncoded());
-    	
-    }
-
-    public static KeyPair deserializeKeyPair(String pub, String priv) {
-    	
-    	return new KeyPair(deserializePublicKey(pub), deserializePrivateKey(priv));
+    	return Base64.getEncoder().encodeToString(b);
     	
     }
     
@@ -655,6 +672,21 @@ public class Monieo {
 		}
     	
     	return null;
+    	
+    }
+    
+    public static PublicKey generatePublic(PrivateKey priv)  {
+    	
+		try {
+			
+			KeyFactory kf = KeyFactory.getInstance("RSA");
+			return kf.generatePublic(new PKCS8EncodedKeySpec(priv.getEncoded()));
+			
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	   	
+	   	return null;
     	
     }
     

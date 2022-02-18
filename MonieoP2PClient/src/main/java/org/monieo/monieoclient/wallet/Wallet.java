@@ -2,10 +2,8 @@ package org.monieo.monieoclient.wallet;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.security.Signature;
-import java.util.Arrays;
-import java.util.Base64;
-
 import org.monieo.monieoclient.Monieo;
 
 public class Wallet {
@@ -14,13 +12,23 @@ public class Wallet {
     private final String address;
     private final KeyPair keyPair;
     
+	public final boolean hasSK;
+    
 	public static final String BASE_58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";  // 0-9 and a-z except 0OIl
 	private static final BigInteger BASE_58_LEN = BigInteger.valueOf(BASE_58.length());
-
+	
     public Wallet(String nick, KeyPair keyPair) {
         this.nickname = nick;
         this.keyPair = keyPair;
-        address = getAddress(Monieo.serializeKeyPairPublic(keyPair));
+        hasSK = true;
+        address = getAddress(Monieo.base64(keyPair.getPublic().getEncoded()));
+    }
+    
+    public Wallet(String nick, PublicKey key) {
+        this.nickname = nick;
+        this.keyPair = new KeyPair(key, null);
+        hasSK = false;
+        address = getAddress(Monieo.base64(keyPair.getPublic().getEncoded()));
     }
     
     public static Wallet newWallet(String nick) {
@@ -57,6 +65,8 @@ public class Wallet {
 	
     public String sign(String msg) {
     	
+    	if (!hasSK) return null;
+    	
     	try {
     		
         	Signature privateSignature = Signature.getInstance("SHA256withRSA");
@@ -65,7 +75,7 @@ public class Wallet {
 
             byte[] signature = privateSignature.sign();
 
-            return Base64.getEncoder().encodeToString(signature);
+            return Monieo.base64(signature);
     		
     	} catch (Exception e) {
     		

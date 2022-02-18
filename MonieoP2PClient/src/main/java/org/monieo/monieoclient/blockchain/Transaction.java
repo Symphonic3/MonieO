@@ -22,6 +22,8 @@ public class Transaction extends AbstractTransaction {
 	
 	public static Transaction createNewTransaction(Wallet fundsOwner, String to, BigDecimal amount, BigDecimal fee) {
 		
+		if (!fundsOwner.hasSK) return null;
+		
 		BigInteger nonce = Monieo.INSTANCE.getHighestBlock().getMetadata().getWalletData(fundsOwner.getAsString()).nonce;
 		
 		//should we use net adjusted time here?
@@ -29,7 +31,9 @@ public class Transaction extends AbstractTransaction {
 		
 		String sig = fundsOwner.sign(td.serialize());
 		
-		return new Transaction(td, Monieo.serializeKeyPairPublic(fundsOwner.getKeyPair()), sig);
+		if (sig == null) return null;
+		
+		return new Transaction(td, Monieo.base64(fundsOwner.getKeyPair().getPublic().getEncoded()), sig);
 		
 	}
 
