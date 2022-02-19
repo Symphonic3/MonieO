@@ -36,6 +36,95 @@ public class Block extends MonieoDataObject{
 		
 	}
 	
+	private File getWorkFile() {
+		
+		return new File(Monieo.INSTANCE.blocksExtraDataFolder.getPath() + "/" + hash() + ".blkd");
+		
+	}
+	
+	public void generateWorkData() {
+		
+		BigDecimal work = null;
+		
+		if (this.equals(Monieo.genesis())) {
+			
+			work = getSingleWork();
+			
+		} else {
+			
+			Block p = getPrevious();
+			
+			if (!p.hasWorkData()) {
+				
+				List<Block> genm = new ArrayList<Block>();
+				genm.add(p);
+				
+				genmloop: while (true) {
+					
+					if (p != null && !p.hasWorkData()) {
+						
+						genm.add(p);
+						
+					} else {
+						
+						for (int i = genm.size(); i-- > 0; ) {
+
+							genm.get(i).generateWorkData();
+							
+						}
+						
+						break genmloop;
+						
+					}
+
+					p = p.getPrevious();
+					
+				}
+				
+			}
+			
+			work = getPrevious().getChainWork().add(getSingleWork());
+			
+		}
+		
+		File f = getWorkFile();
+		
+		try (FileWriter fw = new FileWriter(f, false)) {
+			
+			fw.append(work.toString());
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public BigDecimal getChainWork() {
+		
+		File f = getWorkFile();
+		
+		if (!f.exists()) {
+			
+			generateWorkData();
+			
+		}
+		
+		return new BigDecimal(Monieo.readFileData(f));
+		
+	}
+	
+	public BigDecimal getSingleWork() {
+		
+		return new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(new BigDecimal(header.diff), 100, RoundingMode.HALF_UP);
+		
+	}
+	
+	public boolean hasWorkData() {
+		
+		return getWorkFile().exists();
+		
+	}
+	
 	public Block getPrevious() {
 		
 		return getByHash(header.preHash);
@@ -124,7 +213,7 @@ public class Block extends MonieoDataObject{
 			
 			sum += bz.header.timestamp - blocksToAverage.get(i-1).header.timestamp;
 			
-			sumdiff = sumdiff.add(new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(new BigDecimal(blocksToAverage.get(i-1).header.diff), 100, RoundingMode.HALF_UP));
+			sumdiff = sumdiff.add(blocksToAverage.get(i-1).getSingleWork());
 			
 		}
 		

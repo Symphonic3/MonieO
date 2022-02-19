@@ -44,6 +44,11 @@ public class DefaultMinerImpl implements AbstractMiner{
 	}
 
 	@Override
+	public MiningStatistics getMiningStatistics() {
+		return curr;
+	}
+	
+	@Override
 	public void stop() {
 		stop = true;
 		

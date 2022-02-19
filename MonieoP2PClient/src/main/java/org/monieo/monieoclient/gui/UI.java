@@ -15,6 +15,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.Normalizer.Form;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,10 +46,12 @@ import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.wallet.Wallet;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 
 public class UI {
 	private JFrame frame;
@@ -193,6 +196,15 @@ public class UI {
 						} else {
 							
 							Monieo.INSTANCE.miner.stop();
+							
+							MiningStatistics m = Monieo.INSTANCE.miner.getMiningStatistics();
+							
+							long dur = System.currentTimeMillis() - m.beginTime;
+							
+							BigDecimal hashrate = new BigDecimal(m.hashes).divide(new BigDecimal(dur/1000), 0, RoundingMode.HALF_UP);
+							
+							JOptionPane.showMessageDialog(frame, new JLabel("Session hashrate estimate: " + hashrate.toPlainString() + "h/s"), "Mining session over", 1);
+							
 							text = "Off";
 							
 						}
@@ -223,6 +235,18 @@ public class UI {
 		});
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
+		
+		JButton btnNewButton = null;
+		btnNewButton = new JButton(new FlatSVGIcon("cog.svg"));
+		btnNewButton.putClientProperty("JButton.buttonType", "roundRect");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+		
+		btnNewButton.setBounds(859, 3, 23, 23);
+		frame.getContentPane().add(btnNewButton);
 		
 		lblNewLabel_1 = new JTextField("Address count:");
 		lblNewLabel_1.setEditable(false);
@@ -344,6 +368,7 @@ public class UI {
 		overviewBTN.setBounds(10, 414, 176, 23);
 		overviewBTN.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				list.setSelectedValue(null, false);
 				panel_1.setVisible(true);
                 panel.setVisible(false);
 			    }
@@ -496,17 +521,6 @@ public class UI {
 		JLabel totConnectedNodesDisplay = new JLabel("0");
 		totConnectedNodesDisplay.setBounds(144, 70, 331, 29);
 		panel_1.add(totConnectedNodesDisplay);
-
-		JButton btnNewButton = new JButton("...");
-		btnNewButton.putClientProperty("JButton.buttonType", "roundRect");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-			}
-		});
-		
-		btnNewButton.setBounds(663, 3, 23, 23);
-		panel.add(btnNewButton);
 		
 		JLabel label_5_1 = new JLabel("Pending funds:");
 		label_5_1.setBounds(10, 100, 133, 29);
@@ -540,7 +554,6 @@ public class UI {
 		lblTotalBalancelabel = new JLabel("Total balance:");
 		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
-		
 		
 		invalidWallet = new JPanel();
 		invalidWallet.setBounds(10, 152, 663, 66);

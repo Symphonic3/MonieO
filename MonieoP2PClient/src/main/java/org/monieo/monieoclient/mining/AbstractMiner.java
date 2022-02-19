@@ -11,6 +11,7 @@ public interface AbstractMiner extends Runnable {
 	public void begin(Consumer<MiningStatistics> supervisor);
 	public void stop();
 	public String getMiningName();
+	public MiningStatistics getMiningStatistics();
 	
 	public class MiningStatistics {
 

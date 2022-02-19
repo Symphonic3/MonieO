@@ -7,13 +7,11 @@ public class NetworkPacket {
 		SEND_VER,
 		ACK_VER,
 		REQUEST_BLOCKS_AFTER,
-		REQUEST_SINGLE_BLOCK,
+		REQUEST_SINGLE_BLOCK, //potentially unnessecary
 		REQUEST_NODES,
-		REQUEST_TIME,
 		SEND_TRANSACTION,
 		SEND_BLOCK,
-		SEND_NODES,
-		SEND_TIME
+		SEND_ADDR
 			
 	}
 	

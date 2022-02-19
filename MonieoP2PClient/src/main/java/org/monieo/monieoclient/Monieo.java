@@ -51,7 +51,7 @@ public class Monieo {
 	public static int MAX_INCOMING_CONNECTIONS = 15;
 	
 	public static int CONFIRMATIONS = 5;
-	public static int CONFIRMATIONS_BLOCK_SENSITIVE = 60; //TODO if we get a new block that attempts to extend the blockchain earlier than this point*2, discard it
+	public static int CONFIRMATIONS_BLOCK_SENSITIVE = 60;
 	
 	public static Monieo INSTANCE;
 	
@@ -153,6 +153,7 @@ public class Monieo {
 	File nodesFile;
 	public File walletsFolder; 
 	public File blocksFolder; 
+	public File blocksExtraDataFolder;
 	public File blockMetadataFolder; 
 	
 	public File blkhighest;
@@ -264,6 +265,9 @@ public class Monieo {
         
         blocksFolder = new File(workingFolder.getPath() + "/blocks");
         blocksFolder.mkdir();
+        
+        blocksExtraDataFolder = new File(workingFolder.getPath() + "/blockextra");
+        blocksExtraDataFolder.mkdir();
 		
 		blockMetadataFolder = new File(workingFolder.getPath() + "/blockmeta");
 		blockMetadataFolder.mkdir();
@@ -405,7 +409,7 @@ public class Monieo {
 
 		if (b == null || !b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
 		
-		if (getHighestBlock() != null && b.header.height+(CONFIRMATIONS_BLOCK_SENSITIVE*2) < getHighestBlock().header.height) return;
+		if (getHighestBlock() != null && b.header.height+(CONFIRMATIONS_BLOCK_SENSITIVE*4) < getHighestBlock().header.height) return;
 		
 		String blockname = b.hash();
 		
@@ -430,7 +434,7 @@ public class Monieo {
 			System.out.println("generating metadata " + b.hash());
 			b.generateMetadata();
 			
-			if (getHighestBlock() == null || b.header.height > getHighestBlock().header.height) {
+			if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
 				
 				setHighestBlock(b);
 				if (ui != null) ui.refresh(false); //ui not initialized yet!

@@ -36,6 +36,8 @@ public class Node implements Runnable{
 	
 	private boolean server;
 	
+	public long timeOffset = -1;
+	
 	PrintWriter pw;
 	BufferedReader br;
 	
@@ -373,11 +375,7 @@ public class Node implements Runnable{
 				
 				k = k.substring(0, k.length() - 1);
 				
-				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_NODES, k), null);
-				
-			} else if (nc.cmd == NetworkPacketType.REQUEST_TIME) {
-				
-				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TIME, String.valueOf(System.currentTimeMillis())), null);
+				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k), null);
 				
 			} else if (nc.cmd == NetworkPacketType.SEND_TRANSACTION) {
 
@@ -395,11 +393,7 @@ public class Node implements Runnable{
 				
 				Monieo.INSTANCE.handleBlock(b);
 				
-			} else if (nc.cmd == NetworkPacketType.SEND_NODES) {
-				
-				
-				
-			} else if (nc.cmd == NetworkPacketType.SEND_TIME) {
+			} else if (nc.cmd == NetworkPacketType.SEND_ADDR) {
 				
 				
 				
