@@ -28,7 +28,6 @@ public class Node implements Runnable{
 	public static String TERM = "EOM";
 	
 	public volatile boolean busy = false;
-	public Vector<PacketCommitment> packetCommitments = new Vector<PacketCommitment>();
 	
 	private boolean kill = false;
 	
@@ -94,13 +93,13 @@ public class Node implements Runnable{
 		
 	}
 	
-	public static void propagateAll(NetworkPacket nc, PacketCommitment pc) {
+	public static void propagateAll(NetworkPacket nc) {
 		
 		Monieo.INSTANCE.nodes.forEach(new Consumer<Node>() {
 
 			@Override
 			public void accept(Node t) {
-				t.sendNetworkPacket(nc, pc);
+				t.sendNetworkPacket(nc);
 				
 			}
 			
@@ -114,7 +113,7 @@ public class Node implements Runnable{
 		
 	}
 	
-	public void sendNetworkPacket(NetworkPacket nc, PacketCommitment pc) {
+	public void sendNetworkPacket(NetworkPacket nc) {
 		
 		queueAction(new Consumer<Node>() {
 
@@ -130,10 +129,6 @@ public class Node implements Runnable{
 			}
 			
 		});
-		
-		if (pc == null) return;
-		
-		if (packetCommitments.size() > 0) packetCommitments.insertElementAt(pc, 0); else packetCommitments.add(pc);
 		
 	}
 
@@ -221,28 +216,11 @@ public class Node implements Runnable{
 		System.out.println(nc.data);
 		System.out.println("==END NETWORK COMMAND==");
 		
-		for (int i = 0; i < packetCommitments.size(); i++) {
-			
-			if (packetCommitments.get(i).attemptFillShouldBanNode(nc)) { //disconnects node instead of banning, as this is only indicitive that the node is disconnected, not nessecarily that it is uncooperative
-
-				System.out.println("DC BECAUSE OF COMMITMENT!");
-				disconnect();
-				return true;
-				
-			} else {
-				
-				packetCommitments.remove(i);
-				i--;
-				
-			}
-			
-		}
-		
 		if (nc.cmd == NetworkPacketType.SEND_VER) {
 			
 			if (!localAcknowledgedRemote) {
 				
-				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.ACK_VER, null), null);
+				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.ACK_VER, null));
 				
 				localAcknowledgedRemote = true;
 				
@@ -264,7 +242,7 @@ public class Node implements Runnable{
 				
 				for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
 					
-					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()), null);
+					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
 					
 				}
 				
@@ -283,7 +261,7 @@ public class Node implements Runnable{
 					
 				}
 				
-				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()), null);
+				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()));
 				
 			}
 			
@@ -320,7 +298,7 @@ public class Node implements Runnable{
 				for (String s : hashes) {
 					
 					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
-							Block.getByHash(s).serialize()), null);
+							Block.getByHash(s).serialize()));
 					
 				}
 				
@@ -343,7 +321,7 @@ public class Node implements Runnable{
 						
 						if (b != null && b.validate()) {
 							
-							sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()), null);
+							sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 							break;
 							
 						}
@@ -375,7 +353,7 @@ public class Node implements Runnable{
 				
 				k = k.substring(0, k.length() - 1);
 				
-				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k), null);
+				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k));
 				
 			} else if (nc.cmd == NetworkPacketType.SEND_TRANSACTION) {
 

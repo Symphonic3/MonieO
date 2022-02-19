@@ -175,7 +175,7 @@ public class TxPool {
 		if (size > MAX_TRANSACTION_SIZE) return;
 
 		//completely optional. find a way to reward this with the protocol.
-		Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()), null);
+		Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
 		
 		transactions.add(t);
 		
