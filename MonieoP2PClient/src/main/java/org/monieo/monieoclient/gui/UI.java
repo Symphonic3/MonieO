@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.Normalizer.Form;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
@@ -49,9 +48,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.JTextField;
-import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 
 public class UI {
 	private JFrame frame;
@@ -368,25 +365,36 @@ public class UI {
 		JButton overviewBTN = new JButton("Overview");
 		overviewBTN.setBounds(10, 414, 176, 23);
 		overviewBTN.addActionListener(new ActionListener() {
+			
+			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				list.setSelectedValue(null, false);
 				panel_1.setVisible(true);
                 panel.setVisible(false);
-			    }
+                
+                refresh(false);
+                
+			 }
+			
 		});
 		frame.getContentPane().add(overviewBTN);
 		
 		list = new JList<String>();
 		list.setBounds(10, 11, 188, 429);
 		list.addListSelectionListener(new ListSelectionListener() {
+			
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
+				
 				if (!e.getValueIsAdjusting()) {
 	                panel.setVisible(true);
 	                panel_1.setVisible(false);
 
 					refresh(false);
+					
 				}
+				
 			}
 			
 		});
@@ -552,7 +560,7 @@ public class UI {
 		lblToggleExperimentalMining.setBounds(756, 414, 76, 29);
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
-		lblTotalBalancelabel = new JLabel("Total balance:");
+		lblTotalBalancelabel = new JLabel("Total available balance:");
 		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
 		
@@ -582,15 +590,6 @@ public class UI {
 	
 	public void refresh(boolean updlist) {
 
-		BigDecimal tot;
-		for (String s : walletNicks) {
-			for (PendingFunds p : (Monieo.INSTANCE.getHighestBlock().getMetadata().getWalletData(Monieo.INSTANCE.getWalletByNick(s).getAsString()).pf)) {
-				if (p.spendable()) {
-					//tot.add(p.) GOG
-				}
-			}
-		}
-		
     	if (updlist) {
     		
     		walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
@@ -648,19 +647,24 @@ public class UI {
 
     	}
     	
-		BigDecimal tot = BigDecimal.ZERO.setScale(8);
+    	BigDecimal unspendable = BigDecimal.ZERO.setScale(8);
+		BigDecimal spendable = BigDecimal.ZERO.setScale(8);
+    	BigDecimal total = BigDecimal.ZERO.setScale(8);
 		
 		for (String s : walletNicks) {
 			
 			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
 			
-			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf).setScale(8);
-			
-			tot = tot.add(n);
+			List<PendingFunds> pf = m.getWalletData(w.getAsString()).pf;
+
+			spendable = spendable.add(BlockMetadata.getSpendableBalance(pf).setScale(8));
+			unspendable = unspendable.add(BlockMetadata.getUnspendableBalance(pf).setScale(8));
 			
 		}
 		
-		lblTotalBalancelabel.setText("Total balance: " + tot.toPlainString());
+		total = spendable.add(unspendable);
+		
+		lblTotalBalancelabel.setText("Total available balance: " + spendable.toPlainString());
 		
 	}
 	

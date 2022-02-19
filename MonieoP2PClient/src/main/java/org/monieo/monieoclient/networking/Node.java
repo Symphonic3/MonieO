@@ -35,7 +35,8 @@ public class Node implements Runnable{
 	
 	private boolean server;
 	
-	public long timeOffset = -1;
+	private final long timeConnected;
+	private long timeRecieved = Long.MIN_VALUE;
 	
 	PrintWriter pw;
 	BufferedReader br;
@@ -45,7 +46,21 @@ public class Node implements Runnable{
 		this.socket = s;
 		this.server = server;
 		
+		this.timeConnected = System.currentTimeMillis();
+		
 		Monieo.INSTANCE.attemptRememberNode(getAdress());
+		
+	}
+	
+	public long getTimeOffset() {
+		
+		long of = timeRecieved-timeConnected;
+		
+		if (Math.abs(of) > 3600000) { //1 hour
+			
+			return 0;
+			
+		} else return of;
 		
 	}
 
@@ -216,170 +231,178 @@ public class Node implements Runnable{
 		System.out.println(nc.data);
 		System.out.println("==END NETWORK COMMAND==");
 		
-		if (nc.cmd == NetworkPacketType.SEND_VER) {
+		try {
 			
-			if (!localAcknowledgedRemote) {
+			if (nc.cmd == NetworkPacketType.SEND_VER) {
 				
-				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.ACK_VER, null));
-				
-				localAcknowledgedRemote = true;
-				
-			} else return false;
-			
-		} else if (nc.cmd == NetworkPacketType.ACK_VER) {
-			
-			if (!remoteAcknowledgedLocal) {
-				
-				remoteAcknowledgedLocal = true;
-				
-			} else return false;
-			
-		} 
-		
-		if (nc.cmd == NetworkPacketType.ACK_VER || nc.cmd == NetworkPacketType.SEND_VER) {
-			
-			if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
-				
-				for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
+				if (!localAcknowledgedRemote) {
 					
-					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
+					timeRecieved = Long.valueOf(nc.data);
 					
-				}
-				
-				Block b = Monieo.INSTANCE.getHighestBlock();
-				Block g = Monieo.genesis();
-				
-				for (int i = 0; i < Monieo.CONFIRMATIONS_BLOCK_SENSITIVE*2; i++) {
+					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.ACK_VER, null));
 					
-					if (b.equals(g)) {
+					localAcknowledgedRemote = true;
+					
+				} else return false;
+				
+			} else if (nc.cmd == NetworkPacketType.ACK_VER) {
+				
+				if (!remoteAcknowledgedLocal) {
+					
+					remoteAcknowledgedLocal = true;
+					
+				} else return false;
+				
+			} 
+			
+			if (nc.cmd == NetworkPacketType.ACK_VER || nc.cmd == NetworkPacketType.SEND_VER) {
+				
+				if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
+					
+					for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
 						
-						break;
+						sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
 						
 					}
 					
-					b = b.getPrevious();
+					Block b = Monieo.INSTANCE.getHighestBlock();
+					Block g = Monieo.genesis();
 					
-				}
-				
-				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()));
-				
-			}
-			
-		} else if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
-			
-			if (nc.cmd == NetworkPacketType.REQUEST_BLOCKS_AFTER) {
-				
-				String wantedHash = nc.data;
-				
-				List<String> hashes = new ArrayList<String>();
-				
-				Block b = Monieo.INSTANCE.getHighestBlock();
-				Block g = Monieo.genesis();
-				
-				while(true) {
-					
-					if (!b.hash().equals(wantedHash)) {
+					for (int i = 0; i < Monieo.CONFIRMATIONS_BLOCK_SENSITIVE*2; i++) {
 						
-						hashes.add(b.hash());
-						
-					} else break;
-					
-					if (b.equals(g)) {
-						
-						//don't have block, sorry
-						return true;
-						
-					}
-					
-					b = b.getPrevious();
-					
-				}
-				
-				for (String s : hashes) {
-					
-					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
-							Block.getByHash(s).serialize()));
-					
-				}
-				
-			} else if (nc.cmd == NetworkPacketType.REQUEST_SINGLE_BLOCK) {
-				
-				//the previous method of doing this was unsafe.
-				//to avoid issues, we are using the algorithm for next blocks to ensure
-				//file path injection is impossible
-				//obviously there are better ways to do this, but this netcommand
-				//might be removed anyways.
-				
-				String wantedHash = nc.data;
-				
-				Block b = Monieo.INSTANCE.getHighestBlock();
-				Block g = Monieo.genesis();
-				
-				while(true) {
-					
-					if (b.hash().equals(wantedHash)) {
-						
-						if (b != null && b.validate()) {
+						if (b.equals(g)) {
 							
-							sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 							break;
 							
 						}
 						
-					}
-					
-					if (b.equals(g)) {
-						
-						//don't have block, sorry
-						return true;
+						b = b.getPrevious();
 						
 					}
 					
-					b = b.getPrevious();
-					
-				}
-
-			} else if (nc.cmd == NetworkPacketType.REQUEST_NODES) {
-				
-				List<String> s = Monieo.INSTANCE.getValidNodesRightNow();
-				
-				String k = "";
-				
-				for (String a : s) {
-					
-					k = a + " ";
+					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()));
 					
 				}
 				
-				k = k.substring(0, k.length() - 1);
+			} else if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
 				
-				sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k));
-				
-			} else if (nc.cmd == NetworkPacketType.SEND_TRANSACTION) {
+				if (nc.cmd == NetworkPacketType.REQUEST_BLOCKS_AFTER) {
+					
+					String wantedHash = nc.data;
+					
+					List<String> hashes = new ArrayList<String>();
+					
+					Block b = Monieo.INSTANCE.getHighestBlock();
+					Block g = Monieo.genesis();
+					
+					while(true) {
+						
+						if (!b.hash().equals(wantedHash)) {
+							
+							hashes.add(b.hash());
+							
+						} else break;
+						
+						if (b.equals(g)) {
+							
+							//don't have block, sorry
+							return true;
+							
+						}
+						
+						b = b.getPrevious();
+						
+					}
+					
+					for (String s : hashes) {
+						
+						sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
+								Block.getByHash(s).serialize()));
+						
+					}
+					
+				} else if (nc.cmd == NetworkPacketType.REQUEST_SINGLE_BLOCK) {
+					
+					//the previous method of doing this was unsafe.
+					//to avoid issues, we are using the algorithm for next blocks to ensure
+					//file path injection is impossible
+					//obviously there are better ways to do this, but this netcommand
+					//might be removed anyways.
+					
+					String wantedHash = nc.data;
+					
+					Block b = Monieo.INSTANCE.getHighestBlock();
+					Block g = Monieo.genesis();
+					
+					while(true) {
+						
+						if (b.hash().equals(wantedHash)) {
+							
+							if (b != null && b.validate()) {
+								
+								sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
+								break;
+								
+							}
+							
+						}
+						
+						if (b.equals(g)) {
+							
+							//don't have block, sorry
+							return true;
+							
+						}
+						
+						b = b.getPrevious();
+						
+					}
 
-				Transaction t = Transaction.deserialize(nc.data);
-				
-				if (t == null || !t.validate()) return false;
-				
-				Monieo.INSTANCE.txp.add(t);
-				
-			} else if (nc.cmd == NetworkPacketType.SEND_BLOCK) {
-				
-				Block b = Block.deserialize(nc.data);
-				
-				if (b == null || !b.validate()) return false;
-				
-				Monieo.INSTANCE.handleBlock(b);
-				
-			} else if (nc.cmd == NetworkPacketType.SEND_ADDR) {
-				
-				
+				} else if (nc.cmd == NetworkPacketType.REQUEST_NODES) {
+					
+					List<String> s = Monieo.INSTANCE.getValidNodesRightNow();
+					
+					String k = "";
+					
+					for (String a : s) {
+						
+						k = a + " ";
+						
+					}
+					
+					k = k.substring(0, k.length() - 1);
+					
+					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k));
+					
+				} else if (nc.cmd == NetworkPacketType.SEND_TRANSACTION) {
+
+					Transaction t = Transaction.deserialize(nc.data);
+					
+					if (t == null || !t.validate()) return false;
+					
+					Monieo.INSTANCE.txp.add(t);
+					
+				} else if (nc.cmd == NetworkPacketType.SEND_BLOCK) {
+					
+					Block b = Block.deserialize(nc.data);
+					
+					if (b == null || !b.validate()) return false;
+					
+					Monieo.INSTANCE.handleBlock(b);
+					
+				} else if (nc.cmd == NetworkPacketType.SEND_ADDR) {
+					
+					
+					
+				}
 				
 			}
 			
-			//TODO do this here this one
-			
+		} catch (Exception e) {
+			return false;
 		}
+			
+			//TODO do this here this one
 		
 		return true;
 		

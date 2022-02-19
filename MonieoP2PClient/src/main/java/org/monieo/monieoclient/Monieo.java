@@ -20,7 +20,6 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 import java.security.*;
 import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -28,7 +27,6 @@ import java.security.spec.X509EncodedKeySpec;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
-import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.gui.UI;
 import org.monieo.monieoclient.mining.AbstractMiner;
 import org.monieo.monieoclient.mining.DefaultMinerImpl;
@@ -399,9 +397,25 @@ public class Monieo {
 
 	public long getNetAdjustedTime() {
 		
-		//TODO IMPORTANT! MAKE THIS WORK!
+		long o = 0;
 		
-		return System.currentTimeMillis();
+		if (nodes.size() >= 5) {
+			
+			for (Node n : nodes) {
+				
+				o += n.getTimeOffset();
+				
+			}
+			
+			if (Math.abs(o) > 3600000) { //1 hour
+				
+				o = 3600000;
+				
+			}
+			
+			return System.currentTimeMillis()+o;
+			
+		} else return System.currentTimeMillis();
 		
 	}
 	
