@@ -84,6 +84,7 @@ public class UI {
 	JLabel lblTotalBalancelabel;
 	JButton TgBtnTOGGLEMINING;
 	JLabel totAvailableFundsDisplay;
+	JLabel totPendingFundsDisplay;
 	
 	JPanel invalidWallet;
 	
@@ -502,7 +503,7 @@ public class UI {
 		lblNewLabel_2.setBounds(10, 10, 133, 29);
 		panel_1.add(lblNewLabel_2);
 		
-		JLabel totPendingFundsDisplay = new JLabel("0");
+		totPendingFundsDisplay = new JLabel("0");
 		totPendingFundsDisplay.setBounds(144, 10, 331, 29);
 		panel_1.add(totPendingFundsDisplay);
 		
@@ -581,6 +582,15 @@ public class UI {
 	
 	public void refresh(boolean updlist) {
 
+		BigDecimal tot;
+		for (String s : walletNicks) {
+			for (PendingFunds p : (Monieo.INSTANCE.getHighestBlock().getMetadata().getWalletData(Monieo.INSTANCE.getWalletByNick(s).getAsString()).pf)) {
+				if (p.spendable()) {
+					//tot.add(p.)
+				}
+			}
+		}
+		
     	if (updlist) {
     		
     		walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
