@@ -586,7 +586,7 @@ public class UI {
 		for (String s : walletNicks) {
 			for (PendingFunds p : (Monieo.INSTANCE.getHighestBlock().getMetadata().getWalletData(Monieo.INSTANCE.getWalletByNick(s).getAsString()).pf)) {
 				if (p.spendable()) {
-					//tot.add(p.)
+					//tot.add(p.) GOG
 				}
 			}
 		}
