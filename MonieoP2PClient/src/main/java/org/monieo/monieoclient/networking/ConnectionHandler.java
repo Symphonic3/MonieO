@@ -78,6 +78,8 @@ public class ConnectionHandler implements Runnable{
 		
 		Monieo.INSTANCE.nodes.add(n);
 		
+		Monieo.INSTANCE.ui.totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
+		
 		new Thread(n).start();
 		
 	}

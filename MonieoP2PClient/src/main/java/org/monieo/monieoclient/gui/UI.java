@@ -44,6 +44,7 @@ import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.wallet.Wallet;
 
+import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
@@ -84,7 +85,7 @@ public class UI {
 	JLabel totAvailableFundsDisplay;
 	JLabel totPendingFundsDisplay;
 	JLabel totFundsDisplay;
-	JLabel totConnectedNodesDisplay;
+	public JLabel totConnectedNodesDisplay;
 	
 	JPanel invalidWallet;
 	
@@ -239,6 +240,8 @@ public class UI {
 		
 		JButton btnNewButton = null;
 		btnNewButton = new JButton(new FlatSVGIcon("cog.svg"));
+		btnNewButton.setHorizontalAlignment(SwingConstants.CENTER);
+		btnNewButton.setVerticalAlignment(SwingConstants.CENTER);
 		btnNewButton.putClientProperty("JButton.buttonType", "roundRect");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

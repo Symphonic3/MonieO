@@ -145,7 +145,7 @@ public class Monieo {
 
 	}
 	
-	UI ui;
+	public UI ui;
 	
 	File workingFolder;
 	File nodesFile;
