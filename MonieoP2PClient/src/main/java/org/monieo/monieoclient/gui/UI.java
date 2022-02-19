@@ -80,8 +80,11 @@ public class UI {
 	JLabel lblToggleExperimentalMining;
 	JLabel lblTotalBalancelabel;
 	JButton TgBtnTOGGLEMINING;
+	
 	JLabel totAvailableFundsDisplay;
 	JLabel totPendingFundsDisplay;
+	JLabel totFundsDisplay;
+	JLabel totConnectedNodesDisplay;
 	
 	JPanel invalidWallet;
 	
@@ -257,7 +260,7 @@ public class UI {
 		panel.setBounds(196, 0, 689, 400);
 		frame.getContentPane().add(panel);
 		
-		addressLabel = new JTextField("(address)");
+		addressLabel = new JTextField("0");
 		addressLabel.setEditable(false);
 		addressLabel.setOpaque(false); //this is the same as a JLabel
 		addressLabel.setBorder(null); //remove the border
@@ -301,14 +304,14 @@ public class UI {
 		
 		panel.add(addressLabel);
 		
-		nickLabel = new JTextField("(address nickname)");
+		nickLabel = new JTextField("0");
 		nickLabel.setEditable(false);
 		nickLabel.setOpaque(false); //this is the same as a JLabel
 		nickLabel.setBorder(null); //remove the border
 		nickLabel.setBounds(144, 40, 331, 29);
 		panel.add(nickLabel);
 		
-		INDIVbalanceLabel = new JTextField("(address balance)");
+		INDIVbalanceLabel = new JTextField("0");
 		INDIVbalanceLabel.setEditable(false);
 		INDIVbalanceLabel.setOpaque(false); //this is the same as a JLabel
 		INDIVbalanceLabel.setBorder(null); //remove the border
@@ -507,28 +510,36 @@ public class UI {
 		textField_2.setBounds(84, 145, 491, 20);
 		panelTransaction.add(textField_2);
 		
-		JLabel lblNewLabel_2 = new JLabel("Total pending funds:");
-		lblNewLabel_2.setBounds(10, 10, 133, 29);
-		panel_1.add(lblNewLabel_2);
-		
-		totPendingFundsDisplay = new JLabel("0");
-		totPendingFundsDisplay.setBounds(144, 10, 331, 29);
-		panel_1.add(totPendingFundsDisplay);
-		
-		JLabel lblTotalAvailableFunds = new JLabel("Total available funds:");
-		lblTotalAvailableFunds.setBounds(10, 40, 133, 29);
+		JLabel lblTotalAvailableFunds = new JLabel("Total spendable funds:");
+		lblTotalAvailableFunds.setBounds(10, 10, 133, 29);
 		panel_1.add(lblTotalAvailableFunds);
 		
 		totAvailableFundsDisplay = new JLabel("0");
-		totAvailableFundsDisplay.setBounds(144, 40, 331, 29);
+		totAvailableFundsDisplay.setBounds(144, 10, 331, 29);
 		panel_1.add(totAvailableFundsDisplay);
 		
+		JLabel lblNewLabel_2 = new JLabel("Total pending funds:");
+		lblNewLabel_2.setBounds(10, 40, 133, 29);
+		panel_1.add(lblNewLabel_2);
+		
+		totPendingFundsDisplay = new JLabel("0");
+		totPendingFundsDisplay.setBounds(144, 40, 331, 29);
+		panel_1.add(totPendingFundsDisplay);
+		
+		JLabel lblTotalFunds = new JLabel("Total funds:");
+		lblTotalFunds.setBounds(10, 70, 133, 29);
+		panel_1.add(lblTotalFunds);
+		
+		totFundsDisplay = new JLabel("0");
+		totFundsDisplay.setBounds(144, 70, 331, 29);
+		panel_1.add(totFundsDisplay);
+		
 		JLabel lblTotalConnectedNodes = new JLabel("Total connected nodes:");
-		lblTotalConnectedNodes.setBounds(10, 70, 133, 29);
+		lblTotalConnectedNodes.setBounds(10, 100, 133, 29);
 		panel_1.add(lblTotalConnectedNodes);
 		
-		JLabel totConnectedNodesDisplay = new JLabel("0");
-		totConnectedNodesDisplay.setBounds(144, 70, 331, 29);
+		totConnectedNodesDisplay = new JLabel("0");
+		totConnectedNodesDisplay.setBounds(144, 100, 331, 29);
 		panel_1.add(totConnectedNodesDisplay);
 		
 		JLabel label_5_1 = new JLabel("Pending funds:");
@@ -560,7 +571,7 @@ public class UI {
 		lblToggleExperimentalMining.setBounds(756, 414, 76, 29);
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
-		lblTotalBalancelabel = new JLabel("Total available balance:");
+		lblTotalBalancelabel = new JLabel("Total spendable balance:");
 		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
 		
@@ -664,7 +675,10 @@ public class UI {
 		
 		total = spendable.add(unspendable);
 		
-		lblTotalBalancelabel.setText("Total available balance: " + spendable.toPlainString());
+		lblTotalBalancelabel.setText("Total spendable balance: " + spendable.toPlainString());
+		totAvailableFundsDisplay.setText(spendable.toPlainString());
+		totPendingFundsDisplay.setText(unspendable.toPlainString());
+		totFundsDisplay.setText(total.toPlainString());
 		
 	}
 	
