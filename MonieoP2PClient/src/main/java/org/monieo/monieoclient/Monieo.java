@@ -326,7 +326,7 @@ public class Monieo {
 					
 					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
 
-					n.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()), null);
+					n.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()));
 					
 				}
 				
@@ -409,6 +409,7 @@ public class Monieo {
 
 		if (b == null || !b.validate()) throw new IllegalStateException("Attempted to handle an invalid block!");
 		
+		//TODO this based on work
 		if (getHighestBlock() != null && b.header.height+(CONFIRMATIONS_BLOCK_SENSITIVE*4) < getHighestBlock().header.height) return;
 		
 		String blockname = b.hash();
@@ -441,7 +442,7 @@ public class Monieo {
 				
 			}
 			
-			Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()), null);
+			Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 			
 		}
 		
