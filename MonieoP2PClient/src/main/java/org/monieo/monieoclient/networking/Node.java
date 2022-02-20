@@ -392,7 +392,7 @@ public class Node implements Runnable{
 					
 				} else if (nc.cmd == NetworkPacketType.SEND_ADDR) {
 					
-					
+					//TODO send_addr I/O
 					
 				}
 				
@@ -401,9 +401,7 @@ public class Node implements Runnable{
 		} catch (Exception e) {
 			return false;
 		}
-			
-			//TODO do this here this one
-		
+
 		return true;
 		
 	}
