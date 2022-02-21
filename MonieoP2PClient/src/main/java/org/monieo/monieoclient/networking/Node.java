@@ -23,7 +23,7 @@ public class Node implements Runnable{
 	
 	public boolean remoteAcknowledgedLocal = false;
 	public boolean localAcknowledgedRemote = false;
-	public static long MIN_RESPONSE_TIME = 15000;
+	public static long MIN_RESPONSE_TIME = 10000; //10 seconds
 	
 	public static String TERM = "EOM";
 	

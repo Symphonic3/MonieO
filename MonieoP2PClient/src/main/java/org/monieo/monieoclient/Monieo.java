@@ -45,8 +45,8 @@ public class Monieo {
 	public static final String PROTOCOL_VERSION = "1.0";
 	public static double VERSION;
 	
-	public static int MAX_OUTGOING_CONNECTIONS = 15;
-	public static int MAX_INCOMING_CONNECTIONS = 15;
+	public static int MAX_OUTGOING_CONNECTIONS = 10;
+	public static int MAX_INCOMING_CONNECTIONS = 100;
 	
 	public static int CONFIRMATIONS = 5;
 	public static int CONFIRMATIONS_BLOCK_SENSITIVE = 60;

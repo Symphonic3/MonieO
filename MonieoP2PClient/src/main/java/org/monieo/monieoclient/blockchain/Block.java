@@ -296,7 +296,7 @@ public class Block extends MonieoDataObject{
 
 		if (cb != 1) return false;
 
-		if (serialize().getBytes().length > 1024*102) return false;
+		if (serialize().getBytes().length > 1024*256) return false;
 
 		return true;
 		
