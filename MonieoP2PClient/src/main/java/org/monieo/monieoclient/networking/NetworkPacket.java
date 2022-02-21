@@ -1,5 +1,11 @@
 package org.monieo.monieoclient.networking;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.blockchain.Block;
+
 public class NetworkPacket {
 	
 	public enum NetworkPacketType {
@@ -67,6 +73,38 @@ public class NetworkPacket {
 			
 		}
 		
+	}
+	
+	public static NetworkPacket generateSyncPacket() {
+		
+		int step = 10;
+		
+		List<String> hashes = new ArrayList<String>();
+		
+		Block b = Monieo.INSTANCE.getHighestBlock();
+		
+		outer: while (true) {
+			
+			for (int i = 0; i < step; i++) {
+				
+				b = b.getPrevious();
+				if (b == null) {
+					
+					hashes.add(Monieo.genesis().hash());
+					break outer;
+					
+				}
+				
+			}
+			
+			step *= 2;
+			
+			hashes.add(b.hash());
+			
+		}
+		
+		return new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, String.join(" ", hashes));
+
 	}
 
 }

@@ -265,22 +265,7 @@ public class Node implements Runnable{
 						
 					}
 					
-					Block b = Monieo.INSTANCE.getHighestBlock();
-					Block g = Monieo.genesis();
-					
-					for (int i = 0; i < Monieo.CONFIRMATIONS_BLOCK_SENSITIVE*2; i++) {
-						
-						if (b.equals(g)) {
-							
-							break;
-							
-						}
-						
-						b = b.getPrevious();
-						
-					}
-					
-					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()));
+					sendNetworkPacket(NetworkPacket.generateSyncPacket());
 					
 				}
 				
@@ -288,7 +273,9 @@ public class Node implements Runnable{
 				
 				if (nc.cmd == NetworkPacketType.REQUEST_BLOCKS_AFTER) {
 					
-					String wantedHash = nc.data;
+					String[] wantedHashP = nc.data.split(" ");
+					
+					int i = 0;
 					
 					List<String> hashes = new ArrayList<String>();
 					
@@ -297,16 +284,22 @@ public class Node implements Runnable{
 					
 					while(true) {
 						
-						if (!b.hash().equals(wantedHash)) {
+						if (!b.hash().equals(wantedHashP[i])) {
 							
 							hashes.add(b.hash());
 							
 						} else break;
 						
 						if (b.equals(g)) {
-							
-							//don't have block, sorry
-							return true;
+														
+							if (wantedHashP.length != i) {
+								
+								hashes.clear();
+								i++;
+								b = Monieo.INSTANCE.getHighestBlock();
+								continue;
+								
+							} else break;
 							
 						}
 						

@@ -234,17 +234,17 @@ public class Block extends MonieoDataObject{
 
 		if (this.equals(Monieo.genesis())) return true;
 
+		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
+		
 		if (transactions.length == 0) return false;
 
 		if (!merkle(transactions).equals(header.merkleRoot)) return false;
 
 		if (header == null) return false;
-
+		
 		Block prev = getPrevious();
 
 		if (prev == null) return false;
-
-		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
 
 		if (header.height != prev.header.height+1) return false;
 
