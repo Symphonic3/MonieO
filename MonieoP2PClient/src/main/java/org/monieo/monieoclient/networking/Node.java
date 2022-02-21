@@ -41,12 +41,15 @@ public class Node implements Runnable{
 	PrintWriter pw;
 	BufferedReader br;
 	
+	public long lastValidPacketTime;
+	
 	public Node(Socket s, boolean server) {
 		
 		this.socket = s;
 		this.server = server;
 		
 		this.timeConnected = System.currentTimeMillis();
+		lastValidPacketTime = timeConnected;
 		
 		Monieo.INSTANCE.attemptRememberNode(getAdress());
 		
@@ -204,8 +207,7 @@ public class Node implements Runnable{
 					
 				} else {
 					
-					//packet success!
-					//TODO implement timer keepalive thing
+					lastValidPacketTime = System.currentTimeMillis();
 					
 				}
 				

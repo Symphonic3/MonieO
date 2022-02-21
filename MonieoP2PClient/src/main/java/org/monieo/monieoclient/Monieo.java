@@ -318,11 +318,24 @@ public class Monieo {
 					
 				}
 				
-				for (Node n : nodes) {
+				for (int i = 0; i < nodes.size(); i++) {
 
+					Node n = nodes.get(i);
+					
+					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME) {
+						
+						n.disconnect();
+						i--;
+						continue;
+						
+					}
+					
 					if (!n.isServer()) amntns++;
 					
 					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
+					
+					//functions as a keepalive, for now
+					n.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()));
 					
 				}
 				
