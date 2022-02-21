@@ -339,28 +339,31 @@ public class Monieo {
 					
 				}
 				
-				if (amntns < MAX_OUTGOING_CONNECTIONS) {
-					
-					List<String> rn = getValidNodesRightNow();
+				List<String> rn = getValidNodesRightNow();
+				
+				int ind = 0;
 
-					for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
-						
-						if (rn.size() <= i) return;
+				for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
+					
+					whilea: while (rn.size() < ind) {
 						
 						for (int k = 0; k < nodes.size(); k++) {
 							
 							Node n = nodes.get(k);
 							
-							if (n.getAdress().equalsIgnoreCase(rn.get(i))) {
+							if (n.getAdress().equalsIgnoreCase(rn.get(ind))) {
 								
-								return;
+								ind++;
+								continue whilea;
 								
 							}
 							
 						}
 						
 						System.out.println("attempting to connect to a node!");
-						ch.connect(rn.get(i));
+						ch.connect(rn.get(ind));
+						ind++;
+						break whilea;
 						
 					}
 					
