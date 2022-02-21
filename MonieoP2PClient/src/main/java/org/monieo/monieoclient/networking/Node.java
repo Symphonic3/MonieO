@@ -51,8 +51,6 @@ public class Node implements Runnable{
 		this.timeConnected = System.currentTimeMillis();
 		lastValidPacketTime = timeConnected;
 		
-		Monieo.INSTANCE.attemptRememberNode(getAdress());
-		
 	}
 	
 	public long getTimeOffset() {
@@ -261,6 +259,8 @@ public class Node implements Runnable{
 			if (nc.cmd == NetworkPacketType.ACK_VER || nc.cmd == NetworkPacketType.SEND_VER) {
 				
 				if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
+					
+					Monieo.INSTANCE.attemptRememberNode(getAdress());
 					
 					for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
 						
