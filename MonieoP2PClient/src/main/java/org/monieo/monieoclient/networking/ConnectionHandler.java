@@ -26,9 +26,19 @@ public class ConnectionHandler implements Runnable{
 		while (true) {
 			
 			try {
+				
+				if (Monieo.INSTANCE.nodes.size() >= Monieo.MAX_CONNECTIONS) continue;
+				
 				Socket clientSocket = serverSocket.accept();
 				
 				String inet = clientSocket.getInetAddress().getHostAddress();
+				
+				if (!Monieo.INSTANCE.getValidNodesRightNow().contains(inet)) {
+					
+					clientSocket.close();
+					continue;
+					
+				}
 				
 				for (int k = 0; k < Monieo.INSTANCE.nodes.size(); k++) {
 					

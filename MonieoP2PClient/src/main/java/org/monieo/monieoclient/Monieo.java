@@ -46,7 +46,7 @@ public class Monieo {
 	public static double VERSION;
 	
 	public static int MAX_OUTGOING_CONNECTIONS = 10;
-	public static int MAX_INCOMING_CONNECTIONS = 100;
+	public static int MAX_CONNECTIONS = 110;
 	
 	public static int CONFIRMATIONS = 5;
 	public static int CONFIRMATIONS_BLOCK_SENSITIVE = 60;
