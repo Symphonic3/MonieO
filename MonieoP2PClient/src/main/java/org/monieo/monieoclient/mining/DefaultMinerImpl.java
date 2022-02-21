@@ -88,6 +88,23 @@ public class DefaultMinerImpl implements AbstractMiner{
 			curr.blockTarget = diff;
 			
 			long nettime = Monieo.INSTANCE.getNetAdjustedTime();
+			
+			long btoavtime = 0;
+			int divisor = 0;
+			Block d = h;
+			
+			while (d != null) {
+				
+				btoavtime += d.header.timestamp;
+				divisor++;
+				
+				if (divisor == 6) break;
+				
+				d = d.getPrevious();
+				
+			}
+			
+			if ((btoavtime/divisor) >= nettime) nettime = (btoavtime/divisor)+1;
 
 			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*128, h); //128 is completely arbitrary. This should be optimized later.
 			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick("MININGWALLET").getAsString(), Block.getMaxCoinbase(hei));

@@ -252,7 +252,22 @@ public class Block extends MonieoDataObject{
 
 		if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
 
-		if (prev.header.timestamp >= header.timestamp) return false;
+		long btoavtime = 0;
+		int divisor = 0;
+		Block d = prev;
+		
+		while (d != null) {
+			
+			btoavtime += d.header.timestamp;
+			divisor++;
+			
+			if (divisor == 6) break;
+			
+			d = d.getPrevious();
+			
+		}
+		
+		if ((btoavtime/divisor) >= header.timestamp) return false;
 
 		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
 		
