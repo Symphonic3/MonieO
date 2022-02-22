@@ -14,42 +14,42 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 public class MessageWithLink extends JEditorPane {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public MessageWithLink(String htmlBody) {
-        super("text/html", "<html><body style=\"" + getStyle() + "\">" + htmlBody + "</body></html>");
-        addHyperlinkListener(new HyperlinkListener() {
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-                    try {
+	public MessageWithLink(String htmlBody) {
+		super("text/html", "<html><body style=\"" + getStyle() + "\">" + htmlBody + "</body></html>");
+		addHyperlinkListener(new HyperlinkListener() {
+			public void hyperlinkUpdate(HyperlinkEvent e) {
+				if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+					try {
 						java.awt.Desktop.getDesktop().browse(e.getURL().toURI());
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					} catch (URISyntaxException e1) {
 						e1.printStackTrace();
 					}
-                    
-                    JDialog topFrame = (JDialog) SwingUtilities.getWindowAncestor(MessageWithLink.this.getRootPane());
-                    topFrame.dispatchEvent(new WindowEvent(topFrame, WindowEvent.WINDOW_CLOSING));
+					
+					JDialog topFrame = (JDialog) SwingUtilities.getWindowAncestor(MessageWithLink.this.getRootPane());
+					topFrame.dispatchEvent(new WindowEvent(topFrame, WindowEvent.WINDOW_CLOSING));
 
-                }
-            }
-        });
-        setEditable(false);
-        setBorder(null);
-    }
+				}
+			}
+		});
+		setEditable(false);
+		setBorder(null);
+	}
 
-    static StringBuffer getStyle() {
-        // for copying style
-        JLabel label = new JLabel();
-        Font font = label.getFont();
-        Color color = label.getBackground();
+	static StringBuffer getStyle() {
+		// for copying style
+		JLabel label = new JLabel();
+		Font font = label.getFont();
+		Color color = label.getBackground();
 
-        // create some css from the label's font
-        StringBuffer style = new StringBuffer("font-family:" + font.getFamily() + ";");
-        style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
-        style.append("font-size:" + font.getSize() + "pt;");
-        style.append("background-color: rgb("+color.getRed()+","+color.getGreen()+","+color.getBlue()+");");
-        return style;
-    }
+		// create some css from the label's font
+		StringBuffer style = new StringBuffer("font-family:" + font.getFamily() + ";");
+		style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
+		style.append("font-size:" + font.getSize() + "pt;");
+		style.append("background-color: rgb("+color.getRed()+","+color.getGreen()+","+color.getBlue()+");");
+		return style;
+	}
 }

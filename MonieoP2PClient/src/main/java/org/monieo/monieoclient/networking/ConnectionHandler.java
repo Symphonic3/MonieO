@@ -17,7 +17,7 @@ public class ConnectionHandler implements Runnable{
 	@Override
 	public void run() {
 		
-        try {
+		try {
 			serverSocket = new ServerSocket(Monieo.PORT);
 		} catch (IOException e1) {
 			e1.printStackTrace();

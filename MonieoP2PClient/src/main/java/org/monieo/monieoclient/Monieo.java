@@ -90,9 +90,9 @@ public class Monieo {
 		
 		ssg.setComposite(AlphaComposite.Clear);
 		ssg.fillRect(30,310,210,20);
-        ssg.setPaintMode();
-        ssg.setColor(Color.BLACK);
-        ssg.setFont(new Font("Dialog", Font.PLAIN, 15));
+		ssg.setPaintMode();
+		ssg.setColor(Color.BLACK);
+		ssg.setFont(new Font("Dialog", Font.PLAIN, 15));
 		ssg.drawString("v" + String.valueOf(VERSION), 30, 310);
 		
 		ss.update();
@@ -214,12 +214,12 @@ public class Monieo {
 
 		if (OS.contains("WIN"))
 		{
-		    workingDirectory = System.getenv("AppData");
+			workingDirectory = System.getenv("AppData");
 		}
 		else
 		{
-		    workingDirectory = System.getProperty("user.home");
-		    workingDirectory += "/Library/Application Support";
+			workingDirectory = System.getProperty("user.home");
+			workingDirectory += "/Library/Application Support";
 		}
 		
 		workingDirectory += "/MonieO";
@@ -294,12 +294,12 @@ public class Monieo {
 		}
 		
 		miner = new DefaultMinerImpl();
-        
-        blocksFolder = new File(workingFolder.getPath() + "/blocks");
-        blocksFolder.mkdir();
-        
-        blocksExtraDataFolder = new File(workingFolder.getPath() + "/blockextra");
-        blocksExtraDataFolder.mkdir();
+		
+		blocksFolder = new File(workingFolder.getPath() + "/blocks");
+		blocksFolder.mkdir();
+		
+		blocksExtraDataFolder = new File(workingFolder.getPath() + "/blockextra");
+		blocksExtraDataFolder.mkdir();
 		
 		blockMetadataFolder = new File(workingFolder.getPath() + "/blockmeta");
 		blockMetadataFolder.mkdir();
@@ -321,9 +321,9 @@ public class Monieo {
 		
 		handleBlock(genesis());
 
-        ui = new UI();
-        ui.initialize();
-        
+		ui = new UI();
+		ui.initialize();
+		
 		txp = new TxPool(txlistFolder);
 		
 		ch = new ConnectionHandler();
@@ -622,9 +622,9 @@ public class Monieo {
 			}
 			
 		}
-	    
+		
 		path.delete();
-	    return;
+		return;
 		
 	}
 	
@@ -700,60 +700,60 @@ public class Monieo {
 		
 	}
 	
-    public static KeyPair generateKeyPair() {
-        try {
-            KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-            return gen.generateKeyPair();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
-    public static String base64(byte[] b) {
-    	
-    	return Base64.getEncoder().encodeToString(b);
-    	
-    }
-    
-    public static PublicKey deserializePublicKey(String pub) {
-    	
-    	try {
-    		
+	public static KeyPair generateKeyPair() {
+		try {
+			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+			return gen.generateKeyPair();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static String base64(byte[] b) {
+		
+		return Base64.getEncoder().encodeToString(b);
+		
+	}
+	
+	public static PublicKey deserializePublicKey(String pub) {
+		
+		try {
+			
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			
 			PublicKey pka = kf.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(pub)));
-		    
+			
 			return pka;
-            
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	
-    	return null;
-    	
-    }
-    
-    public static PrivateKey deserializePrivateKey(String priv) {
-    	
-    	try {
-    		
+		
+		return null;
+		
+	}
+	
+	public static PrivateKey deserializePrivateKey(String priv) {
+		
+		try {
+			
 			KeyFactory kf = KeyFactory.getInstance("RSA");
-	    	
-		    PrivateKey ska = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priv)));
-		    
+			
+			PrivateKey ska = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(priv)));
+			
 			return ska;
-            
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	
-    	return null;
-    	
-    }
-    
-    public static PublicKey generatePublic(PrivateKey priv)  {
-    	
+		
+		return null;
+		
+	}
+	
+	public static PublicKey generatePublic(PrivateKey priv)  {
+		
 		try {
 			
 			KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -765,45 +765,45 @@ public class Monieo {
 		}
 	   	
 	   	return null;
-    	
-    }
-    
-	public static boolean verifySignature(String plainText, String signature, PublicKey publicKey) throws Exception {
-	    Signature publicSignature = Signature.getInstance("SHA256withRSA");
-	    publicSignature.initVerify(publicKey);
-	    publicSignature.update(plainText.getBytes("UTF8"));
-
-	    byte[] signatureBytes = Base64.getDecoder().decode(signature);
-
-	    return publicSignature.verify(signatureBytes);
+		
 	}
-    
-    public static String readFileData(File f) {
-    	
-    	if (f == null || !f.exists()) return null;
-    	
-    	if (!Monieo.INSTANCE.isMonieoFile(f)) return null;
-    	
-    	//safe against injection of this pattern.
-    	try (Scanner c = new Scanner(f).useDelimiter(Pattern.compile("\\Z"))) {
-    		
-    		String ret = "";
-    		
-    		while (c.hasNext()) {
-    			
-    			ret += c.next();
-    			
-    		}
-    		
-    		return ret;
-    		
-    	} catch (FileNotFoundException e) {
+	
+	public static boolean verifySignature(String plainText, String signature, PublicKey publicKey) throws Exception {
+		Signature publicSignature = Signature.getInstance("SHA256withRSA");
+		publicSignature.initVerify(publicKey);
+		publicSignature.update(plainText.getBytes("UTF8"));
+
+		byte[] signatureBytes = Base64.getDecoder().decode(signature);
+
+		return publicSignature.verify(signatureBytes);
+	}
+	
+	public static String readFileData(File f) {
+		
+		if (f == null || !f.exists()) return null;
+		
+		if (!Monieo.INSTANCE.isMonieoFile(f)) return null;
+		
+		//safe against injection of this pattern.
+		try (Scanner c = new Scanner(f).useDelimiter(Pattern.compile("\\Z"))) {
+			
+			String ret = "";
+			
+			while (c.hasNext()) {
+				
+				ret += c.next();
+				
+			}
+			
+			return ret;
+			
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-    	
-    	return null;
-    	
-    }
+		
+		return null;
+		
+	}
 
 	public static byte[] sha256dRaw(String s) {
 		
@@ -839,15 +839,15 @@ public class Monieo {
 	}
 	
 	private static String bytesToHex(byte[] hash) {
-	    StringBuilder hexString = new StringBuilder(2 * hash.length);
-	    for (int i = 0; i < hash.length; i++) {
-	        String hex = Integer.toHexString(0xff & hash[i]);
-	        if(hex.length() == 1) {
-	            hexString.append('0');
-	        }
-	        hexString.append(hex);
-	    }
-	    return hexString.toString();
+		StringBuilder hexString = new StringBuilder(2 * hash.length);
+		for (int i = 0; i < hash.length; i++) {
+			String hex = Integer.toHexString(0xff & hash[i]);
+			if(hex.length() == 1) {
+				hexString.append('0');
+			}
+			hexString.append(hex);
+		}
+		return hexString.toString();
 	}
 	
 	public static boolean assertSupportedProtocol(String[] s) {
@@ -858,13 +858,13 @@ public class Monieo {
 	
 	public boolean isMonieoFile(File f) {
 		
-	    while (f.getParentFile()!=null) {
-	       f = f.getParentFile();
-	       if (f.equals(workingFolder)) {
-	           return true;
-	       }
-	    }
-	    return false;
+		while (f.getParentFile()!=null) {
+		   f = f.getParentFile();
+		   if (f.equals(workingFolder)) {
+			   return true;
+		   }
+		}
+		return false;
 	}
 	
 }

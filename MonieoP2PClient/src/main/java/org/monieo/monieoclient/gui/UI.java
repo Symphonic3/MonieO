@@ -221,14 +221,14 @@ public class UI {
 				miningWindowOpen = true;
 				
 				jd.addWindowListener(new WindowAdapter()
-		        {
-		            @Override
-		            public void windowClosing(WindowEvent e)
-		            {
-		                miningWindowOpen = false;
-		            }
-		            
-		        });
+				{
+					@Override
+					public void windowClosing(WindowEvent e)
+					{
+						miningWindowOpen = false;
+					}
+					
+				});
 				
 				jd.setVisible(true);
 				
@@ -272,36 +272,36 @@ public class UI {
 		addressLabel.addMouseListener(new MouseAdapter() {
 			
 			 @Override
-             public void mouseClicked(MouseEvent e) {
-                StringSelection ss = new StringSelection(addressLabel.getText());
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
-                
-                JDialog jd = new JDialog();
-                jd.setSize(50, 15);
-                jd.setLocation(e.getLocationOnScreen());
-                jd.getContentPane().add(new JLabel("Copied!"));
-                jd.setUndecorated(true);
-                ((JPanel)jd.getContentPane()).setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                jd.setFocusable(false);
-                jd.setFocusableWindowState(false);
-                
-                jd.setModalityType(ModalityType.MODELESS);
+			 public void mouseClicked(MouseEvent e) {
+				StringSelection ss = new StringSelection(addressLabel.getText());
+				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
+				
+				JDialog jd = new JDialog();
+				jd.setSize(50, 15);
+				jd.setLocation(e.getLocationOnScreen());
+				jd.getContentPane().add(new JLabel("Copied!"));
+				jd.setUndecorated(true);
+				((JPanel)jd.getContentPane()).setBorder(BorderFactory.createLineBorder(Color.BLACK));
+				jd.setFocusable(false);
+				jd.setFocusableWindowState(false);
+				
+				jd.setModalityType(ModalityType.MODELESS);
 
-                jd.setVisible(true);
-                
-                new Timer().schedule(new TimerTask() {
+				jd.setVisible(true);
+				
+				new Timer().schedule(new TimerTask() {
 					
 					@Override
 					public void run() {
 						
-                		jd.setVisible(false);
-                        jd.dispose();
+						jd.setVisible(false);
+						jd.dispose();
 						
 					}
 					
 				}, 1000);
-                
-             }
+				
+			 }
 			
 		});
 		
@@ -377,10 +377,10 @@ public class UI {
 				
 				list.setSelectedValue(null, false);
 				panel_1.setVisible(true);
-                panel.setVisible(false);
-                
-                refresh(false);
-                
+				panel.setVisible(false);
+				
+				refresh(false);
+				
 			 }
 			
 		});
@@ -394,8 +394,8 @@ public class UI {
 			public void valueChanged(ListSelectionEvent e) {
 				
 				if (!e.getValueIsAdjusting()) {
-	                panel.setVisible(true);
-	                panel_1.setVisible(false);
+					panel.setVisible(true);
+					panel_1.setVisible(false);
 
 					refresh(false);
 					
@@ -408,7 +408,7 @@ public class UI {
 		scrollPane = new JScrollPane(list);
 		scrollPane.setBounds(10, 11, 176, 396);
 		scrollPane.createVerticalScrollBar();
-        scrollPane.setLayout(new ScrollPaneLayout());
+		scrollPane.setLayout(new ScrollPaneLayout());
 		frame.getContentPane().add(scrollPane);
 		
 		label_1 = new JLabel("Selected address:");
@@ -556,15 +556,15 @@ public class UI {
 		BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			    Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
-			    if (result!= null) {
-			    	
-			    	String resp = Monieo.INSTANCE.createWallet(result.toString());
-			    	
-			    	JOptionPane.showMessageDialog(frame, resp, "Info", 1);
-			    	
-			    	refresh(true);
-			    }
+				Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
+				if (result!= null) {
+					
+					String resp = Monieo.INSTANCE.createWallet(result.toString());
+					
+					JOptionPane.showMessageDialog(frame, resp, "Info", 1);
+					
+					refresh(true);
+				}
 			}
 		});
 		BtnNEWADDRESS.setBounds(321, 417, 109, 23);
@@ -604,66 +604,66 @@ public class UI {
 	
 	public void refresh(boolean updlist) {
 
-    	if (updlist) {
-    		
-    		walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
-        	for (int i = 0; i < walletNicks.length; i++) {
-        		
-        		walletNicks[i] = Monieo.INSTANCE.myWallets.get(i).nickname;
-        		
-        	}
-        	list.setListData(walletNicks);
-        	lblNewLabel_1.setText("Address count: " + walletNicks.length);
-    		
-    	}
+		if (updlist) {
+			
+			walletNicks = new String[Monieo.INSTANCE.myWallets.size()];
+			for (int i = 0; i < walletNicks.length; i++) {
+				
+				walletNicks[i] = Monieo.INSTANCE.myWallets.get(i).nickname;
+				
+			}
+			list.setListData(walletNicks);
+			lblNewLabel_1.setText("Address count: " + walletNicks.length);
+			
+		}
 		
 		BlockMetadata m = Monieo.INSTANCE.getHighestBlock().getMetadata();
-    	
-    	if (list.getSelectedIndex() == -1) {
+		
+		if (list.getSelectedIndex() == -1) {
 
-    		panel.setVisible(false);
-    		
-    	} else {
-    		
-    		for (String s : walletNicks) {
-    			
-    			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
-    			
-    			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf).setScale(8);
-    			
-    			totAvailableFundsDisplay.setText(n.toPlainString());
-    			
-    			if (s.equals(list.getSelectedValue())) {
-    				
-    	    		panel.setVisible(true);
+			panel.setVisible(false);
+			
+		} else {
+			
+			for (String s : walletNicks) {
+				
+				Wallet w = Monieo.INSTANCE.getWalletByNick(s);
+				
+				BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf).setScale(8);
+				
+				totAvailableFundsDisplay.setText(n.toPlainString());
+				
+				if (s.equals(list.getSelectedValue())) {
 					
-    	    		addressLabel.setText(w.getAsString());
-    	    		nickLabel.setText(w.nickname);
-    				INDIVbalanceLabel.setText(n.toPlainString());
-    	    		
-    				if (w.hasSK) {
-        				
-        				invalidWallet.setVisible(false);
-        				panelTransaction.setVisible(true);
-    					
-    				} else {
+					panel.setVisible(true);
+					
+					addressLabel.setText(w.getAsString());
+					nickLabel.setText(w.nickname);
+					INDIVbalanceLabel.setText(n.toPlainString());
+					
+					if (w.hasSK) {
+						
+						invalidWallet.setVisible(false);
+						panelTransaction.setVisible(true);
+						
+					} else {
 
-        				panelTransaction.setVisible(false);
-        				invalidWallet.setVisible(true);
-    					
-    				}
-    				
-    				break;
-    				
-    			}
-    			
-    		}
+						panelTransaction.setVisible(false);
+						invalidWallet.setVisible(true);
+						
+					}
+					
+					break;
+					
+				}
+				
+			}
 
-    	}
-    	
-    	BigDecimal unspendable = BigDecimal.ZERO.setScale(8);
+		}
+		
+		BigDecimal unspendable = BigDecimal.ZERO.setScale(8);
 		BigDecimal spendable = BigDecimal.ZERO.setScale(8);
-    	BigDecimal total = BigDecimal.ZERO.setScale(8);
+		BigDecimal total = BigDecimal.ZERO.setScale(8);
 		
 		for (String s : walletNicks) {
 			
