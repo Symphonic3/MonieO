@@ -1,5 +1,10 @@
 package org.monieo.monieoclient;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.SplashScreen;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -18,6 +23,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 import java.util.regex.Pattern;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+
 import java.security.*;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -55,7 +65,13 @@ public class Monieo {
 	
 	public static final BigInteger MAXIMUM_HASH_VALUE = BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE);
 	
+	public static SplashScreen ss;
+	public static Graphics2D ssg;
+	
 	public static void main(String[] args) {
+		
+		ss = SplashScreen.getSplashScreen();
+		ssg = ss.createGraphics();
 		
 		final Properties properties = new Properties();
 		try {
@@ -71,6 +87,24 @@ public class Monieo {
 		System.out.println("");
 		System.out.println("If there are any issues with running the application, all errors will be logged in this window.");
 		System.out.println("Please paste the full log of this window when submitting a bug report.");
+		
+		ssg.setComposite(AlphaComposite.Clear);
+		ssg.fillRect(30,310,210,20);
+        ssg.setPaintMode();
+        ssg.setColor(Color.BLACK);
+        ssg.setFont(new Font("Dialog", Font.PLAIN, 15));
+		ssg.drawString("v" + String.valueOf(VERSION), 30, 310);
+		
+		ss.update();
+		
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		ss.close();
 		
 		/*String url = "https://api.github.com/repos/Symphonic3/MonieO/releases/latest";
 
@@ -372,6 +406,14 @@ public class Monieo {
 			}
 			
 		}, 0, 2500);
+		
+	}
+	
+	public boolean isSynchronized() {
+		
+		//TODO work on this check
+		
+		return getHighestBlock().header.timestamp + 7200000 > getNetAdjustedTime();
 		
 	}
 	
