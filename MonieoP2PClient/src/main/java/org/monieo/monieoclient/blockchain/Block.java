@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import org.monieo.monieoclient.Monieo;
@@ -270,48 +271,79 @@ public class Block extends MonieoDataObject{
 		if ((btoavtime/divisor) >= header.timestamp) return false;
 
 		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
+
+		if (serialize().getBytes().length > 1024*256) return false; //256kb
 		
-		int cb = 0;
+		//validate transactions
+		//all of this is a very inefficient algorithm. if anyone has any bright ideas on how to fix this, please do!
+		//we could easily reduce complexity if we thought about it a bit more but i can't be bothered to do that right now
 		
-		for (AbstractTransaction t : transactions) {
+		List<AbstractTransaction> txf = Arrays.asList(transactions);
+		
+		List<String> sources = new ArrayList<String>();
+		boolean cb = false;
+		
+		for (AbstractTransaction t : txf) {
 			
 			if (t == null) return false;
 			
 			if (t instanceof CoinbaseTransaction) {
+				
+				if (cb == true) return false; //>1 coinbase transaction
+				cb = true;
 
 				if (!((CoinbaseTransaction) t).validate(this)) return false;
-
-				cb++;
+				
+				continue;
 				
 			} else if (t instanceof Transaction) {
 				
-				Transaction at = (Transaction) t;
-
-				if (!at.testHasAmount(prev)) return false;
+				if (Collections.frequency(txf, t) > 1) return false;
 				
-			}
+			} else return false; //shouldn't happen
 			
-			int count = 0;
+			Transaction tr = (Transaction) t;
 			
-			for (AbstractTransaction t1 : transactions) {
+			if (!sources.contains(tr.getSource())) sources.add(tr.getSource());
+			
+		}
+		
+		BlockMetadata m = prev.getMetadata();
+		
+		for (String s : sources) {
+			
+			WalletData wd = m.getWalletData(s);
+			
+			BigDecimal bal = BlockMetadata.getSpendableBalance(wd.pf);
+			BigInteger nonce = wd.nonce;
+			
+			int am = 0;
+			
+			for (AbstractTransaction t : transactions) {
 				
-				if (t1 instanceof Transaction && t instanceof Transaction) {
+				if (t instanceof Transaction) {
 					
-					if (((Transaction) t1).equals(((Transaction) t))) count++;
+					Transaction tr = (Transaction) t;
+					
+					if (!tr.getSource().equals(s)) continue;
+					
+					am++;
+					
+					bal = bal.subtract(tr.d.amount.add(tr.d.fee));
+					
+					if (tr.d.nonce.compareTo(nonce) == 1) nonce = tr.d.nonce;
 					
 				}
 				
 			}
-
-			if (count > 1) return false;
 			
-			//if (t.expired()) return false;
+			if (bal.compareTo(BigDecimal.ZERO) == -1) return false;
+			
+			if (!nonce.equals(wd.nonce.add(BigInteger.valueOf(am)))) return false;
+			
+			return true;
 			
 		}
-
-		if (cb != 1) return false;
-
-		if (serialize().getBytes().length > 1024*256) return false;
 
 		return true;
 		
@@ -412,26 +444,13 @@ public class Block extends MonieoDataObject{
 			
 			String ph = header.preHash;
 			File prevBlockMetaFile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + ph + ".blkmeta");
-
-			List<AbstractTransaction> txclone = new ArrayList<AbstractTransaction>(Arrays.asList(transactions.clone()));
 			
+			//parse transactions
 			BigDecimal fees = BigDecimal.ZERO;
-			
-			for (AbstractTransaction t : txclone) {
-				
-				if (t instanceof Transaction) {
-					
-					Transaction tr = ((Transaction) t);
-					
-					fees = fees.add(tr.d.fee);
-					
-				}
-				
-			}
 			
 			HashMap<String, WalletData> pfToAdd = new HashMap<String, WalletData>();
 			
-			for (AbstractTransaction t : txclone) {
+			for (AbstractTransaction t : transactions) {
 				
 				boolean cb = (t instanceof CoinbaseTransaction); //assume that if it is not a coinbasetransaction it is a transaction
 				
@@ -449,13 +468,15 @@ public class Block extends MonieoDataObject{
 					pfToAdd.get(w).pf.add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS));
 					
 					Transaction tr = ((Transaction) t);
+					fees = fees.add(tr.d.fee);
 					
 					String w2 = tr.getSource();
 					
 					if (!pfToAdd.containsKey(w2)) pfToAdd.put(w2, new WalletData(w2, BigInteger.ZERO, new ArrayList<PendingFunds>()));
 					
 					pfToAdd.get(w2).pf.add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
-					pfToAdd.get(w2).nonce = pfToAdd.get(w2).nonce.max(tr.d.nonce.add(BigInteger.ONE));
+					//this increments the nonce assuming that transactions are already validated and all nonces line up. this is checked in Block#validate().
+					pfToAdd.get(w2).nonce = tr.d.nonce.add(BigInteger.ONE);
 					
 				}
 				
@@ -465,6 +486,7 @@ public class Block extends MonieoDataObject{
 				
 				if (!this.equals(Monieo.genesis())) {
 					
+					//generate any needed previous metadata
 					if (!prevBlockMetaFile.exists()) {
 						
 						Block p = getPrevious();
@@ -506,6 +528,7 @@ public class Block extends MonieoDataObject{
 						
 					}
 					
+					//execute writes
 					try (Scanner c = new Scanner(prevBlockMetaFile)) {
 						
 						while (c.hasNextLine()) {

@@ -107,20 +107,6 @@ public class Transaction extends AbstractTransaction {
 		
 	}
 	
-	public boolean testHasAmount(Block b) {
-		
-		BlockMetadata m = b.getMetadata();
-		
-		WalletData wd = m.getWalletData(d.from);
-		
-		BigDecimal bal = BlockMetadata.getSpendableBalance(wd.pf);
-		
-		if (d.amount.add(d.fee).compareTo(bal) == 1) return false;
-		
-		if (!d.nonce.equals(wd.nonce)) return false;
-		
-		return true;
-		
-	}
+	//testHasAmount method removed because this needs to be checked dynamically
 	
 }
