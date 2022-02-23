@@ -91,7 +91,7 @@ public class Node implements Runnable{
 			e1.printStackTrace();
 		}
 		Monieo.INSTANCE.nodes.remove(this);
-		Monieo.INSTANCE.ui.totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
+		if (Monieo.INSTANCE.ui != null) Monieo.INSTANCE.ui.refresh(false);
 		kill = true;
 		
 	}

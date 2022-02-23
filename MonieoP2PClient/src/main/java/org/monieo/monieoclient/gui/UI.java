@@ -34,6 +34,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -88,6 +89,8 @@ public class UI {
 	public JLabel totConnectedNodesDisplay;
 	
 	JPanel invalidWallet;
+	JPanel desyncDetected;
+	JLabel desyncLabel;
 	
 	public boolean mining;
 	JTextArea miningstats;
@@ -96,6 +99,7 @@ public class UI {
 	public boolean modeToggleStatus;
 	private JLabel lblNewLabel_4;
 	
+	boolean dark = false;
 	
 	public UI() {
 	}
@@ -111,16 +115,12 @@ public class UI {
 		miningstats = new JTextArea("Mining statistics");
 		miningstats.setEditable(false);
 		miningstats.setOpaque(false); //this is the same as a JLabel
-		miningstats.setBorder(null); //remove the border
+
 		miningstats.setBounds(10, 64, 205, 190);
 		miningstats.setLineWrap(true);
 		
 		frame = new JFrame();
-		try {
-			frame.setIconImage(ImageIO.read(Monieo.class.getClassLoader().getResourceAsStream("icon.png")));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		frame.setIconImage(new FlatSVGIcon("icon.svg").getImage());
 		frame.setTitle("MonieO Client Version " + Monieo.VERSION);
 		frame.setBounds(100, 100, 901, 485);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -244,29 +244,36 @@ public class UI {
 		btnNewButton.setVerticalAlignment(SwingConstants.CENTER);
 		btnNewButton.putClientProperty("JButton.buttonType", "roundRect");
 		btnNewButton.addActionListener(new ActionListener() {
+			
 			public void actionPerformed(ActionEvent e) {
-
+				
+				dark = !dark;
+				
+				refresh(false);
+				
 			}
+			
 		});
 		
-		btnNewButton.setBounds(859, 3, 23, 23);
+		btnNewButton.setBounds(852, 2, 26, 26);
 		frame.getContentPane().add(btnNewButton);
 		
 		lblNewLabel_1 = new JTextField("Address count:");
 		lblNewLabel_1.setEditable(false);
-		lblNewLabel_1.setBorder(null); //remove the border
+
 		lblNewLabel_1.setBounds(208, 411, 109, 34);
 		frame.getContentPane().add(lblNewLabel_1);
 		
 		panel = new JPanel();
+		panel.setOpaque(false);
 		panel.setLayout(null);
-		panel.setBounds(196, 0, 689, 400);
+		panel.setBounds(196, 0, 689, 380);
 		frame.getContentPane().add(panel);
 		
 		addressLabel = new JTextField("0");
 		addressLabel.setEditable(false);
 		addressLabel.setOpaque(false); //this is the same as a JLabel
-		addressLabel.setBorder(null); //remove the border
+
 		addressLabel.setBounds(144, 10, 496, 29);
 		
 		addressLabel.addMouseListener(new MouseAdapter() {
@@ -310,18 +317,19 @@ public class UI {
 		nickLabel = new JTextField("0");
 		nickLabel.setEditable(false);
 		nickLabel.setOpaque(false); //this is the same as a JLabel
-		nickLabel.setBorder(null); //remove the border
+
 		nickLabel.setBounds(144, 40, 331, 29);
 		panel.add(nickLabel);
 		
 		INDIVbalanceLabel = new JTextField("0");
 		INDIVbalanceLabel.setEditable(false);
 		INDIVbalanceLabel.setOpaque(false); //this is the same as a JLabel
-		INDIVbalanceLabel.setBorder(null); //remove the border
+
 		INDIVbalanceLabel.setBounds(144, 70, 331, 29);
 		panel.add(INDIVbalanceLabel);
 		
 		panelTransaction = new JPanel();
+		panelTransaction.setOpaque(false);
 		panelTransaction.setBounds(10, 152, 663, 225);
 		panel.add(panelTransaction);
 		panelTransaction.setLayout(null);
@@ -363,7 +371,8 @@ public class UI {
 		});
 		
 		JPanel panel_1 = new JPanel();
-		panel_1.setBounds(196, 0, 689, 400);
+		panel_1.setOpaque(false);
+		panel_1.setBounds(196, 0, 689, 380);
 		frame.getContentPane().add(panel_1);
 		panel_1.setLayout(null);
 		panel_1.setVisible(false);
@@ -578,6 +587,7 @@ public class UI {
 		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
 		
+		//warning invalid wallet
 		invalidWallet = new JPanel();
 		invalidWallet.setBounds(10, 152, 663, 66);
 		invalidWallet.setBorder(BorderFactory.createLineBorder(new Color(237, 162, 0, 180), 4, true));
@@ -596,6 +606,25 @@ public class UI {
 		
 		invalidWallet.setVisible(false);
 		
+		//warning desync
+		desyncDetected = new JPanel();
+		desyncDetected.setBounds(206, 370, 663, 40);
+		desyncDetected.setBorder(BorderFactory.createLineBorder(new Color(237, 162, 0, 180), 4, true));
+		frame.getContentPane().add(desyncDetected);
+		desyncDetected.setLayout(new BoxLayout(desyncDetected, BoxLayout.X_AXIS));
+		
+		desyncDetected.add(Box.createRigidArea(new Dimension(20, 0)));
+		
+		JLabel lblNewLabel_210 = new JLabel(UIManager.getIcon("OptionPane.warningIcon"));
+		desyncDetected.add(lblNewLabel_210);
+		
+		desyncDetected.add(Box.createRigidArea(new Dimension(100, 0)));
+		
+		desyncLabel = new JLabel("Warning! Detected blockchain desync! (approx. " + 0 + " blocks)", SwingConstants.CENTER);
+		desyncDetected.add(desyncLabel);
+		
+		desyncDetected.setVisible(false);
+		
 		frame.setResizable(false);
 		refresh(true);
 		frame.setVisible(true);
@@ -603,7 +632,41 @@ public class UI {
 	}
 	
 	public void refresh(boolean updlist) {
+		
+		if (!dark) {
+			
+			FlatLightLaf.setup();
+			SwingUtilities.updateComponentTreeUI(frame);
+			
+		} else {
+			
+			FlatDarkLaf.setup();
+			SwingUtilities.updateComponentTreeUI(frame);
+			
+		}
 
+		INDIVbalanceLabel.setBorder(null); //remove the border
+		nickLabel.setBorder(null); //remove the border
+		addressLabel.setBorder(null); //remove the border
+		lblNewLabel_1.setBorder(null); //remove the border
+		miningstats.setBorder(null); //remove the border
+		
+		totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
+		
+		long ds = Monieo.INSTANCE.desyncAmount();
+		
+		if (ds != -1) {
+			
+			desyncLabel.setText("Warning! Detected blockchain desync! (approx. " + ds + " blocks)");
+			
+			desyncDetected.setVisible(true);
+			
+		} else {
+			
+			desyncDetected.setVisible(false);
+			
+		}
+		
 		if (updlist) {
 			
 			walletNicks = new String[Monieo.INSTANCE.myWallets.size()];

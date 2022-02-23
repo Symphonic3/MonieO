@@ -97,15 +97,6 @@ public class Monieo {
 		
 		ss.update();
 		
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		ss.close();
-		
 		/*String url = "https://api.github.com/repos/Symphonic3/MonieO/releases/latest";
 
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
@@ -320,9 +311,6 @@ public class Monieo {
 		}
 		
 		handleBlock(genesis());
-
-		ui = new UI();
-		ui.initialize();
 		
 		txp = new TxPool(txlistFolder);
 		
@@ -332,8 +320,27 @@ public class Monieo {
 		//main timer
 		new Timer().schedule(new TimerTask() {
 			
+			int at = 0;
+			
 			@Override
 			public void run() {
+				
+				//attempt to load blockchain before starting UI application
+				if (ss != null) {
+					
+					if (desyncAmount() == -1 || at >= 4) {
+						
+						ss.close();
+						ss = null;
+
+						ui = new UI();
+						ui.initialize();
+						
+					}
+					
+					at++;
+					
+				}
 				
 				int amntns = 0;
 
@@ -409,11 +416,19 @@ public class Monieo {
 		
 	}
 	
-	public boolean isSynchronized() {
+	public long desyncAmount() {
 		
 		//TODO work on this check
 		
-		return getHighestBlock().header.timestamp + 7200000 > getNetAdjustedTime();
+		if (getHighestBlock().header.timestamp + 7200000 > getNetAdjustedTime()) { //2h
+			
+			return -1;
+			
+		} else {
+			
+			return (getNetAdjustedTime()-getHighestBlock().header.timestamp)/60000;
+			
+		}
 		
 	}
 	
@@ -508,7 +523,7 @@ public class Monieo {
 			if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
 				
 				setHighestBlock(b);
-				if (ui != null) ui.refresh(false); //ui not initialized yet!
+				if (ui != null) ui.refresh(false);
 				
 			}
 			
