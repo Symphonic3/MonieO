@@ -195,8 +195,6 @@ public class TxPool {
 		
 		for (int i = 0; i < lt.size(); i++) {
 			
-			System.out.println("lts");
-			
 			Transaction tr = (Transaction) lt.get(i);
 			
 			if (!sources.containsKey(tr.getSource())) sources.put(tr.getSource(), m.getWalletData(tr.getSource()));
