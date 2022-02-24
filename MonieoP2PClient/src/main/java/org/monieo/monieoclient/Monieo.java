@@ -383,10 +383,12 @@ public class Monieo {
 				List<String> rn = getValidNodesRightNow();
 				
 				int ind = 0;
-
+				
 				for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
 					
-					whilea: while (rn.size() < ind) {
+					whilea: while (rn.size() > ind) {
+						
+						//System.out.println("ASd1");
 						
 						for (int k = 0; k < nodes.size(); k++) {
 							
