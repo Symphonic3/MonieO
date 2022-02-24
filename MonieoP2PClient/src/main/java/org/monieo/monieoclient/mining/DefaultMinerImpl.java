@@ -12,6 +12,7 @@ import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
+import org.monieo.monieoclient.blockchain.Transaction;
 
 public class DefaultMinerImpl implements AbstractMiner{
 
@@ -107,6 +108,15 @@ public class DefaultMinerImpl implements AbstractMiner{
 			if ((btoavtime/divisor) >= nettime) nettime = (btoavtime/divisor)+1;
 
 			List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*128, h); //128 is completely arbitrary. This should be optimized later.
+			
+			for (AbstractTransaction t : tx) {
+				
+				Transaction tr = (Transaction) t;
+				
+				System.out.println(tr.serialize());
+				
+			}
+			
 			CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick("MININGWALLET").getAsString(), Block.getMaxCoinbase(hei));
 			tx.add(ct);
 			

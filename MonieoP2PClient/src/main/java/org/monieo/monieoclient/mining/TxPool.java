@@ -195,13 +195,15 @@ public class TxPool {
 		
 		for (int i = 0; i < lt.size(); i++) {
 			
+			System.out.println("lts");
+			
 			Transaction tr = (Transaction) lt.get(i);
 			
 			if (!sources.containsKey(tr.getSource())) sources.put(tr.getSource(), m.getWalletData(tr.getSource()));
 
 			WalletData w = sources.get(tr.getSource());
 			//althought transactions are ordered based on nonce, sometimes the nonce may be too high. this check is nessecary.
-			if (!tr.d.nonce.equals(w.nonce.add(BigInteger.ONE))) continue;
+			if (!tr.d.nonce.equals(w.nonce)) continue;
 			BigDecimal bal = BlockMetadata.getSpendableBalance(w.pf);
 			bal = bal.subtract(tr.d.amount.add(tr.d.fee));
 			if (bal.compareTo(BigDecimal.ZERO) == -1) continue;

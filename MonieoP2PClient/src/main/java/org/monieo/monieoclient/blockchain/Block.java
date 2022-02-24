@@ -339,7 +339,7 @@ public class Block extends MonieoDataObject{
 			
 			if (bal.compareTo(BigDecimal.ZERO) == -1) return false;
 			
-			if (!nonce.equals(wd.nonce.add(BigInteger.valueOf(am)))) return false;
+			if (!nonce.equals(wd.nonce.add(BigInteger.valueOf(am-1)))) return false;
 			
 			return true;
 			
