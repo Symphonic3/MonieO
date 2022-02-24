@@ -31,6 +31,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
 import javax.swing.SwingConstants;
@@ -38,6 +39,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.BlockMetadata;
 import org.monieo.monieoclient.blockchain.PendingFunds;
@@ -377,6 +380,25 @@ public class UI {
 		panel_1.setLayout(null);
 		panel_1.setVisible(false);
 		
+        String[] columnNames = {"Wallet name",
+                "Amount",
+                "Available in # blocks"};
+
+        Object[][] data = {
+                {"f", "htrfg1","2"},
+                  {"a2", "12r","22"},
+                  {"a3", "1a3","23"},
+        };
+
+        JTable table = new JTable(data, columnNames);
+        table.setModel(new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        });
+        table.setBounds(-1, 150, 683, 236);
+		
 		JButton overviewBTN = new JButton("Overview");
 		overviewBTN.setBounds(10, 414, 176, 23);
 		overviewBTN.addActionListener(new ActionListener() {
@@ -628,6 +650,8 @@ public class UI {
 		frame.setResizable(false);
 		refresh(true);
 		frame.setVisible(true);
+		
+		
 		
 	}
 	
