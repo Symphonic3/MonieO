@@ -27,8 +27,6 @@ public class Node implements Runnable{
 	
 	public static String TERM = "EOM";
 	
-	public volatile boolean busy = false;
-	
 	private boolean kill = false;
 	
 	public Vector<Consumer<Node>> queue = new Vector<Consumer<Node>>();
@@ -116,7 +114,7 @@ public class Node implements Runnable{
 
 			@Override
 			public void accept(Node t) {
-				t.sendNetworkPacket(nc);
+				t.queueNetworkPacket(nc);
 				
 			}
 			
@@ -130,7 +128,7 @@ public class Node implements Runnable{
 		
 	}
 	
-	public void sendNetworkPacket(NetworkPacket nc) {
+	public void queueNetworkPacket(NetworkPacket nc) {
 		
 		queueAction(new Consumer<Node>() {
 
@@ -148,6 +146,20 @@ public class Node implements Runnable{
 		});
 		
 	}
+	
+	private void sendNetworkPacketNow(NetworkPacket nc) {
+		
+		//this is done because sendnetworkpacketnow is only used in resource-intensive applications, where we will be sending lots and therefore
+		//do not want to time out the remote client
+		lastValidPacketTime = System.currentTimeMillis(); 
+		
+		pw.print(nc.serialize());
+		pw.println();
+		pw.print(TERM);
+		pw.println();
+		pw.flush();
+		
+	}
 
 	@Override
 	public void run() {
@@ -163,15 +175,11 @@ public class Node implements Runnable{
 				
 				if (!queue.isEmpty()) {
 					
-					busy = true;
-					
 					for (Consumer<Node> a : queue) {
 						
 						a.accept(this);
 						
 					}
-					
-					busy = false;
 					
 				}
 				
@@ -240,7 +248,7 @@ public class Node implements Runnable{
 					
 					timeRecieved = Long.valueOf(nc.data);
 					
-					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.ACK_VER, null));
+					sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.ACK_VER, null));
 					
 					localAcknowledgedRemote = true;
 					
@@ -264,11 +272,11 @@ public class Node implements Runnable{
 					
 					for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
 						
-						sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
+						sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
 						
 					}
 					
-					sendNetworkPacket(NetworkPacket.generateSyncPacket());
+					sendNetworkPacketNow(NetworkPacket.generateSyncPacket());
 					
 				}
 				
@@ -312,7 +320,7 @@ public class Node implements Runnable{
 					
 					for (String s : hashes) {
 						
-						sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
+						sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
 								Block.getByHash(s).serialize()));
 						
 					}
@@ -336,7 +344,7 @@ public class Node implements Runnable{
 							
 							if (b != null && b.validate()) {
 								
-								sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
+								sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 								break;
 								
 							}
@@ -368,7 +376,7 @@ public class Node implements Runnable{
 					
 					k = k.substring(0, k.length() - 1);
 					
-					sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k));
+					sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k));
 					
 				} else if (nc.cmd == NetworkPacketType.SEND_TRANSACTION) {
 

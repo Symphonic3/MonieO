@@ -84,7 +84,7 @@ public class ConnectionHandler implements Runnable{
 		System.out.println("Connected to: " + s.getInetAddress().getHostAddress());
 		
 		Node n = new Node(s, server);
-		n.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_VER, String.valueOf(System.currentTimeMillis())));
+		n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_VER, String.valueOf(System.currentTimeMillis())));
 		
 		Monieo.INSTANCE.nodes.add(n);
 		
