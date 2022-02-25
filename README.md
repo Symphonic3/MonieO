@@ -1,7 +1,7 @@
 MonieO
 =========
 
-[![GitLab Release](https://img.shields.io/gitlab/v/release/Symphonic3/MonieO?sort=semver)](https://github.com/Symphonic3/MonieO/releases/latest)
+[![Release](https://img.shields.io/github/v/release/Symphonic3/MonieO)](https://github.com/Symphonic3/MonieO/releases/latest)
 ![Language](https://img.shields.io/github/languages/top/Symphonic3/MonieO)
 ![Donate](https://img.shields.io/badge/donate%20mno-c5Dz6UZ4Pkpdrhe9d2uSFZCCaYfSK6X63x4esnc3gxUD-blue)
 [![Discord](https://img.shields.io/discord/750151713473953832)](https://discord.gg/CaTSY8n)
