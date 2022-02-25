@@ -525,7 +525,7 @@ public class Monieo {
 			if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
 				
 				setHighestBlock(b);
-				if (ui != null) ui.refresh(false);
+				if (ui != null) ui.refresh(false, false);
 				
 			}
 			

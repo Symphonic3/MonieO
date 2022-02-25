@@ -89,7 +89,7 @@ public class Node implements Runnable{
 			e1.printStackTrace();
 		}
 		Monieo.INSTANCE.nodes.remove(this);
-		if (Monieo.INSTANCE.ui != null) Monieo.INSTANCE.ui.refresh(false);
+		if (Monieo.INSTANCE.ui != null) Monieo.INSTANCE.ui.refresh(false, false);
 		kill = true;
 		
 	}
@@ -224,6 +224,8 @@ public class Node implements Runnable{
 			
 			//possibly infraction here?
 			System.out.println("DC BECAUSE OF EXCEPTION!");
+			
+			//TODO remove this
 			e.printStackTrace();
 			disconnect();			
 

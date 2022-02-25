@@ -69,6 +69,7 @@ public class UI {
 	
 	JTextField lblNewLabel_1;
 	JPanel panel;
+	JPanel panel_1;
 	JPanel panelTransaction;
 	public JTextField addressLabel;
 	JTextField nickLabel;
@@ -252,7 +253,7 @@ public class UI {
 				
 				dark = !dark;
 				
-				refresh(false);
+				refresh(false, true);
 				
 			}
 			
@@ -350,7 +351,7 @@ public class UI {
 						File newWalletFolder = new File((oldWalletFolder.getParentFile().getPath() + "/" + newNick));
 						oldWalletFolder.renameTo(newWalletFolder);
 						Monieo.INSTANCE.getWalletByNick(selectedWal.nickname).nickname = newNick;
-						refresh(true);
+						refresh(true, false);
 					}
 				}
 			}
@@ -407,10 +408,8 @@ public class UI {
 			public void actionPerformed(ActionEvent e) {
 				
 				list.setSelectedValue(null, false);
-				panel_1.setVisible(true);
-				panel.setVisible(false);
 				
-				refresh(false);
+				refresh(false, false);
 				
 			 }
 			
@@ -425,10 +424,8 @@ public class UI {
 			public void valueChanged(ListSelectionEvent e) {
 				
 				if (!e.getValueIsAdjusting()) {
-					panel.setVisible(true);
-					panel_1.setVisible(false);
 
-					refresh(false);
+					refresh(false, false);
 					
 				}
 				
@@ -502,7 +499,7 @@ public class UI {
 						
 						JOptionPane.showMessageDialog(frame, "Transaction sent!");
 						
-						refresh(false);
+						refresh(false, false);
 						
 						return;
 						
@@ -594,7 +591,7 @@ public class UI {
 					
 					JOptionPane.showMessageDialog(frame, resp, "Info", 1);
 					
-					refresh(true);
+					refresh(true, false);
 				}
 			}
 		});
@@ -648,32 +645,34 @@ public class UI {
 		desyncDetected.setVisible(false);
 		
 		frame.setResizable(false);
-		refresh(true);
+		refresh(true, true);
 		frame.setVisible(true);
-		
-		
 		
 	}
 	
-	public void refresh(boolean updlist) {
+	public void refresh(boolean updlist, boolean changeColor) {
 		
-		if (!dark) {
+		if (changeColor) {
 			
-			FlatLightLaf.setup();
-			SwingUtilities.updateComponentTreeUI(frame);
-			
-		} else {
-			
-			FlatDarkLaf.setup();
-			SwingUtilities.updateComponentTreeUI(frame);
+			if (!dark) {
+				
+				FlatLightLaf.setup();
+				SwingUtilities.updateComponentTreeUI(frame);
+				
+			} else {
+				
+				FlatDarkLaf.setup();
+				SwingUtilities.updateComponentTreeUI(frame);
+				
+			}
+
+			INDIVbalanceLabel.setBorder(null); //remove the border
+			nickLabel.setBorder(null); //remove the border
+			addressLabel.setBorder(null); //remove the border
+			lblNewLabel_1.setBorder(null); //remove the border
+			miningstats.setBorder(null); //remove the border
 			
 		}
-
-		INDIVbalanceLabel.setBorder(null); //remove the border
-		nickLabel.setBorder(null); //remove the border
-		addressLabel.setBorder(null); //remove the border
-		lblNewLabel_1.setBorder(null); //remove the border
-		miningstats.setBorder(null); //remove the border
 		
 		totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
 		
@@ -709,6 +708,7 @@ public class UI {
 		if (list.getSelectedIndex() == -1) {
 
 			panel.setVisible(false);
+			panel_1.setVisible(true);
 			
 		} else {
 			
@@ -722,6 +722,7 @@ public class UI {
 				
 				if (s.equals(list.getSelectedValue())) {
 					
+					panel_1.setVisible(false);
 					panel.setVisible(true);
 					
 					addressLabel.setText(w.getAsString());

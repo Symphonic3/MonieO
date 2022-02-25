@@ -55,6 +55,7 @@ public class ConnectionHandler implements Runnable{
 				
 				nodeDo(clientSocket, true);
 			} catch (IOException e) {
+				//TODO remove this
 				e.printStackTrace();
 			}
 			
@@ -73,9 +74,7 @@ public class ConnectionHandler implements Runnable{
 		try {
 			Socket s = new Socket(inet, Monieo.PORT);
 			nodeDo(s, false);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException e) {}
 		
 	}
 	
@@ -88,7 +87,7 @@ public class ConnectionHandler implements Runnable{
 		
 		Monieo.INSTANCE.nodes.add(n);
 		
-		if (Monieo.INSTANCE.ui != null) Monieo.INSTANCE.ui.refresh(false);
+		if (Monieo.INSTANCE.ui != null) Monieo.INSTANCE.ui.refresh(false, false);
 		
 		new Thread(n).start();
 		

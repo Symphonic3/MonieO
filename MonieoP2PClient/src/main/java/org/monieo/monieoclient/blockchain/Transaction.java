@@ -79,27 +79,27 @@ public class Transaction extends AbstractTransaction {
 
 	@Override
 	boolean testValidity() {
-
-		if (d == null) return false;
 		
-		if (!Monieo.assertSupportedProtocol(new String[]{d.mn,d.pv})) return false;
-		
-		//if (d.from.length() != 64 || d.to.length() != 64) return false;
-		
-		if (d.amount.signum() != 1 || d.amount.scale() > 8) return false;
-		if (d.fee.signum() == -1 || d.fee.scale() > 8) return false;
-		
-		if (!Wallet.getAddress(pubkey).equals(d.from)) return false;
-		
-		PublicKey pk = Monieo.deserializePublicKey(pubkey);
-		
-		if (pk == null) return false;
 		try {
+			
+			if (d == null) return false;
+			
+			if (!Monieo.assertSupportedProtocol(new String[]{d.mn,d.pv})) return false;
+			
+			//if (d.from.length() != 64 || d.to.length() != 64) return false;
+			
+			if (d.amount.signum() != 1 || d.amount.scale() > 8) return false;
+			if (d.fee.signum() == -1 || d.fee.scale() > 8) return false;
+			
+			if (!Wallet.getAddress(pubkey).equals(d.from)) return false;
+			
+			PublicKey pk = Monieo.deserializePublicKey(pubkey);
+			
+			if (pk == null) return false;
 			
 			if (Monieo.verifySignature(d.serialize(), signature, pk)) return true;
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			return false;
 		}
 
