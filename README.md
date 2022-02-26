@@ -1,7 +1,7 @@
 MonieO
 =========
 
-[![Release](https://img.shields.io/github/v/release/Symphonic3/MonieO?display_name=tag&include_prereleases)](https://github.com/Symphonic3/MonieO/releases/latest)
+[![Release](https://img.shields.io/github/v/release/Symphonic3/MonieO?display_name=tag)](https://github.com/Symphonic3/MonieO/releases/latest)
 ![Language](https://img.shields.io/github/languages/top/Symphonic3/MonieO)
 [![Discord](https://img.shields.io/discord/750151713473953832)](https://discord.gg/CaTSY8n)
 [![Wiki](https://img.shields.io/badge/wiki-work%20in%20progress-informational)](https://github.com/Symphonic3/MonieO/wiki)
