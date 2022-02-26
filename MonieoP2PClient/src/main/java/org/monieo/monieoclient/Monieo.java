@@ -58,7 +58,7 @@ public class Monieo {
 	public static int MAX_OUTGOING_CONNECTIONS = 10;
 	public static int MAX_CONNECTIONS = 110;
 	
-	public static int CONFIRMATIONS = 5;
+	public static int CONFIRMATIONS_IGNORE = 100;
 	public static int CONFIRMATIONS_BLOCK_SENSITIVE = 60;
 	
 	public static Monieo INSTANCE;
@@ -349,7 +349,7 @@ public class Monieo {
 				Block b = getHighestBlock();
 				Block g = genesis();
 				
-				for (int i = 0; i < CONFIRMATIONS*2; i++) {
+				for (int i = 0; i < 10; i++) { //hardcoded to 10 now because we removed CONFIRMATIONS
 					
 					if (b.equals(g)) {
 						

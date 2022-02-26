@@ -50,7 +50,7 @@ public class BlockMetadata {
 		
 		for (PendingFunds t : pf) {
 			
-			if (t.spendable()) bal = bal.add(t.amount);
+			if (t.isSpendable()) bal = bal.add(t.amount);
 			
 		}
 		
@@ -64,7 +64,7 @@ public class BlockMetadata {
 		
 		for (PendingFunds t : pf) {
 			
-			if (!t.spendable()) bal = bal.add(t.amount);
+			if (!t.isSpendable()) bal = bal.add(t.amount);
 			
 		}
 		
@@ -97,7 +97,7 @@ public class BlockMetadata {
 			
 			PendingFunds pf = PendingFunds.deserialize(s[i]);
 			
-			if (pf.amount.signum() != 1) {
+			if (pf.amount.signum() == 0) {
 				
 				continue;
 				

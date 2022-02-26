@@ -431,7 +431,8 @@ public class Block extends MonieoDataObject{
 		//This method is full of horrible code.
 		//Deal with it, or refactor it yourself.
 		
-		if (!validate()) throw new IllegalStateException("Attempted to generate metadata for an invalid block!");
+		//removing this sanity check because we shouldn't need it anyways
+		//if (!validate()) throw new IllegalStateException("Attempted to generate metadata for an invalid block!");
 		
 		if (!hasMetadata()) {
 			
@@ -460,12 +461,13 @@ public class Block extends MonieoDataObject{
 				
 				if (cb) {
 					
-					pfToAdd.get(w).pf.add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS_BLOCK_SENSITIVE));
-					pfToAdd.get(w).pf.add(new PendingFunds(fees, Monieo.CONFIRMATIONS));
+					//negative symbol is important here!
+					pfToAdd.get(w).pf.add(new PendingFunds(t.getAmount(), -Monieo.CONFIRMATIONS_BLOCK_SENSITIVE));
+					pfToAdd.get(w).pf.add(new PendingFunds(fees, 0));
 					
 				} else {
 					
-					pfToAdd.get(w).pf.add(new PendingFunds(t.getAmount(), Monieo.CONFIRMATIONS));
+					pfToAdd.get(w).pf.add(new PendingFunds(t.getAmount(), 0));
 					
 					Transaction tr = ((Transaction) t);
 					fees = fees.add(tr.d.fee);
@@ -473,7 +475,7 @@ public class Block extends MonieoDataObject{
 					String w2 = tr.getSource();
 					
 					if (!pfToAdd.containsKey(w2)) pfToAdd.put(w2, new WalletData(w2, BigInteger.ZERO, new ArrayList<PendingFunds>()));
-					
+
 					pfToAdd.get(w2).pf.add(new PendingFunds(tr.d.amount.negate().add(tr.d.fee.negate()), 0)); //lol
 					//this increments the nonce assuming that transactions are already validated and all nonces line up. this is checked in Block#validate().
 					pfToAdd.get(w2).nonce = tr.d.nonce.add(BigInteger.ONE);
@@ -541,17 +543,17 @@ public class Block extends MonieoDataObject{
 							BigInteger nonce = new BigInteger(l.split(" ")[1]);
 							
 							List<PendingFunds> tcs = BlockMetadata.getTXCS(l);
-							BigDecimal spendable = BigDecimal.ZERO;
+							BigDecimal fullyconfirmed = BigDecimal.ZERO;
 							
 							for (int i = 0; i < tcs.size(); i++) {
 								
 								PendingFunds t = tcs.get(i);
 								
-								t.confRemain--;
+								t.conf++;
 								
-								if (t.spendable()) {
+								if (t.isOverConfirmed()) {
 									
-									spendable = spendable.add(t.amount);
+									fullyconfirmed = fullyconfirmed.add(t.amount);
 									
 									tcs.remove(i);
 									i--;
@@ -564,11 +566,11 @@ public class Block extends MonieoDataObject{
 								
 								for (PendingFunds pf : pfToAdd.get(wa).pf) {
 									
-									if (pf.spendable()) {
+									if (pf.isOverConfirmed()) {
 										
-										spendable = spendable.add(pf.amount);
+										fullyconfirmed = fullyconfirmed.add(pf.amount);
 										
-									} else if (!pf.junk()) {
+									} else if (!pf.isJunk()) { //usually happens for empty fees
 										
 										tcs.add(pf);
 										
@@ -581,7 +583,7 @@ public class Block extends MonieoDataObject{
 							//WalletData dat = pfToAdd.get(wa);
 							//BigInteger f = new BigInteger(l.split(" ")[1]);
 							
-							String lnwrite = wa + " " + (pfToAdd.containsKey(wa) ? nonce.add(pfToAdd.get(wa).nonce) : nonce) + " " + spendable.stripTrailingZeros().toPlainString();
+							String lnwrite = wa + " " + (pfToAdd.containsKey(wa) ? nonce.add(pfToAdd.get(wa).nonce) : nonce) + " " + fullyconfirmed.stripTrailingZeros().toPlainString();
 							
 							for (PendingFunds pf : tcs) {
 								
@@ -607,7 +609,7 @@ public class Block extends MonieoDataObject{
 					
 					for (PendingFunds pf : pfToAdd.get(w).pf) {
 						
-						lnwrite = lnwrite + " " + pf.serialize();
+						if (!pf.isJunk()) lnwrite = lnwrite + " " + pf.serialize();
 						
 					}
 
