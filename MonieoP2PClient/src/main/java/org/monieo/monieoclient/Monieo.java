@@ -328,13 +328,15 @@ public class Monieo {
 				//attempt to load blockchain before starting UI application
 				if (ss != null) {
 					
-					if (desyncAmount() == -1 || at >= 4) {
+					if (desyncAmount() == -1 || at >= /*2*/0) { //try twice
 						
 						ss.close();
 						ss = null;
 
 						ui = new UI();
+						System.err.println("a");
 						ui.initialize();
+						System.err.println("b");
 						
 					}
 					

@@ -46,6 +46,7 @@ import org.monieo.monieoclient.blockchain.BlockMetadata;
 import org.monieo.monieoclient.blockchain.PendingFunds;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
+import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
 
 import com.formdev.flatlaf.FlatDarkLaf;
@@ -54,11 +55,15 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.JTextField;
 import javax.swing.BoxLayout;
+import javax.swing.JTabbedPane;
 
 public class UI {
 	private JFrame frame;
 	
 	private String[] walletNicks;
+	
+	public JTable table;
+	public JTable table2;
 	
 	public JList<String> list;
 	public JButton btnChangeWalName;
@@ -104,6 +109,16 @@ public class UI {
 	private JLabel lblNewLabel_4;
 	
 	boolean dark = false;
+	
+    public static final String[] FUNDINFO_COLUMN_NAMES = {"Wallet name",
+            "Amount",
+            "Confirmations"};
+    
+    public static final String[] NETWORK_COLUMN_NAMES = {"Node",
+            "Direction",
+            "Connected since"};
+    
+    private JScrollPane scrollPane_1;
 	
 	public UI() {
 	}
@@ -239,6 +254,78 @@ public class UI {
 			}
 			
 		});
+		
+		panel_1 = new JPanel();
+		panel_1.setOpaque(false);
+		panel_1.setBounds(196, 0, 689, 380);
+		panel_1.setLayout(null);
+		frame.getContentPane().add(panel_1);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBounds(10, 130, 663, 225);
+		panel_1.add(tabbedPane);
+		
+		scrollPane_1 = new JScrollPane();
+		tabbedPane.add("Funds Summary", scrollPane_1);
+		
+		table = new JTable();
+		table.getTableHeader().setReorderingAllowed(false);
+		scrollPane_1.setViewportView(table);
+		table.setModel(new DefaultTableModel(null, FUNDINFO_COLUMN_NAMES) {
+			
+			@Override
+		    public boolean isCellEditable(int row, int column) {
+				return false;
+		    }
+		            
+		});
+		
+		JScrollPane scrollPane_7 = new JScrollPane();
+		tabbedPane.add("Network", scrollPane_7);
+		
+		table2 = new JTable();
+		table2.getTableHeader().setReorderingAllowed(false);
+		scrollPane_7.setViewportView(table2);
+		table2.setModel(new DefaultTableModel(null, NETWORK_COLUMN_NAMES) {
+			
+			@Override
+		    public boolean isCellEditable(int row, int column) {
+				return false;
+		    }
+		            
+		});
+		
+		JLabel lblTotalAvailableFunds = new JLabel("Total spendable funds:");
+		lblTotalAvailableFunds.setBounds(10, 10, 133, 29);
+		panel_1.add(lblTotalAvailableFunds);
+		
+		totAvailableFundsDisplay = new JLabel("0");
+		totAvailableFundsDisplay.setBounds(144, 10, 331, 29);
+		panel_1.add(totAvailableFundsDisplay);
+		
+		JLabel lblNewLabel_2 = new JLabel("Total pending funds:");
+		lblNewLabel_2.setBounds(10, 40, 133, 29);
+		panel_1.add(lblNewLabel_2);
+		
+		totPendingFundsDisplay = new JLabel("0");
+		totPendingFundsDisplay.setBounds(144, 40, 331, 29);
+		panel_1.add(totPendingFundsDisplay);
+		
+		JLabel lblTotalFunds = new JLabel("Total funds:");
+		lblTotalFunds.setBounds(10, 70, 133, 29);
+		panel_1.add(lblTotalFunds);
+		
+		totFundsDisplay = new JLabel("0");
+		totFundsDisplay.setBounds(144, 70, 331, 29);
+		panel_1.add(totFundsDisplay);
+		
+		JLabel lblTotalConnectedNodes = new JLabel("Total connected nodes:");
+		lblTotalConnectedNodes.setBounds(10, 100, 133, 29);
+		panel_1.add(lblTotalConnectedNodes);
+		
+		totConnectedNodesDisplay = new JLabel("0");
+		totConnectedNodesDisplay.setBounds(144, 100, 331, 29);
+		panel_1.add(totConnectedNodesDisplay);
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
 		
@@ -269,6 +356,7 @@ public class UI {
 		frame.getContentPane().add(lblNewLabel_1);
 		
 		panel = new JPanel();
+		panel.setVisible(false);
 		panel.setOpaque(false);
 		panel.setLayout(null);
 		panel.setBounds(196, 0, 689, 380);
@@ -334,7 +422,7 @@ public class UI {
 		
 		panelTransaction = new JPanel();
 		panelTransaction.setOpaque(false);
-		panelTransaction.setBounds(10, 152, 663, 225);
+		panelTransaction.setBounds(10, 130, 663, 225);
 		panel.add(panelTransaction);
 		panelTransaction.setLayout(null);
 		
@@ -373,32 +461,6 @@ public class UI {
 				}*/
 			}
 		});
-		
-		JPanel panel_1 = new JPanel();
-		panel_1.setOpaque(false);
-		panel_1.setBounds(196, 0, 689, 380);
-		frame.getContentPane().add(panel_1);
-		panel_1.setLayout(null);
-		panel_1.setVisible(false);
-		
-        String[] columnNames = {"Wallet name",
-                "Amount",
-                "Available in # blocks"};
-
-        Object[][] data = {
-                {"f", "htrfg1","2"},
-                  {"a2", "12r","22"},
-                  {"a3", "1a3","23"},
-        };
-
-        JTable table = new JTable(data, columnNames);
-        table.setModel(new DefaultTableModel(data, columnNames) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        });
-        table.setBounds(-1, 150, 683, 236);
 		
 		JButton overviewBTN = new JButton("Overview");
 		overviewBTN.setBounds(10, 414, 176, 23);
@@ -541,38 +603,6 @@ public class UI {
 		textField_2.setBounds(84, 145, 491, 20);
 		panelTransaction.add(textField_2);
 		
-		JLabel lblTotalAvailableFunds = new JLabel("Total spendable funds:");
-		lblTotalAvailableFunds.setBounds(10, 10, 133, 29);
-		panel_1.add(lblTotalAvailableFunds);
-		
-		totAvailableFundsDisplay = new JLabel("0");
-		totAvailableFundsDisplay.setBounds(144, 10, 331, 29);
-		panel_1.add(totAvailableFundsDisplay);
-		
-		JLabel lblNewLabel_2 = new JLabel("Total pending funds:");
-		lblNewLabel_2.setBounds(10, 40, 133, 29);
-		panel_1.add(lblNewLabel_2);
-		
-		totPendingFundsDisplay = new JLabel("0");
-		totPendingFundsDisplay.setBounds(144, 40, 331, 29);
-		panel_1.add(totPendingFundsDisplay);
-		
-		JLabel lblTotalFunds = new JLabel("Total funds:");
-		lblTotalFunds.setBounds(10, 70, 133, 29);
-		panel_1.add(lblTotalFunds);
-		
-		totFundsDisplay = new JLabel("0");
-		totFundsDisplay.setBounds(144, 70, 331, 29);
-		panel_1.add(totFundsDisplay);
-		
-		JLabel lblTotalConnectedNodes = new JLabel("Total connected nodes:");
-		lblTotalConnectedNodes.setBounds(10, 100, 133, 29);
-		panel_1.add(lblTotalConnectedNodes);
-		
-		totConnectedNodesDisplay = new JLabel("0");
-		totConnectedNodesDisplay.setBounds(144, 100, 331, 29);
-		panel_1.add(totConnectedNodesDisplay);
-		
 		JLabel label_5_1 = new JLabel("Pending funds:");
 		label_5_1.setBounds(10, 100, 133, 29);
 		panel.add(label_5_1);
@@ -608,7 +638,7 @@ public class UI {
 		
 		//warning invalid wallet
 		invalidWallet = new JPanel();
-		invalidWallet.setBounds(10, 152, 663, 66);
+		invalidWallet.setBounds(10, 140, 663, 66);
 		invalidWallet.setBorder(BorderFactory.createLineBorder(new Color(237, 162, 0, 180), 4, true));
 		panel.add(invalidWallet);
 		invalidWallet.setLayout(new BoxLayout(invalidWallet, BoxLayout.X_AXIS));
@@ -647,6 +677,9 @@ public class UI {
 		frame.setResizable(false);
 		refresh(true, true);
 		frame.setVisible(true);
+		frame.setAlwaysOnTop(true);
+		frame.setAlwaysOnTop(false);
+		//frame.requestFocus();
 		
 	}
 	
@@ -676,6 +709,15 @@ public class UI {
 		
 		totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
 		
+		DefaultTableModel model = (DefaultTableModel) table2.getModel();
+		model.setRowCount(0);
+		
+		for (Node n : Monieo.INSTANCE.nodes) {
+			
+			model.addRow(new Object[] {n.getAdress(), n.isServer() ? "Inbound" : "Outbound", n.timeConnected});
+			
+		}
+
 		long ds = Monieo.INSTANCE.desyncAmount();
 		
 		if (ds != -1) {

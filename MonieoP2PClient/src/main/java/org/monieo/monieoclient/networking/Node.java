@@ -33,7 +33,7 @@ public class Node implements Runnable{
 	
 	private boolean server;
 	
-	private final long timeConnected;
+	public final long timeConnected;
 	private long timeRecieved = Long.MIN_VALUE;
 	
 	PrintWriter pw;
