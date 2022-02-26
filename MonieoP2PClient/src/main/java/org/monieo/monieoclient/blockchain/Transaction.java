@@ -97,13 +97,15 @@ public class Transaction extends AbstractTransaction {
 			
 			if (pk == null) return false;
 			
-			if (Monieo.verifySignature(d.serialize(), signature, pk)) return true;
+			if (!Monieo.verifySignature(d.serialize(), signature, pk)) return false;
 
+			return true;
+			
 		} catch (Exception e) {
+			
 			return false;
+			
 		}
-
-		return false;
 		
 	}
 	

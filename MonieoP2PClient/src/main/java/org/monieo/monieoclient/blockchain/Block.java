@@ -233,119 +233,125 @@ public class Block extends MonieoDataObject{
 	@Override
 	boolean testValidity() {
 
-		if (this.equals(Monieo.genesis())) return true;
-
-		if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
-		
-		if (transactions.length == 0) return false;
-
-		if (!merkle(transactions).equals(header.merkleRoot)) return false;
-
-		if (header == null) return false;
-		
-		Block prev = getPrevious();
-
-		if (prev == null) return false;
-
-		if (header.height != prev.header.height+1) return false;
-
-		if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
-
-		if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
-
-		long btoavtime = 0;
-		int divisor = 0;
-		Block d = prev;
-		
-		while (d != null) {
+		try {
 			
-			btoavtime += d.header.timestamp;
-			divisor++;
-			
-			if (divisor == 6) break;
-			
-			d = d.getPrevious();
-			
-		}
-		
-		if ((btoavtime/divisor) >= header.timestamp) return false;
+			if (this.equals(Monieo.genesis())) return true;
 
-		if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
+			if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
+			
+			if (transactions.length == 0) return false;
 
-		if (serialize().getBytes().length > 1024*256) return false; //256kb
-		
-		//validate transactions
-		//all of this is a very inefficient algorithm. if anyone has any bright ideas on how to fix this, please do!
-		//we could easily reduce complexity if we thought about it a bit more but i can't be bothered to do that right now
-		
-		List<AbstractTransaction> txf = Arrays.asList(transactions);
-		
-		List<String> sources = new ArrayList<String>();
-		boolean cb = false;
-		
-		for (AbstractTransaction t : txf) {
+			if (!merkle(transactions).equals(header.merkleRoot)) return false;
+
+			if (header == null) return false;
 			
-			if (t == null) return false;
+			Block prev = getPrevious();
+
+			if (prev == null) return false;
+
+			if (header.height != prev.header.height+1) return false;
+
+			if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
+
+			if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
+
+			long btoavtime = 0;
+			int divisor = 0;
+			Block d = prev;
 			
-			if (t instanceof CoinbaseTransaction) {
+			while (d != null) {
 				
-				if (cb == true) return false; //>1 coinbase transaction
-				cb = true;
-
-				if (!((CoinbaseTransaction) t).validate(this)) return false;
+				btoavtime += d.header.timestamp;
+				divisor++;
 				
-				continue;
+				if (divisor == 6) break;
 				
-			} else if (t instanceof Transaction) {
-				
-				if (Collections.frequency(txf, t) > 1) return false;
-				
-			} else return false; //shouldn't happen
-			
-			Transaction tr = (Transaction) t;
-			
-			if (!sources.contains(tr.getSource())) sources.add(tr.getSource());
-			
-		}
-		
-		BlockMetadata m = prev.getMetadata();
-		
-		for (String s : sources) {
-			
-			WalletData wd = m.getWalletData(s);
-			
-			BigDecimal bal = BlockMetadata.getSpendableBalance(wd.pf);
-			BigInteger nonce = wd.nonce;
-			
-			int am = 0;
-			
-			for (AbstractTransaction t : transactions) {
-				
-				if (t instanceof Transaction) {
-					
-					Transaction tr = (Transaction) t;
-					
-					if (!tr.getSource().equals(s)) continue;
-					
-					am++;
-					
-					bal = bal.subtract(tr.d.amount.add(tr.d.fee));
-					
-					if (tr.d.nonce.compareTo(nonce) == 1) nonce = tr.d.nonce;
-					
-				}
+				d = d.getPrevious();
 				
 			}
 			
-			if (bal.compareTo(BigDecimal.ZERO) == -1) return false;
+			if ((btoavtime/divisor) >= header.timestamp) return false;
+
+			if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
+
+			if (serialize().getBytes().length > 1024*256) return false; //256kb
 			
-			if (!nonce.equals(wd.nonce.add(BigInteger.valueOf(am-1)))) return false;
+			//validate transactions
+			//all of this is a very inefficient algorithm. if anyone has any bright ideas on how to fix this, please do!
+			//we could easily reduce complexity if we thought about it a bit more but i can't be bothered to do that right now
 			
+			List<AbstractTransaction> txf = Arrays.asList(transactions);
+			
+			List<String> sources = new ArrayList<String>();
+			boolean cb = false;
+			
+			for (AbstractTransaction t : txf) {
+				
+				if (t == null) return false;
+				
+				if (t instanceof CoinbaseTransaction) {
+					
+					if (cb == true) return false; //>1 coinbase transaction
+					cb = true;
+
+					if (!((CoinbaseTransaction) t).validate(this)) return false;
+					
+					continue;
+					
+				} else if (t instanceof Transaction) {
+					
+					if (Collections.frequency(txf, t) > 1) return false;
+					
+				} else return false; //shouldn't happen
+				
+				Transaction tr = (Transaction) t;
+				
+				if (!sources.contains(tr.getSource())) sources.add(tr.getSource());
+				
+			}
+			
+			BlockMetadata m = prev.getMetadata();
+			
+			for (String s : sources) {
+				
+				WalletData wd = m.getWalletData(s);
+				
+				BigDecimal bal = BlockMetadata.getSpendableBalance(wd.pf);
+				BigInteger nonce = wd.nonce;
+				
+				int am = 0;
+				
+				for (AbstractTransaction t : transactions) {
+					
+					if (t instanceof Transaction) {
+						
+						Transaction tr = (Transaction) t;
+						
+						if (!tr.getSource().equals(s)) continue;
+						
+						am++;
+						
+						bal = bal.subtract(tr.d.amount.add(tr.d.fee));
+						
+						if (tr.d.nonce.compareTo(nonce) == 1) nonce = tr.d.nonce;
+						
+					}
+					
+				}
+				
+				if (bal.compareTo(BigDecimal.ZERO) == -1) return false;
+				
+				if (!nonce.equals(wd.nonce.add(BigInteger.valueOf(am-1)))) return false;
+				
+			}
+
 			return true;
 			
+		} catch (Exception e) {
+			
+			return false;
+			
 		}
-
-		return true;
 		
 	}
 	
