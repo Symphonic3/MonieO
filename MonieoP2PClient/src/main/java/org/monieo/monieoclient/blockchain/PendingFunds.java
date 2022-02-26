@@ -8,8 +8,8 @@ public class PendingFunds {
 	
 	//If a transaction is > CONFIRMATIONS_BLOCK_SENSITIVE, it is combined with no confirmations field with any others
 
-	long conf;
-	BigDecimal amount;
+	public long conf;
+	public BigDecimal amount;
 	
 	public PendingFunds(BigDecimal transactionAmount, long conf) {
 		

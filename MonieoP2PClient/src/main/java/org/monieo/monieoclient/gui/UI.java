@@ -269,6 +269,7 @@ public class UI {
 		tabbedPane.add("Funds Summary", scrollPane_1);
 		
 		table = new JTable();
+		table.setAutoCreateRowSorter(true);
 		table.getTableHeader().setReorderingAllowed(false);
 		scrollPane_1.setViewportView(table);
 		table.setModel(new DefaultTableModel(null, FUNDINFO_COLUMN_NAMES) {
@@ -284,6 +285,7 @@ public class UI {
 		tabbedPane.add("Network", scrollPane_7);
 		
 		table2 = new JTable();
+		table2.setAutoCreateRowSorter(true);
 		table2.getTableHeader().setReorderingAllowed(false);
 		scrollPane_7.setViewportView(table2);
 		table2.setModel(new DefaultTableModel(null, NETWORK_COLUMN_NAMES) {
@@ -709,14 +711,17 @@ public class UI {
 		
 		totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
 		
-		DefaultTableModel model = (DefaultTableModel) table2.getModel();
-		model.setRowCount(0);
+		DefaultTableModel model2 = (DefaultTableModel) table2.getModel();
+		model2.setRowCount(0);
 		
 		for (Node n : Monieo.INSTANCE.nodes) {
 			
-			model.addRow(new Object[] {n.getAdress(), n.isServer() ? "Inbound" : "Outbound", n.timeConnected});
+			model2.addRow(new Object[] {n.getAdress(), n.isServer() ? "Inbound" : "Outbound", n.timeConnected});
 			
 		}
+
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		model.setRowCount(0);
 
 		long ds = Monieo.INSTANCE.desyncAmount();
 		
@@ -754,38 +759,25 @@ public class UI {
 			
 		} else {
 			
-			for (String s : walletNicks) {
+			panel_1.setVisible(false);
+			panel.setVisible(true);
+			
+			Wallet w = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+			BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf).setScale(8);
+			
+			addressLabel.setText(w.getAsString());
+			nickLabel.setText(w.nickname);
+			INDIVbalanceLabel.setText(n.toPlainString());
+			
+			if (w.hasSK) {
 				
-				Wallet w = Monieo.INSTANCE.getWalletByNick(s);
+				invalidWallet.setVisible(false);
+				panelTransaction.setVisible(true);
 				
-				BigDecimal n = BlockMetadata.getSpendableBalance(m.getWalletData(w.getAsString()).pf).setScale(8);
-				
-				totAvailableFundsDisplay.setText(n.toPlainString());
-				
-				if (s.equals(list.getSelectedValue())) {
-					
-					panel_1.setVisible(false);
-					panel.setVisible(true);
-					
-					addressLabel.setText(w.getAsString());
-					nickLabel.setText(w.nickname);
-					INDIVbalanceLabel.setText(n.toPlainString());
-					
-					if (w.hasSK) {
-						
-						invalidWallet.setVisible(false);
-						panelTransaction.setVisible(true);
-						
-					} else {
+			} else {
 
-						panelTransaction.setVisible(false);
-						invalidWallet.setVisible(true);
-						
-					}
-					
-					break;
-					
-				}
+				panelTransaction.setVisible(false);
+				invalidWallet.setVisible(true);
 				
 			}
 
@@ -800,9 +792,22 @@ public class UI {
 			Wallet w = Monieo.INSTANCE.getWalletByNick(s);
 			
 			List<PendingFunds> pf = m.getWalletData(w.getAsString()).pf;
+			
+			for (PendingFunds p : pf) {
+				
+				if (p.isSpendable()) {
 
-			spendable = spendable.add(BlockMetadata.getSpendableBalance(pf).setScale(8));
-			unspendable = unspendable.add(BlockMetadata.getUnspendableBalance(pf).setScale(8));
+					spendable = spendable.add(p.amount);
+					
+				} else {
+					
+					unspendable = unspendable.add(p.amount);
+					
+				}
+			
+				model.addRow(new Object[] {s, p.amount.toPlainString(), p.isOverConfirmed() ? "100+" : p.conf});
+				
+			}
 			
 		}
 		
