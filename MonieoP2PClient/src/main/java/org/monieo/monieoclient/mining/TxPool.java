@@ -142,7 +142,7 @@ public class TxPool {
 				
 			}
 			
-			for (Transaction t : transactions) {
+			for (Transaction t : (Vector<Transaction>)transactions.clone()) {
 				
 				File f2 = new File(f.getPath() + "/" + t.hash() + ".mnot");
 				
