@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -117,44 +118,54 @@ public class Monieo {
 
 			String link = "https://github.com/Symphonic3/MonieO/releases/tag/" + releaseLatest;
 
-			int res = JOptionPane.showOptionDialog(null,
-					new MessageWithLink(
-							"New update available. Press 'OK' to automatically download, or download and use version "
-									+ releaseLatest + " from github:" + "\n <a href=\"" + link + "\">Click here</a>"),
-					"New update available!", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, null, null);
+			JSONObject assetInfo = response.getJSONArray("assets").getJSONObject(0);
+			String downloadURL = assetInfo.getString("browser_download_url");
+			String fileName = assetInfo.getString("name");
 
-			if (res == 0) {
+			String jarFol = null;
+			try {
+				jarFol = new File(Monieo.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+						.getParent();
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
 
-				JSONObject assetInfo = response.getJSONArray("assets").getJSONObject(0);
-				String downloadURL = assetInfo.getString("browser_download_url");
-				String fileName = assetInfo.getString("name");
-
-				String jarFol = null;
+			File newJar = new File(jarFol + "/" + fileName);
+			
+			if (newJar.exists()) {
+				
 				try {
-					jarFol = new File(Monieo.class.getProtectionDomain().getCodeSource().getLocation().toURI())
-							.getParent();
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-
-				File newJar = new File(jarFol + "/" + fileName);
-
-				try (FileWriter fw = new FileWriter(newJar)) {
-					
-					String data = getHTML(downloadURL);
-					
-					if (data != null) {
-						
-						fw.write(data);
-						
-					}
-
+					Runtime.getRuntime().exec("java -jar " + "\"" + newJar.getPath() + "\"" + " " + String.join(" ", args));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				
+			} else {
 
+				int res = JOptionPane.showOptionDialog(null,
+						new MessageWithLink(
+								"New update available. Press 'OK' to automatically download, or download and use version "
+										+ releaseLatest + " from github:" + "\n <a href=\"" + link + "\">Click here</a>"),
+						"New update available!", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, null, null);
+
+				if (res == 0) {
+
+					try {
+						Files.copy(new URL(downloadURL).openStream(), newJar.toPath());
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					
+					try {
+						Runtime.getRuntime().exec("java -jar " + "\"" + newJar.getPath() + "\"" + " " + String.join(" ", args));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+				}
+				
 			}
-
+			
 			System.exit(0);
 
 		}
@@ -176,7 +187,7 @@ public class Monieo {
 				 
 				for (String line; (line = reader.readLine()) != null;) {
 			        	  
-					result.append(line);
+					result.append(line + "\n");
 			              
 			    }
 				 
@@ -351,15 +362,15 @@ public class Monieo {
 				//attempt to load blockchain before starting UI application
 				if (ss != null) {
 					
-					if (desyncAmount() == -1 || at >= /*2*/0) { //try twice
+					if (desyncAmount() == -1 || at >= 2) { //try twice
 						
 						ss.close();
 						ss = null;
 
 						ui = new UI();
-						System.err.println("a");
+						System.err.println("Initializing UI...");
 						ui.initialize();
-						System.err.println("b");
+						System.err.println("...UI Initialized!");
 						
 					}
 					
