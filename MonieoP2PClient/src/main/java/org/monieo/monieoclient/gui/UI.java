@@ -140,7 +140,7 @@ public class UI {
 		
 		frame = new JFrame();
 		frame.setIconImage(new FlatSVGIcon("icon.svg").getImage());
-		frame.setTitle("MonieO Client Version " + Monieo.VERSION);
+		frame.setTitle("MonieO Client v" + Monieo.VERSION);
 		frame.setBounds(100, 100, 901, 485);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
@@ -156,7 +156,7 @@ public class UI {
 				
 				JDialog jd = new JDialog(frame);
 				
-				jd.setTitle("Mining " + Monieo.VERSION);
+				jd.setTitle("Mining v" + Monieo.VERSION);
 				jd.setBounds(150, 150, 242, 350);
 				jd.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				jd.setResizable(false);
@@ -610,6 +610,18 @@ public class UI {
 		panel.add(label_5_1);
 		
 		JButton btnNewButton_1 = new JButton("Click to view");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				list.setSelectedValue(null, false);
+				tabbedPane.setSelectedIndex(0);
+				refresh(false, false);
+				
+			 }
+			
+		});
 		btnNewButton_1.setBounds(144, 102, 116, 23);
 		panel.add(btnNewButton_1);
 		
