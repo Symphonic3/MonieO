@@ -229,21 +229,17 @@ public class Block extends MonieoDataObject{
 		return discrepancy.setScale(0, RoundingMode.HALF_UP).toBigIntegerExact();
 		
 	}
-
-	@Override
-	boolean testValidity() {
-
+	
+	public boolean isReady() {
+		
 		try {
 			
 			if (this.equals(Monieo.genesis())) return true;
-
-			if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
 			
-			if (transactions.length == 0) return false;
-
-			if (!merkle(transactions).equals(header.merkleRoot)) return false;
-
-			if (header == null) return false;
+			//this is an easy shortcut:
+			if (hasMetadata()) return true;
+			
+			if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
 			
 			Block prev = getPrevious();
 
@@ -252,9 +248,7 @@ public class Block extends MonieoDataObject{
 			if (header.height != prev.header.height+1) return false;
 
 			if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
-
-			if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
-
+			
 			long btoavtime = 0;
 			int divisor = 0;
 			Block d = prev;
@@ -271,11 +265,8 @@ public class Block extends MonieoDataObject{
 			}
 			
 			if ((btoavtime/divisor) >= header.timestamp) return false;
-
-			if (Monieo.INSTANCE.getNetAdjustedTime() + 7200000 < header.timestamp) return false; //2h
-
-			if (serialize().getBytes().length > 1024*256) return false; //256kb
 			
+			//TODO fix this so we don't have to evaluate ALL of this in the ready function
 			//validate transactions
 			//all of this is a very inefficient algorithm. if anyone has any bright ideas on how to fix this, please do!
 			//we could easily reduce complexity if we thought about it a bit more but i can't be bothered to do that right now
@@ -344,6 +335,37 @@ public class Block extends MonieoDataObject{
 				if (!nonce.equals(wd.nonce.add(BigInteger.valueOf(am-1)))) return false;
 				
 			}
+			
+			return true;
+			
+		} catch (Exception e) {
+			
+			return false;
+			
+		}
+		
+	}
+
+	@Override
+	boolean testValidity() {
+
+		//this only represents a potentially valid block, we need to check isReady to be 100% sure
+		
+		try {
+			
+			if (this.equals(Monieo.genesis())) return true;
+
+			if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
+			
+			if (transactions.length == 0) return false;
+
+			if (!merkle(transactions).equals(header.merkleRoot)) return false;
+
+			if (header == null) return false;
+
+			if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
+
+			if (serialize().getBytes().length > 1024*256) return false; //256kb
 
 			return true;
 			
@@ -442,6 +464,13 @@ public class Block extends MonieoDataObject{
 		//if (!validate()) throw new IllegalStateException("Attempted to generate metadata for an invalid block!");
 		
 		if (!hasMetadata()) {
+			
+			if (!isReady()) {
+				
+				System.out.println("Attempted to generate metadata for an unready block! Not generated.");
+				return;
+				
+			}
 			
 			File blockmetafile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + hash() + ".blkmeta");
 			try {

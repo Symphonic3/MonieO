@@ -134,17 +134,25 @@ public class DefaultMinerImpl implements AbstractMiner{
 					
 					if (b.validate()) {
 						
-						System.out.println("Found valid block!");
-						
-						Monieo.INSTANCE.handleBlock(b);
-						nonce = BigInteger.ZERO;
-						curr.blocks++;
-						curr.total = curr.total.add(ct.getAmount());
-						break in;
+						if (b.isReady()) {
+							
+							System.out.println("Found valid block!");
+							
+							Monieo.INSTANCE.handleBlock(b);
+							nonce = BigInteger.ZERO;
+							curr.blocks++;
+							curr.total = curr.total.add(ct.getAmount());
+							break in;
+							
+						} else {
+							
+							throw new IllegalStateException("Found block but it was not ready!");
+							
+						}
 						
 					}
 					
-					throw new IllegalStateException("Found valid block but block could not be validated!");
+					throw new IllegalStateException("Found block but block could not be validated!");
 					
 				}
 

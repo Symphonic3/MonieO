@@ -394,12 +394,8 @@ public class Node implements Runnable{
 
 								if (b.hash().equals(wantedHash)) {
 									
-									if (b != null && b.validate()) {
-										
-										t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
-										break;
-										
-									}
+									t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
+									break;
 									
 								}
 								

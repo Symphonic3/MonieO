@@ -555,17 +555,21 @@ public class Monieo {
 				e.printStackTrace();
 			}
 			
-			System.out.println("generating metadata " + b.hash());
-			b.generateMetadata();
-			
-			if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
+			if (b.isReady()) {
 				
-				setHighestBlock(b);
-				if (ui != null) ui.refresh(false, false);
+				System.out.println("generating metadata " + b.hash());
+				b.generateMetadata();
+				
+				if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
+					
+					setHighestBlock(b);
+					if (ui != null) ui.refresh(false, false);
+					
+				}
+				
+				Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 				
 			}
-			
-			Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 			
 		}
 		
