@@ -33,7 +33,7 @@ public class ConnectionHandler implements Runnable{
 				
 				String inet = clientSocket.getInetAddress().getHostAddress();
 				
-				if (!Monieo.INSTANCE.getValidNodesRightNow().contains(inet)) {
+				if (Monieo.INSTANCE.knownNodes.contains(inet) && !Monieo.INSTANCE.getValidNodesRightNow().contains(inet)) {
 					
 					clientSocket.close();
 					continue;

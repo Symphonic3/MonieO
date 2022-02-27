@@ -693,11 +693,13 @@ public class UI {
 				
 				FlatLightLaf.setup();
 				SwingUtilities.updateComponentTreeUI(frame);
+				miningstats.updateUI();
 				
 			} else {
 				
 				FlatDarkLaf.setup();
 				SwingUtilities.updateComponentTreeUI(frame);
+				miningstats.updateUI();
 				
 			}
 
@@ -805,7 +807,7 @@ public class UI {
 					
 				}
 			
-				model.addRow(new Object[] {s, p.amount.toPlainString(), p.isOverConfirmed() ? "100+" : p.conf});
+				model.addRow(new Object[] {s, p.amount.toPlainString(), p.isOverConfirmed() ? Monieo.CONFIRMATIONS_IGNORE + "+" : p.conf});
 				
 			}
 			

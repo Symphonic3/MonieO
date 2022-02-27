@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.monieo</groupId>
 	<artifactId>MonieoP2PClient</artifactId>
-	<version>0.1</version>
+	<version>0.2</version>
 	<packaging>jar</packaging>
 	<name>MonieoP2PClient</name>
 	<properties>
@@ -75,6 +75,16 @@
 			<groupId>com.formdev</groupId>
 			<artifactId>flatlaf-extras</artifactId>
 			<version>2.0.1</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.json</groupId>
+    		<artifactId>json</artifactId>
+    		<version>20211205</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.apache.maven</groupId>
+    		<artifactId>maven-artifact</artifactId>
+    		<version>3.8.4</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -5,13 +5,19 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.SplashScreen;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -24,19 +30,19 @@ import java.util.TimerTask;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-
+import javax.swing.JOptionPane;
 import java.security.*;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.json.JSONObject;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
+import org.monieo.monieoclient.gui.MessageWithLink;
 import org.monieo.monieoclient.gui.UI;
 import org.monieo.monieoclient.mining.AbstractMiner;
 import org.monieo.monieoclient.mining.DefaultMinerImpl;
@@ -53,7 +59,7 @@ public class Monieo {
 	public static final int PORT = 21093;
 	public static final String MAGIC_NUMBERS = "MEOPROTOCOL";
 	public static final String PROTOCOL_VERSION = "1.0";
-	public static double VERSION;
+	public static String VERSION;
 	
 	public static int MAX_OUTGOING_CONNECTIONS = 10;
 	public static int MAX_CONNECTIONS = 110;
@@ -80,13 +86,14 @@ public class Monieo {
 			e.printStackTrace();
 		}
 
-		VERSION = Double.valueOf(properties.getProperty("version"));
+		VERSION = properties.getProperty("version");
 		
 		System.out.println("Version: " + VERSION);
 		System.out.println("Please look towards the GUI application.");
 		System.out.println("");
 		System.out.println("If there are any issues with running the application, all errors will be logged in this window.");
 		System.out.println("Please paste the full log of this window when submitting a bug report.");
+		System.out.println("Charset: " + Charset.defaultCharset().name());
 		
 		ssg.setComposite(AlphaComposite.Clear);
 		ssg.fillRect(30,310,210,20);
@@ -96,38 +103,17 @@ public class Monieo {
 		ssg.drawString("v" + String.valueOf(VERSION), 30, 310);
 		
 		ss.update();
-		
-		/*String url = "https://api.github.com/repos/Symphonic3/MonieO/releases/latest";
 
-		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-		HttpGet request = new HttpGet(url);
-		request.addHeader("content-type", "application/json");
-		HttpResponse result = null;
-		try {
-			result = httpClient.execute(request);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		if (result.getStatusLine().getStatusCode() != 200)
-			throw new RuntimeException("Could not parse github API");
-		String json = null;
-		try {
-			json = EntityUtils.toString(result.getEntity(), "UTF-8");
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		String result = getHTML("https://api.github.com/repos/Symphonic3/MonieO/releases/latest");
+	    
+		if (result == null) throw new RuntimeException("Could not parse github API");
 
-		JSONObject response = new JSONObject(json);
-		
-		try {
-			httpClient.close();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		
-		double releaseLatest = Double.valueOf(response.getString("tag_name"));
+		JSONObject response = new JSONObject(result);
 
-		if (releaseLatest > version) {
+		ComparableVersion releaseLatest = new ComparableVersion(response.getString("tag_name"));
+		ComparableVersion versionActual = new ComparableVersion(String.valueOf(VERSION));
+
+		if (releaseLatest.compareTo(versionActual) == 1) {
 
 			String link = "https://github.com/Symphonic3/MonieO/releases/tag/" + releaseLatest;
 
@@ -153,8 +139,16 @@ public class Monieo {
 
 				File newJar = new File(jarFol + "/" + fileName);
 
-				try {
-					FileUtils.copyURLToFile(new URL(downloadURL), newJar);
+				try (FileWriter fw = new FileWriter(newJar)) {
+					
+					String data = getHTML(downloadURL);
+					
+					if (data != null) {
+						
+						fw.write(data);
+						
+					}
+
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -164,10 +158,39 @@ public class Monieo {
 			System.exit(0);
 
 		}
-		*/
 		
 		new Monieo();
 
+	}
+	
+	public static String getHTML(String url) {
+		
+		try {
+		
+			StringBuilder result = new StringBuilder();
+			URL uri = new URL(url);
+			HttpURLConnection conn = (HttpURLConnection) uri.openConnection();
+			conn.setRequestMethod("GET");
+			    
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+				 
+				for (String line; (line = reader.readLine()) != null;) {
+			        	  
+					result.append(line);
+			              
+			    }
+				 
+			}
+			
+			return result.toString();
+			
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+			return null;
+			
+		}
+		
 	}
 	
 	public UI ui;
@@ -184,7 +207,7 @@ public class Monieo {
 	public File txlistFolder;
 	
 	List<Socket> connections = new ArrayList<Socket>();
-	List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
+	public List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
 	
 	public List<Wallet> myWallets = new ArrayList<Wallet>();
 	
