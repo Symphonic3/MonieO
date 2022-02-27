@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
@@ -39,7 +40,44 @@ public class Node implements Runnable{
 	PrintWriter pw;
 	BufferedReader br;
 	
+	NodeWatcher nw;
+	
 	public long lastValidPacketTime;
+	
+	public class NodeWatcher implements Runnable {
+		
+		Node n;
+		
+		public NodeWatcher(Node n) {
+			
+			this.n = n;
+			
+		}
+
+		@Override
+		public void run() {
+			
+			while (true) {
+				
+				if (n.kill) return;
+				
+				if (!queue.isEmpty()) {
+					
+					for (Consumer<Node> a : queue) {
+						
+						a.accept(n);
+						
+					}
+					
+				}
+				
+				queue.clear();
+				
+			}
+			
+		}
+
+	}
 	
 	public Node(Socket s, boolean server) {
 		
@@ -48,6 +86,27 @@ public class Node implements Runnable{
 		
 		this.timeConnected = System.currentTimeMillis();
 		lastValidPacketTime = timeConnected;
+		
+		try {
+			
+			this.pw = new PrintWriter(socket.getOutputStream(), false);
+			this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			
+		} catch (IOException e) {
+
+			System.out.println("DC BECAUSE OF SOCKET RETRIEVE EXCEPTION!");
+			
+			//TODO remove this
+			e.printStackTrace();
+			disconnect();			
+
+			return;
+			
+			
+		}
+		
+		nw = new NodeWatcher(this);
+		new Thread(nw).start();
 		
 	}
 	
@@ -135,11 +194,7 @@ public class Node implements Runnable{
 			@Override
 			public void accept(Node t) {
 				
-				pw.print(nc.serialize());
-				pw.println();
-				pw.print(TERM);
-				pw.println();
-				pw.flush();
+				sendNetworkPacket(nc);
 				
 			}
 			
@@ -147,16 +202,12 @@ public class Node implements Runnable{
 		
 	}
 	
-	private void sendNetworkPacketNow(NetworkPacket nc) {
-		
-		//this is done because sendnetworkpacketnow is only used in resource-intensive applications, where we will be sending lots and therefore
-		//do not want to time out the remote client
-		lastValidPacketTime = System.currentTimeMillis(); 
-		
+	private void sendNetworkPacket(NetworkPacket nc) {
+
 		pw.print(nc.serialize());
-		pw.println();
+		pw.print("\n");
 		pw.print(TERM);
-		pw.println();
+		pw.print("\n");
 		pw.flush();
 		
 	}
@@ -165,25 +216,10 @@ public class Node implements Runnable{
 	public void run() {
 
 		try {
-
-			pw = new PrintWriter(socket.getOutputStream(), false, Charset.forName("UTF8"));
-			br = new BufferedReader(new InputStreamReader(socket.getInputStream(), Charset.forName("UTF8")));
 			
 			while (true) {
 				
 				if (kill) return;
-				
-				if (!queue.isEmpty()) {
-					
-					for (Consumer<Node> a : queue) {
-						
-						a.accept(this);
-						
-					}
-					
-				}
-				
-				queue.clear();
 				
 				NetworkPacket nc = null;
 				
@@ -193,7 +229,7 @@ public class Node implements Runnable{
 				String t;
 				
 				inner: while ((t = br.readLine()) != null) {
-					
+
 					if (t.equals(TERM)) break inner;
 					s = s + t + "\n";
 					
@@ -250,7 +286,7 @@ public class Node implements Runnable{
 					
 					timeRecieved = Long.valueOf(nc.data);
 					
-					sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.ACK_VER, null));
+					queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.ACK_VER, null));
 					
 					localAcknowledgedRemote = true;
 					
@@ -274,11 +310,11 @@ public class Node implements Runnable{
 					
 					for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
 						
-						sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
+						queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
 						
 					}
 					
-					sendNetworkPacketNow(NetworkPacket.generateSyncPacket());
+					queueNetworkPacket(NetworkPacket.generateSyncPacket());
 					
 				}
 				
@@ -286,46 +322,55 @@ public class Node implements Runnable{
 				
 				if (nc.cmd == NetworkPacketType.REQUEST_BLOCKS_AFTER) {
 					
-					String[] wantedHashP = nc.data.split(" ");
-					
-					int i = 0;
-					
-					List<String> hashes = new ArrayList<String>();
-					
-					Block b = Monieo.INSTANCE.getHighestBlock();
-					Block g = Monieo.genesis();
-					
-					while(true) {
-						
-						if (!b.hash().equals(wantedHashP[i])) {
+					queueAction(new Consumer<Node>() {
+
+						@Override
+						public void accept(Node t) {
 							
-							hashes.add(b.hash());
+							String[] wantedHashP = nc.data.split(" ");
 							
-						} else break;
-						
-						if (b.equals(g)) {
-														
-							if (wantedHashP.length != i) {
+							int i = 0;
+							
+							List<String> hashes = new ArrayList<String>();
+							
+							Block b = Monieo.INSTANCE.getHighestBlock();
+							Block g = Monieo.genesis();
+							
+							while(true) {
 								
-								hashes.clear();
-								i++;
-								b = Monieo.INSTANCE.getHighestBlock();
-								continue;
+								if (!b.hash().equals(wantedHashP[i])) {
+									hashes.add(b.hash());
+									
+								} else break;
 								
-							} else break;
+								if (b.equals(g)) {
+																
+									if (wantedHashP.length != i) {
+										
+										hashes.clear();
+										i++;
+										b = Monieo.INSTANCE.getHighestBlock();
+										continue;
+										
+									} else break;
+									
+								}
+								
+								b = b.getPrevious();
+								
+							}
+							Collections.reverse(hashes);
+							
+							for (String s : hashes) {
+								
+								t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
+										Block.getByHash(s).serialize()));
+								
+							}
 							
 						}
 						
-						b = b.getPrevious();
-						
-					}
-					
-					for (String s : hashes) {
-						
-						sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
-								Block.getByHash(s).serialize()));
-						
-					}
+					});
 					
 				} else if (nc.cmd == NetworkPacketType.REQUEST_SINGLE_BLOCK) {
 					
@@ -335,35 +380,45 @@ public class Node implements Runnable{
 					//obviously there are better ways to do this, but this netcommand
 					//might be removed anyways.
 					
-					String wantedHash = nc.data;
-					
-					Block b = Monieo.INSTANCE.getHighestBlock();
-					Block g = Monieo.genesis();
-					
-					while(true) {
-						
-						if (b.hash().equals(wantedHash)) {
+					queueAction(new Consumer<Node>() {
+
+						@Override
+						public void accept(Node t) {
 							
-							if (b != null && b.validate()) {
+							String wantedHash = nc.data;
+							
+							Block b = Monieo.INSTANCE.getHighestBlock();
+							Block g = Monieo.genesis();
+							
+							while(true) {
+
+								if (b.hash().equals(wantedHash)) {
+									
+									if (b != null && b.validate()) {
+										
+										t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
+										break;
+										
+									}
+									
+								}
 								
-								sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
-								break;
+								if (b.equals(g)) {
+									
+									//don't have block, sorry
+									return;
+									
+								}
+								
+								b = b.getPrevious();
 								
 							}
-							
-						}
-						
-						if (b.equals(g)) {
-							
-							//don't have block, sorry
-							return true;
-							
-						}
-						
-						b = b.getPrevious();
-						
-					}
 
+							
+						}
+						
+					});
+					
 				} else if (nc.cmd == NetworkPacketType.REQUEST_NODES) {
 					
 					List<String> s = Monieo.INSTANCE.getValidNodesRightNow();
@@ -378,7 +433,7 @@ public class Node implements Runnable{
 					
 					k = k.substring(0, k.length() - 1);
 					
-					sendNetworkPacketNow(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k));
+					queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k));
 					
 				} else if (nc.cmd == NetworkPacketType.SEND_TRANSACTION) {
 

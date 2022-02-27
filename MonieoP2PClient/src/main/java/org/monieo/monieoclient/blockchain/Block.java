@@ -299,7 +299,7 @@ public class Block extends MonieoDataObject{
 					continue;
 					
 				} else if (t instanceof Transaction) {
-					
+
 					if (Collections.frequency(txf, t) > 1) return false;
 					
 				} else return false; //shouldn't happen
@@ -338,9 +338,9 @@ public class Block extends MonieoDataObject{
 					}
 					
 				}
-				
+
 				if (bal.compareTo(BigDecimal.ZERO) == -1) return false;
-				
+
 				if (!nonce.equals(wd.nonce.add(BigInteger.valueOf(am-1)))) return false;
 				
 			}
@@ -349,6 +349,7 @@ public class Block extends MonieoDataObject{
 			
 		} catch (Exception e) {
 			
+			e.printStackTrace();
 			return false;
 			
 		}
