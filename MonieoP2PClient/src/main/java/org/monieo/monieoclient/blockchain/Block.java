@@ -249,6 +249,32 @@ public class Block extends MonieoDataObject{
 
 			if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
 			
+			Block p = prev;
+			
+			List<Block> genm = new ArrayList<Block>();
+			
+			genmloop: while (true) {
+				
+				if (!p.isReady()) {
+					
+					genm.add(p);
+					
+				} else {
+					
+					for (int i = genm.size(); i-- > 0; ) {
+
+						genm.get(i).isReady();
+						
+					}
+					
+					break genmloop;
+					
+				}
+
+				p = p.getPrevious();
+				
+			}
+			
 			long btoavtime = 0;
 			int divisor = 0;
 			Block d = prev;
@@ -465,12 +491,12 @@ public class Block extends MonieoDataObject{
 		
 		if (!hasMetadata()) {
 			
-			if (!isReady()) {
+			/*if (!isReady()) {
 				
 				System.out.println("Attempted to generate metadata for an unready block! Not generated.");
 				return;
 				
-			}
+			}*/
 			
 			File blockmetafile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + hash() + ".blkmeta");
 			try {
