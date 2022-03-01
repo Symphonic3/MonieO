@@ -607,6 +607,7 @@ public class Monieo {
 						
 						if (curr.transactions.length == 0) {
 							
+							txCount++;
 							lowestT = BigDecimal.ZERO;
 							avT = BigDecimal.ZERO;
 							break;
