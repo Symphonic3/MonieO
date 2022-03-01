@@ -448,7 +448,7 @@ public class Block extends MonieoDataObject{
 		
 		for (int i = 0; i < halvings; i++) {
 			
-			defaultAmount = defaultAmount.divide(BigDecimal.valueOf(2));
+			defaultAmount = defaultAmount.divide(BigDecimal.valueOf(2), 100, RoundingMode.HALF_UP);
 			
 		}
 		

@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -170,7 +171,7 @@ public class TxPool {
 	
 	public BigDecimal ratio(Transaction l) {
 		
-		return l.d.fee.divide(new BigDecimal(l.serialize().getBytes().length));
+		return l.d.fee.divide(new BigDecimal(l.serialize().getBytes().length), 100, RoundingMode.HALF_UP);
 		
 	}
 	
