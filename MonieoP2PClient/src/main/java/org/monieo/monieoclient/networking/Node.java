@@ -65,6 +65,8 @@ public class Node implements Runnable{
 					
 					for (Consumer<Node> a : queue) {
 						
+						if (n.kill) return;
+						
 						a.accept(n);
 						
 					}
@@ -230,6 +232,8 @@ public class Node implements Runnable{
 				
 				inner: while ((t = br.readLine()) != null) {
 
+					if (kill) return;
+					
 					if (t.equals(TERM)) break inner;
 					s = s + t + "\n";
 					
@@ -310,6 +314,8 @@ public class Node implements Runnable{
 					
 					for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
 						
+						if (kill) return true;
+						
 						queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
 						
 					}
@@ -338,6 +344,8 @@ public class Node implements Runnable{
 							
 							while(true) {
 								
+								if (kill) return;
+								
 								if (!b.hash().equals(wantedHashP[i])) {
 									hashes.add(b.hash());
 									
@@ -362,6 +370,8 @@ public class Node implements Runnable{
 							Collections.reverse(hashes);
 							
 							for (String s : hashes) {
+								
+								if (kill) return;
 								
 								t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
 										Block.getByHash(s).serialize()));
@@ -392,6 +402,8 @@ public class Node implements Runnable{
 							
 							while(true) {
 
+								if (kill) return;
+								
 								if (b.hash().equals(wantedHash)) {
 									
 									t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
