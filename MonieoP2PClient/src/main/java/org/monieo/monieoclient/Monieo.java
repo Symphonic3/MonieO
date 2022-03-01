@@ -363,6 +363,21 @@ public class Monieo {
 		
 		handleBlock(genesis());
 		
+		Block b = getHighestBlock();
+		
+		if (b == null || !b.validate() || !b.isReady() || !b.hasMetadata() || !b.hasWorkData()) {
+			
+			String warning = "Detected potential block data corruption or system clock desync.\n"
+					+ "Please backup the ENTIRE MonieO/wallets folder as to not lose your MonieO due to further corruption.\n"
+					+ "MonieO will not start until the corrupted blocks are removed or the issue is manually corrected.";
+			System.out.println(warning);
+			
+			JOptionPane.showMessageDialog(null, warning, "Error", JOptionPane.ERROR_MESSAGE);
+			
+			System.exit(0);
+			
+		}
+		
 		txp = new TxPool(txlistFolder);
 		
 		ch = new ConnectionHandler();

@@ -231,7 +231,7 @@ public class UI {
 							
 							BigDecimal hashrate = new BigDecimal(m.hashes).divide(new BigDecimal(dur/1000), 0, RoundingMode.HALF_UP);
 							
-							JOptionPane.showMessageDialog(frame, new JLabel("Session hashrate estimate: " + hashrate.toPlainString() + "h/s"), "Mining session over", 1);
+							JOptionPane.showMessageDialog(frame, new JLabel("Session hashrate estimate: " + hashrate.toPlainString() + "h/s"), "Mining session over", JOptionPane.INFORMATION_MESSAGE);
 							
 							text = "Off";
 							
@@ -711,7 +711,7 @@ public class UI {
 					
 					String resp = Monieo.INSTANCE.createWallet(result.toString());
 					
-					JOptionPane.showMessageDialog(frame, resp, "Info", 1);
+					JOptionPane.showMessageDialog(frame, resp, "Info", JOptionPane.INFORMATION_MESSAGE);
 					
 					refresh(true, false);
 				}
@@ -901,7 +901,7 @@ public class UI {
 	
 	public void notifyInvalid() {
 		
-		JOptionPane.showMessageDialog(frame, "Invalid data entered!", "Error", 0);
+		JOptionPane.showMessageDialog(frame, "Invalid data entered!", "Error", JOptionPane.ERROR_MESSAGE);
 		
 	}
 }
