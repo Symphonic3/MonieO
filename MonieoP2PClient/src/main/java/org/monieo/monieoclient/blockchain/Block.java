@@ -33,6 +33,8 @@ public class Block extends MonieoDataObject{
 		
 		Block r = Block.deserialize(Monieo.readFileData(f));
 		
+		if (r == null || !r.validate()) throw new IllegalStateException("Attempted to fetch a block from disk that is not valid!");
+		
 		return r;
 		
 	}
@@ -255,7 +257,7 @@ public class Block extends MonieoDataObject{
 			
 			genmloop: while (true) {
 				
-				if (!p.isReady()) {
+				if (!p.hasMetadata()) { //shortcut again, means it hasn't been ready checked yet
 					
 					genm.add(p);
 					
@@ -263,7 +265,7 @@ public class Block extends MonieoDataObject{
 					
 					for (int i = genm.size(); i-- > 0; ) {
 
-						genm.get(i).isReady();
+						if (!genm.get(i).isReady()) return false;
 						
 					}
 					
@@ -504,9 +506,8 @@ public class Block extends MonieoDataObject{
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			
-			String ph = header.preHash;
-			File prevBlockMetaFile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + ph + ".blkmeta");
+
+			File prevBlockMetaFile = getPrevious().getMetadata().blockmetafile;
 			
 			//parse transactions
 			BigDecimal fees = BigDecimal.ZERO;
@@ -551,7 +552,7 @@ public class Block extends MonieoDataObject{
 				if (!this.equals(Monieo.genesis())) {
 					
 					//generate any needed previous metadata
-					if (!prevBlockMetaFile.exists()) {
+					if (prevBlockMetaFile == null || !prevBlockMetaFile.exists()) {
 						
 						Block p = getPrevious();
 						

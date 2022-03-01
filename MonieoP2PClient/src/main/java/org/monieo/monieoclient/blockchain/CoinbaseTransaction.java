@@ -13,6 +13,7 @@ public class CoinbaseTransaction extends AbstractTransaction{
 		this.amount = a;
 		
 	}
+	
 	@Override
 	public String getDestination() {
 		return destination;
@@ -57,6 +58,7 @@ public class CoinbaseTransaction extends AbstractTransaction{
 		}
 		
 	}
+	
 	@Override
 	public String serialize() {
 		
