@@ -37,6 +37,8 @@ import javax.swing.ScrollPaneLayout;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -45,6 +47,7 @@ import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.BlockMetadata;
 import org.monieo.monieoclient.blockchain.PendingFunds;
 import org.monieo.monieoclient.blockchain.Transaction;
+import org.monieo.monieoclient.gui.FeeEstimate.FeeEstimateType;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
@@ -56,6 +59,8 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.JTextField;
 import javax.swing.BoxLayout;
 import javax.swing.JTabbedPane;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 
 public class UI {
 	private JFrame frame;
@@ -107,6 +112,8 @@ public class UI {
 	
 	public boolean modeToggleStatus;
 	private JLabel lblNewLabel_4;
+	
+	JComboBox<FeeEstimate> comboBox;
 	
 	boolean dark = false;
 	
@@ -328,6 +335,302 @@ public class UI {
 		totConnectedNodesDisplay = new JLabel("0");
 		totConnectedNodesDisplay.setBounds(144, 100, 331, 29);
 		panel_1.add(totConnectedNodesDisplay);
+		
+		panel = new JPanel();
+		panel.setVisible(false);
+		panel.setOpaque(false);
+		panel.setLayout(null);
+		panel.setBounds(196, 0, 689, 380);
+		frame.getContentPane().add(panel);
+		
+		addressLabel = new JTextField("0");
+		addressLabel.setEditable(false);
+		addressLabel.setOpaque(false); //this is the same as a JLabel
+		
+				addressLabel.setBounds(144, 10, 496, 29);
+				
+				addressLabel.addMouseListener(new MouseAdapter() {
+					
+					 @Override
+					 public void mouseClicked(MouseEvent e) {
+						StringSelection ss = new StringSelection(addressLabel.getText());
+						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
+						
+						JDialog jd = new JDialog();
+						jd.setSize(50, 15);
+						jd.setLocation(e.getLocationOnScreen());
+						jd.getContentPane().add(new JLabel("Copied!"));
+						jd.setUndecorated(true);
+						((JPanel)jd.getContentPane()).setBorder(BorderFactory.createLineBorder(Color.BLACK));
+						jd.setFocusable(false);
+						jd.setFocusableWindowState(false);
+						
+						jd.setModalityType(ModalityType.MODELESS);
+
+						jd.setVisible(true);
+						
+						new Timer().schedule(new TimerTask() {
+							
+							@Override
+							public void run() {
+								
+								jd.setVisible(false);
+								jd.dispose();
+								
+							}
+							
+						}, 1000);
+						
+					 }
+					
+				});
+				
+				panelTransaction = new JPanel();
+				panelTransaction.setOpaque(false);
+				panelTransaction.setBounds(10, 130, 663, 225);
+				panel.add(panelTransaction);
+				panelTransaction.setLayout(null);
+				
+				//what is a trnt and why is it already sent
+				sentTrnt = new JButton("Send transaction");
+				sentTrnt.setBounds(84, 191, 144, 23);
+				panelTransaction.add(sentTrnt);
+				sentTrnt.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						try {
+							//TODO sanitize data and do pending in/out money. Client should allow you to create transactions spending funds that are already sent in other transactions,
+							//TODO but not without warning first. Client should also track the expiry of generated transactions and un-pend funds that do not make it into blocks
+							
+							Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+							
+							if (selectedWal == null || 
+									textField.getText() == null || textField_1.getText() == null || textField_2.getText() == null) {
+								
+								notifyInvalid();
+								return;
+								
+							}
+
+							Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new String(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
+							
+							if (newTransaction == null || !newTransaction.validate()) {
+
+								notifyInvalid();
+								return;
+								
+							}
+							
+							String res = JOptionPane.showInputDialog(frame, 
+									"WARNING: YOU ARE ABOUT TO SEND A MONIEO TRANSACTION.\nTHIS ACTION IS IRREVERSIBLE AND CANNOT BE UNDONE.\n\n"
+									+ "To: " + newTransaction.d.to
+									+ "\nAmount: " + newTransaction.d.amount.toPlainString() + " MNO"
+									+ "\nFee: " + newTransaction.d.fee.toPlainString() + " MNO"
+									+ "\n\nPlease type \"confirm\" below to confirm.", "Confirmation", 2);
+							
+							if (res == null) return;
+							
+							if (res.equals("confirm")) {
+								
+								Monieo.INSTANCE.txp.add(newTransaction);
+								
+								textField.setText(null);
+								textField_1.setText(null);
+								textField_2.setText(null);
+								
+								JOptionPane.showMessageDialog(frame, "Transaction sent!");
+								
+								refresh(false, false);
+								
+								return;
+								
+							}
+							
+							notifyInvalid();
+							
+						} catch (Exception e2) {
+							e2.printStackTrace();
+							notifyInvalid();
+						}
+					}
+				});
+				
+				textField = new JTextField();
+				textField.setBounds(84, 36, 491, 20);
+				panelTransaction.add(textField);
+				textField.setColumns(10);
+				
+				lblNewLabel = new JLabel("Recipient address:");
+				lblNewLabel.setBounds(84, 11, 117, 14);
+				panelTransaction.add(lblNewLabel);
+				
+				lblTransactionAmount = new JLabel("Transaction amount:");
+				lblTransactionAmount.setBounds(84, 67, 117, 14);
+				panelTransaction.add(lblTransactionAmount);
+				
+				textField_1 = new JTextField();
+				textField_1.setColumns(10);
+				textField_1.setBounds(84, 92, 491, 20);
+				panelTransaction.add(textField_1);
+				
+				lblFee = new JLabel("Fee:");
+				lblFee.setBounds(84, 120, 117, 14);
+				panelTransaction.add(lblFee);
+				
+				textField_2 = new JTextField();
+				textField_2.setColumns(10);
+				textField_2.setBounds(84, 145, 94, 20);
+				textField_2.setEnabled(false);
+				panelTransaction.add(textField_2);
+				
+				JCheckBox chckbxNewCheckBox = new JCheckBox("Select fee manually");
+				chckbxNewCheckBox.setBounds(456, 144, 125, 23);
+				panelTransaction.add(chckbxNewCheckBox);
+				chckbxNewCheckBox.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						boolean s = chckbxNewCheckBox.isSelected();
+						
+						if (s) {
+							
+							comboBox.setEnabled(false);
+							textField_2.setEnabled(true);
+							
+						} else {
+							
+							textField_2.setEnabled(false);
+							comboBox.setEnabled(true);
+							FeeEstimate f = (FeeEstimate)comboBox.getSelectedItem();
+							textField_2.setText(f == null ? null : f.fee.toPlainString());
+							
+						}
+						
+					}
+					
+				});
+				
+				comboBox = new JComboBox<FeeEstimate>();
+				comboBox.setBounds(188, 145, 262, 20);
+				panelTransaction.add(comboBox);
+				comboBox.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						if (!chckbxNewCheckBox.isSelected()) {
+							
+							FeeEstimate f = (FeeEstimate)comboBox.getSelectedItem();
+							textField_2.setText(f == null ? null : f.fee.toPlainString());
+							
+						}
+						
+					}
+					
+				});
+				
+				panel.add(addressLabel);
+				
+				nickLabel = new JTextField("0");
+				nickLabel.setEditable(false);
+				nickLabel.setOpaque(false); //this is the same as a JLabel
+				
+						nickLabel.setBounds(144, 40, 331, 29);
+						panel.add(nickLabel);
+						
+						INDIVbalanceLabel = new JTextField("0");
+						INDIVbalanceLabel.setEditable(false);
+						INDIVbalanceLabel.setOpaque(false); //this is the same as a JLabel
+						
+								INDIVbalanceLabel.setBounds(144, 70, 331, 29);
+								panel.add(INDIVbalanceLabel);
+								
+								btnChangeWalName = new JButton("Change wallet name");
+								btnChangeWalName.setBounds(480, 60, 160, 29);
+								panel.add(btnChangeWalName);
+								btnChangeWalName.addActionListener(new ActionListener() {
+									public void actionPerformed(ActionEvent e) {
+										if (list.getSelectedValue() != null) {
+											Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+											String newNick = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
+											if (newNick != null) {
+												File oldWalletFolder = new File((Monieo.INSTANCE.walletsFolder.toString() + "/" + selectedWal.nickname));
+												File newWalletFolder = new File((oldWalletFolder.getParentFile().getPath() + "/" + newNick));
+												oldWalletFolder.renameTo(newWalletFolder);
+												Monieo.INSTANCE.getWalletByNick(selectedWal.nickname).nickname = newNick;
+												refresh(true, false);
+											}
+										}
+									}
+								});
+								
+								btnDelWal = new JButton("Delete selected wallet");
+								btnDelWal.setEnabled(false);
+								btnDelWal.setBounds(480, 97, 160, 29);
+								panel.add(btnDelWal);
+								btnDelWal.addActionListener(new ActionListener() {
+									public void actionPerformed(ActionEvent e) {
+										/*(Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+										if (list.getSelectedValue() != null) {
+											String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
+											if (confirmation.equals(walletInQuestion.nickname)) {
+												Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
+												refresh(true);
+											}
+										}*/
+									}
+								});
+								
+								label_1 = new JLabel("Selected address:");
+								label_1.setBounds(10, 10, 106, 29);
+								panel.add(label_1);
+								
+								label_3 = new JLabel("Address nickname:");
+								label_3.setBounds(10, 40, 133, 29);
+								panel.add(label_3);
+								
+								label_5 = new JLabel("Address balance:");
+								label_5.setBounds(10, 70, 133, 29);
+								panel.add(label_5);
+								
+								JLabel label_5_1 = new JLabel("Pending funds:");
+								label_5_1.setBounds(10, 100, 133, 29);
+								panel.add(label_5_1);
+								
+								JButton btnNewButton_1 = new JButton("Click to view");
+								btnNewButton_1.addActionListener(new ActionListener() {
+									
+									@Override
+									public void actionPerformed(ActionEvent e) {
+										
+										list.setSelectedValue(null, false);
+										tabbedPane.setSelectedIndex(0);
+										refresh(false, false);
+										
+									 }
+									
+								});
+								btnNewButton_1.setBounds(144, 102, 116, 23);
+								panel.add(btnNewButton_1);
+								
+								//warning invalid wallet
+								invalidWallet = new JPanel();
+								invalidWallet.setBounds(10, 140, 663, 66);
+								invalidWallet.setBorder(BorderFactory.createLineBorder(new Color(237, 162, 0, 180), 4, true));
+								panel.add(invalidWallet);
+								invalidWallet.setLayout(new BoxLayout(invalidWallet, BoxLayout.X_AXIS));
+								
+								invalidWallet.add(Box.createRigidArea(new Dimension(20, 0)));
+								
+								lblNewLabel_4 = new JLabel(UIManager.getIcon("OptionPane.warningIcon"));
+								invalidWallet.add(lblNewLabel_4);
+								
+								invalidWallet.add(Box.createRigidArea(new Dimension(20, 0)));
+								
+								JLabel lblNewLabel_3 = new JLabel("Warning! This wallet has no associated private key, therefore the funds in it are not spendable!", SwingConstants.CENTER);
+								invalidWallet.add(lblNewLabel_3);
+								
+								invalidWallet.setVisible(false);
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
 		
@@ -357,113 +660,6 @@ public class UI {
 		lblNewLabel_1.setBounds(208, 411, 109, 34);
 		frame.getContentPane().add(lblNewLabel_1);
 		
-		panel = new JPanel();
-		panel.setVisible(false);
-		panel.setOpaque(false);
-		panel.setLayout(null);
-		panel.setBounds(196, 0, 689, 380);
-		frame.getContentPane().add(panel);
-		
-		addressLabel = new JTextField("0");
-		addressLabel.setEditable(false);
-		addressLabel.setOpaque(false); //this is the same as a JLabel
-
-		addressLabel.setBounds(144, 10, 496, 29);
-		
-		addressLabel.addMouseListener(new MouseAdapter() {
-			
-			 @Override
-			 public void mouseClicked(MouseEvent e) {
-				StringSelection ss = new StringSelection(addressLabel.getText());
-				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
-				
-				JDialog jd = new JDialog();
-				jd.setSize(50, 15);
-				jd.setLocation(e.getLocationOnScreen());
-				jd.getContentPane().add(new JLabel("Copied!"));
-				jd.setUndecorated(true);
-				((JPanel)jd.getContentPane()).setBorder(BorderFactory.createLineBorder(Color.BLACK));
-				jd.setFocusable(false);
-				jd.setFocusableWindowState(false);
-				
-				jd.setModalityType(ModalityType.MODELESS);
-
-				jd.setVisible(true);
-				
-				new Timer().schedule(new TimerTask() {
-					
-					@Override
-					public void run() {
-						
-						jd.setVisible(false);
-						jd.dispose();
-						
-					}
-					
-				}, 1000);
-				
-			 }
-			
-		});
-		
-		panel.add(addressLabel);
-		
-		nickLabel = new JTextField("0");
-		nickLabel.setEditable(false);
-		nickLabel.setOpaque(false); //this is the same as a JLabel
-
-		nickLabel.setBounds(144, 40, 331, 29);
-		panel.add(nickLabel);
-		
-		INDIVbalanceLabel = new JTextField("0");
-		INDIVbalanceLabel.setEditable(false);
-		INDIVbalanceLabel.setOpaque(false); //this is the same as a JLabel
-
-		INDIVbalanceLabel.setBounds(144, 70, 331, 29);
-		panel.add(INDIVbalanceLabel);
-		
-		panelTransaction = new JPanel();
-		panelTransaction.setOpaque(false);
-		panelTransaction.setBounds(10, 130, 663, 225);
-		panel.add(panelTransaction);
-		panelTransaction.setLayout(null);
-		
-		btnChangeWalName = new JButton("Change wallet name");
-		btnChangeWalName.setBounds(480, 60, 160, 29);
-		panel.add(btnChangeWalName);
-		btnChangeWalName.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (list.getSelectedValue() != null) {
-					Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
-					String newNick = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
-					if (newNick != null) {
-						File oldWalletFolder = new File((Monieo.INSTANCE.walletsFolder.toString() + "/" + selectedWal.nickname));
-						File newWalletFolder = new File((oldWalletFolder.getParentFile().getPath() + "/" + newNick));
-						oldWalletFolder.renameTo(newWalletFolder);
-						Monieo.INSTANCE.getWalletByNick(selectedWal.nickname).nickname = newNick;
-						refresh(true, false);
-					}
-				}
-			}
-		});
-		
-		btnDelWal = new JButton("Delete selected wallet");
-		btnDelWal.setEnabled(false);
-		btnDelWal.setBounds(480, 97, 160, 29);
-		panel.add(btnDelWal);
-		btnDelWal.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				/*(Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
-				if (list.getSelectedValue() != null) {
-					String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
-					if (confirmation.equals(walletInQuestion.nickname)) {
-						Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
-						refresh(true);
-					}
-				}*/
-			}
-		});
-		
 		JButton overviewBTN = new JButton("Overview");
 		overviewBTN.setBounds(10, 414, 176, 23);
 		overviewBTN.addActionListener(new ActionListener() {
@@ -489,6 +685,10 @@ public class UI {
 				
 				if (!e.getValueIsAdjusting()) {
 
+					textField.setText(null);
+					textField_1.setText(null);
+					textField_2.setText(null);
+					
 					refresh(false, false);
 					
 				}
@@ -502,128 +702,6 @@ public class UI {
 		scrollPane.createVerticalScrollBar();
 		scrollPane.setLayout(new ScrollPaneLayout());
 		frame.getContentPane().add(scrollPane);
-		
-		label_1 = new JLabel("Selected address:");
-		label_1.setBounds(10, 10, 106, 29);
-		panel.add(label_1);
-		
-		label_3 = new JLabel("Address nickname:");
-		label_3.setBounds(10, 40, 133, 29);
-		panel.add(label_3);
-		
-		label_5 = new JLabel("Address balance:");
-		label_5.setBounds(10, 70, 133, 29);
-		panel.add(label_5);
-		
-		//what is a trnt and why is it already sent
-		sentTrnt = new JButton("Send transaction");
-		sentTrnt.setBounds(84, 191, 144, 23);
-		panelTransaction.add(sentTrnt);
-		sentTrnt.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					//TODO sanitize data and do pending in/out money. Client should allow you to create transactions spending funds that are already sent in other transactions,
-					//TODO but not without warning first. Client should also track the expiry of generated transactions and un-pend funds that do not make it into blocks
-					
-					Wallet selectedWal = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
-					
-					if (selectedWal == null || 
-							textField.getText() == null || textField_1.getText() == null || textField_2.getText() == null) {
-						
-						notifyInvalid();
-						return;
-						
-					}
-
-					Transaction newTransaction = Transaction.createNewTransaction(selectedWal, new String(textField.getText()), new BigDecimal(textField_1.getText()), new BigDecimal(textField_2.getText()));
-					
-					if (newTransaction == null || !newTransaction.validate()) {
-
-						notifyInvalid();
-						return;
-						
-					}
-					
-					String res = JOptionPane.showInputDialog(frame, 
-							"WARNING: YOU ARE ABOUT TO SEND A MONIEO TRANSACTION.\nTHIS ACTION IS IRREVERSIBLE AND CANNOT BE UNDONE.\n\n"
-							+ "To: " + newTransaction.d.to
-							+ "\nAmount: " + newTransaction.d.amount.toPlainString() + " MNO"
-							+ "\nFee: " + newTransaction.d.fee.toPlainString() + " MNO"
-							+ "\n\nPlease type \"confirm\" below to confirm.", "Confirmation", 2);
-					
-					if (res == null) return;
-					
-					if (res.equals("confirm")) {
-						
-						Monieo.INSTANCE.txp.add(newTransaction);
-						
-						textField.setText(null);
-						textField_1.setText(null);
-						textField_2.setText(null);
-						
-						JOptionPane.showMessageDialog(frame, "Transaction sent!");
-						
-						refresh(false, false);
-						
-						return;
-						
-					}
-					
-					notifyInvalid();
-					
-				} catch (Exception e2) {
-					e2.printStackTrace();
-					notifyInvalid();
-				}
-			}
-		});
-		
-		textField = new JTextField();
-		textField.setBounds(84, 36, 491, 20);
-		panelTransaction.add(textField);
-		textField.setColumns(10);
-		
-		lblNewLabel = new JLabel("Recipient address:");
-		lblNewLabel.setBounds(84, 11, 117, 14);
-		panelTransaction.add(lblNewLabel);
-		
-		lblTransactionAmount = new JLabel("Transaction amount:");
-		lblTransactionAmount.setBounds(84, 67, 117, 14);
-		panelTransaction.add(lblTransactionAmount);
-		
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(84, 92, 491, 20);
-		panelTransaction.add(textField_1);
-		
-		lblFee = new JLabel("Fee:");
-		lblFee.setBounds(84, 120, 117, 14);
-		panelTransaction.add(lblFee);
-		
-		textField_2 = new JTextField();
-		textField_2.setColumns(10);
-		textField_2.setBounds(84, 145, 491, 20);
-		panelTransaction.add(textField_2);
-		
-		JLabel label_5_1 = new JLabel("Pending funds:");
-		label_5_1.setBounds(10, 100, 133, 29);
-		panel.add(label_5_1);
-		
-		JButton btnNewButton_1 = new JButton("Click to view");
-		btnNewButton_1.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				list.setSelectedValue(null, false);
-				tabbedPane.setSelectedIndex(0);
-				refresh(false, false);
-				
-			 }
-			
-		});
-		btnNewButton_1.setBounds(144, 102, 116, 23);
-		panel.add(btnNewButton_1);
 		
 		BtnNEWADDRESS = new JButton("New address");
 		BtnNEWADDRESS.addActionListener(new ActionListener() {
@@ -649,25 +727,6 @@ public class UI {
 		lblTotalBalancelabel = new JLabel("Total spendable balance:");
 		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
-		
-		//warning invalid wallet
-		invalidWallet = new JPanel();
-		invalidWallet.setBounds(10, 140, 663, 66);
-		invalidWallet.setBorder(BorderFactory.createLineBorder(new Color(237, 162, 0, 180), 4, true));
-		panel.add(invalidWallet);
-		invalidWallet.setLayout(new BoxLayout(invalidWallet, BoxLayout.X_AXIS));
-		
-		invalidWallet.add(Box.createRigidArea(new Dimension(20, 0)));
-		
-		lblNewLabel_4 = new JLabel(UIManager.getIcon("OptionPane.warningIcon"));
-		invalidWallet.add(lblNewLabel_4);
-		
-		invalidWallet.add(Box.createRigidArea(new Dimension(20, 0)));
-		
-		JLabel lblNewLabel_3 = new JLabel("Warning! This wallet has no associated private key, therefore the funds in it are not spendable!", SwingConstants.CENTER);
-		invalidWallet.add(lblNewLabel_3);
-		
-		invalidWallet.setVisible(false);
 		
 		//warning desync
 		desyncDetected = new JPanel();
@@ -722,6 +781,12 @@ public class UI {
 			miningstats.setBorder(null); //remove the border
 			
 		}
+		
+		comboBox.removeAllItems();
+		
+		comboBox.addItem(new FeeEstimate(Monieo.INSTANCE.getEstimatedAverageFee(), FeeEstimateType.AVERAGE));
+		comboBox.addItem(new FeeEstimate(Monieo.INSTANCE.getEstimatedLowestFee(), FeeEstimateType.SMALLEST));
+		comboBox.addItem(new FeeEstimate(Monieo.INSTANCE.getEstimatedHighestFee(), FeeEstimateType.LARGEST));
 		
 		totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
 		

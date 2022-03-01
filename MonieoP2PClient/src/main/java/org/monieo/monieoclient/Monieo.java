@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -40,9 +41,11 @@ import java.security.spec.X509EncodedKeySpec;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.json.JSONObject;
+import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
+import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.gui.MessageWithLink;
 import org.monieo.monieoclient.gui.UI;
 import org.monieo.monieoclient.mining.AbstractMiner;
@@ -213,6 +216,8 @@ public class Monieo {
 	public File blocksExtraDataFolder;
 	public File blockMetadataFolder; 
 	
+	public File feeEstimate;
+	
 	public File blkhighest;
 	
 	public File txlistFolder;
@@ -331,6 +336,18 @@ public class Monieo {
 		
 		txlistFolder = new File(workingFolder.getPath() + "/txlist");
 		txlistFolder.mkdir();
+		
+		feeEstimate = new File(workingFolder.getParent() + "/feeestim.dat");
+		
+		if (!feeEstimate.exists()) {
+			
+			try {
+				feeEstimate.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
 		
 		blkhighest = new File(workingFolder.getPath() + "/.blkhighest");
 
@@ -563,6 +580,53 @@ public class Monieo {
 				if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
 					
 					setHighestBlock(b);
+					
+					Block curr = b;
+					
+					BigDecimal lowestT = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE); //big number
+					BigDecimal highestT = BigDecimal.ZERO;
+					BigDecimal avT = BigDecimal.ZERO;
+					int txCount = 0;
+					
+					for (int i = 0; i < 60; i++) {
+						
+						if (curr.transactions.length == 0) {
+							
+							lowestT = BigDecimal.ZERO;
+							avT = BigDecimal.ZERO;
+							break;
+							
+						} else for (AbstractTransaction t : curr.transactions) {
+							
+							if (t instanceof Transaction) {
+								
+								Transaction tr = (Transaction)t;
+								
+								if (tr.d.fee.compareTo(lowestT) == -1) lowestT = tr.d.fee;
+								if (tr.d.fee.compareTo(highestT) == 1) highestT = tr.d.fee;
+								txCount++;
+								avT = avT.add(tr.d.fee);
+								
+							}
+							
+						}
+						
+						curr = curr.getPrevious();
+						
+						if (curr == null) break;
+						
+					}
+					
+					avT = avT.divide(BigDecimal.valueOf(txCount), 8, RoundingMode.HALF_UP);
+					
+					try (FileWriter fw = new FileWriter(feeEstimate, false)) {
+						
+						fw.append(lowestT.toPlainString() + "\n" + avT.toPlainString() + "\n" + highestT.toPlainString());
+						
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
 					if (ui != null) ui.refresh(false, false);
 					
 				}
@@ -572,6 +636,35 @@ public class Monieo {
 			}
 			
 		}
+		
+	}
+	
+	public BigDecimal getEstimatedLowestFee() {
+		
+		return getFeeData(0);
+		
+	}
+	
+	public BigDecimal getEstimatedAverageFee() {
+		
+		return getFeeData(1);
+		
+	}
+	
+	public BigDecimal getEstimatedHighestFee() {
+		
+		return getFeeData(2);
+		
+	}
+	
+	private BigDecimal getFeeData(int i) {
+		
+		String d = readFileData(feeEstimate);
+		if (d == null) return BigDecimal.ZERO;
+		
+		String[] fs = d.split("\n");
+		
+		return new BigDecimal(fs[i]);
 		
 	}
 	
