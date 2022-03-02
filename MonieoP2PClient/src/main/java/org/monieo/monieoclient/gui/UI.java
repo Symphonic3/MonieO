@@ -5,6 +5,7 @@ import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -82,7 +83,7 @@ public class UI {
 	private JTextField textField_1;
 	private JTextField textField_2;
 	
-	JTextField lblNewLabel_1;
+	JLabel lblNewLabel_1;
 	JPanel panel;
 	JPanel panel_1;
 	JPanel panelTransaction;
@@ -101,6 +102,8 @@ public class UI {
 	JLabel lblToggleExperimentalMining;
 	JLabel lblTotalBalancelabel;
 	JButton TgBtnTOGGLEMINING;
+	
+	JTextField lblTotalBalancelabel_1;
 	
 	JLabel totAvailableFundsDisplay;
 	JLabel totPendingFundsDisplay;
@@ -131,6 +134,7 @@ public class UI {
             "Connected since"};
     
     private JScrollPane scrollPane_1;
+    private JTextField textField_3;
 	
 	public UI() {
 	}
@@ -298,6 +302,7 @@ public class UI {
 		tabbedPane.add("Funds Summary", scrollPane_1);
 		
 		table = new JTable();
+		table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		table.setAutoCreateRowSorter(true);
 		table.getTableHeader().setReorderingAllowed(false);
 		scrollPane_1.setViewportView(table);
@@ -314,6 +319,7 @@ public class UI {
 		tabbedPane.add("Network", scrollPane_7);
 		
 		table2 = new JTable();
+		table2.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		table2.setAutoCreateRowSorter(true);
 		table2.getTableHeader().setReorderingAllowed(false);
 		scrollPane_7.setViewportView(table2);
@@ -331,6 +337,7 @@ public class UI {
 		panel_1.add(lblTotalAvailableFunds);
 		
 		totAvailableFundsDisplay = new JLabel("0");
+		totAvailableFundsDisplay.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		totAvailableFundsDisplay.setBounds(144, 10, 331, 29);
 		panel_1.add(totAvailableFundsDisplay);
 		
@@ -339,6 +346,7 @@ public class UI {
 		panel_1.add(lblNewLabel_2);
 		
 		totPendingFundsDisplay = new JLabel("0");
+		totPendingFundsDisplay.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		totPendingFundsDisplay.setBounds(144, 40, 331, 29);
 		panel_1.add(totPendingFundsDisplay);
 		
@@ -347,6 +355,7 @@ public class UI {
 		panel_1.add(lblTotalFunds);
 		
 		totFundsDisplay = new JLabel("0");
+		totFundsDisplay.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		totFundsDisplay.setBounds(144, 70, 331, 29);
 		panel_1.add(totFundsDisplay);
 		
@@ -355,6 +364,7 @@ public class UI {
 		panel_1.add(lblTotalConnectedNodes);
 		
 		totConnectedNodesDisplay = new JLabel("0");
+		totConnectedNodesDisplay.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		totConnectedNodesDisplay.setBounds(144, 100, 331, 29);
 		panel_1.add(totConnectedNodesDisplay);
 		
@@ -477,6 +487,7 @@ public class UI {
 				});
 				
 				textField = new JTextField();
+				textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 				textField.setBounds(84, 36, 491, 20);
 				panelTransaction.add(textField);
 				textField.setColumns(10);
@@ -490,6 +501,7 @@ public class UI {
 				panelTransaction.add(lblTransactionAmount);
 				
 				textField_1 = new JTextField();
+				textField_1.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 				textField_1.setColumns(10);
 				textField_1.setBounds(84, 92, 491, 20);
 				panelTransaction.add(textField_1);
@@ -499,6 +511,7 @@ public class UI {
 				panelTransaction.add(lblFee);
 				
 				textField_2 = new JTextField();
+				textField_2.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 				textField_2.setColumns(10);
 				textField_2.setBounds(84, 145, 94, 20);
 				textField_2.setEnabled(false);
@@ -561,6 +574,7 @@ public class UI {
 						panel.add(nickLabel);
 						
 						INDIVbalanceLabel = new JTextField("0");
+						INDIVbalanceLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 						INDIVbalanceLabel.setEditable(false);
 						INDIVbalanceLabel.setOpaque(false); //this is the same as a JLabel
 						
@@ -658,9 +672,7 @@ public class UI {
 		
 		JButton btnNewButton = null;
 		
-		lblNewLabel_1 = new JTextField("Address count:");
-		lblNewLabel_1.setEditable(false);
-
+		lblNewLabel_1 = new JLabel("Address count:");
 		lblNewLabel_1.setBounds(208, 411, 109, 34);
 		frame.getContentPane().add(lblNewLabel_1);
 		
@@ -702,7 +714,7 @@ public class UI {
 		});
 		
 		scrollPane = new JScrollPane(list);
-		scrollPane.setBounds(10, 11, 176, 396);
+		scrollPane.setBounds(10, 7, 176, 396);
 		scrollPane.createVerticalScrollBar();
 		scrollPane.setLayout(new ScrollPaneLayout());
 		frame.getContentPane().add(scrollPane);
@@ -731,6 +743,18 @@ public class UI {
 		
 		desyncLabel = new JLabel("Warning! Detected blockchain desync! (approx. " + 0 + " blocks)", SwingConstants.CENTER);
 		desyncDetected.add(desyncLabel);
+		
+		textField_3 = new JTextField("0");
+		textField_3.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		textField_3.setEditable(false);
+		textField_3.setBounds(290, 411, 109, 34);
+		frame.getContentPane().add(textField_3);
+		
+		lblTotalBalancelabel_1 = new JTextField("0");
+		lblTotalBalancelabel_1.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		lblTotalBalancelabel_1.setEditable(false);
+		lblTotalBalancelabel_1.setBounds(545, 406, 231, 44);
+		frame.getContentPane().add(lblTotalBalancelabel_1);
 		
 		desyncDetected.setVisible(false);
 		
@@ -892,10 +916,11 @@ public class UI {
 				
 			}
 
+			lblTotalBalancelabel_1.setBorder(null);
 			INDIVbalanceLabel.setBorder(null); //remove the border
 			nickLabel.setBorder(null); //remove the border
 			addressLabel.setBorder(null); //remove the border
-			lblNewLabel_1.setBorder(null); //remove the border
+			textField_3.setBorder(null); //remove the border
 			miningstats.setBorder(null); //remove the border
 			
 		}
@@ -943,7 +968,7 @@ public class UI {
 				
 			}
 			list.setListData(walletNicks);
-			lblNewLabel_1.setText("Address count: " + walletNicks.length);
+			textField_3.setText(String.valueOf(walletNicks.length));
 			
 		}
 		
@@ -1010,7 +1035,7 @@ public class UI {
 		
 		total = spendable.add(unspendable);
 		
-		lblTotalBalancelabel.setText("Total spendable balance: " + spendable.toPlainString());
+		lblTotalBalancelabel_1.setText(spendable.toPlainString());
 		totAvailableFundsDisplay.setText(spendable.toPlainString());
 		totPendingFundsDisplay.setText(unspendable.toPlainString());
 		totFundsDisplay.setText(total.toPlainString());
