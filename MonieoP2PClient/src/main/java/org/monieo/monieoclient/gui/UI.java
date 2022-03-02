@@ -62,6 +62,7 @@ import javax.swing.JTextField;
 import javax.swing.BoxLayout;
 import javax.swing.JTabbedPane;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -106,6 +107,8 @@ public class UI {
 	JLabel totFundsDisplay;
 	public JLabel totConnectedNodesDisplay;
 	
+	JCheckBoxMenuItem toggleDarkMode;
+	
 	JPanel invalidWallet;
 	JPanel desyncDetected;
 	JLabel desyncLabel;
@@ -118,8 +121,6 @@ public class UI {
 	private JLabel lblNewLabel_4;
 	
 	JComboBox<FeeEstimate> comboBox;
-	
-	boolean dark = false;
 	
     public static final String[] FUNDINFO_COLUMN_NAMES = {"Wallet name",
             "Amount",
@@ -737,12 +738,71 @@ public class UI {
 		frame.setJMenuBar(menuBar);
 		
 		JMenu file = new JMenu("File");
+		JMenuItem newAddress = new JMenuItem("New Address...");
+		newAddress.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				for (ActionListener n : BtnNEWADDRESS.getActionListeners()) n.actionPerformed(null);
+				
+			}
+			
+		});
+		file.add(newAddress);
 		menuBar.add(file);
 		
 		JMenu settings = new JMenu("Settings");
+		toggleDarkMode = new JCheckBoxMenuItem("Dark mode");
+		toggleDarkMode.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				refresh(false, true);
+				
+			}
+			
+		});
+		settings.add(toggleDarkMode);
+		settings.add(new JSeparator());
+		JMenuItem options = new JMenuItem("Options...");
+		options.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		settings.add(options);
 		menuBar.add(settings);
 		
 		JMenu window = new JMenu("Window");
+		JMenuItem showOverview = new JMenuItem("Show Overview");
+		showOverview.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				for (ActionListener n : overviewBTN.getActionListeners()) n.actionPerformed(null);
+				
+			}
+			
+		});
+		window.add(showOverview);
+		JMenuItem showMining = new JMenuItem("Show Mining");
+		showMining.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				for (ActionListener n : TgBtnTOGGLEMINING.getActionListeners()) n.actionPerformed(null);
+				
+			}
+			
+		});
+		window.add(showMining);
 		menuBar.add(window);
 		
 		JMenu help = new JMenu("Help");		
@@ -818,7 +878,7 @@ public class UI {
 		
 		if (changeColor) {
 			
-			if (!dark) {
+			if (!toggleDarkMode.getState()) {
 				
 				FlatLightLaf.setup();
 				SwingUtilities.updateComponentTreeUI(frame);
