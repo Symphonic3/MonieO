@@ -63,7 +63,10 @@ public class Monieo {
 	public static final int PORT = 21093;
 	public static final String MAGIC_NUMBERS = "MEOPROTOCOL";
 	public static final String PROTOCOL_VERSION = "1.0";
+	
 	public static String VERSION;
+	public static String NEXT_AVAILABLE = null;
+	public static boolean UPDATE = false;
 	
 	public static int MAX_OUTGOING_CONNECTIONS = 10;
 	public static int MAX_CONNECTIONS = 110;
@@ -113,11 +116,15 @@ public class Monieo {
 		if (result == null) throw new RuntimeException("Could not parse github API");
 
 		JSONObject response = new JSONObject(result);
+		
+		NEXT_AVAILABLE = response.getString("tag_name");
 
-		ComparableVersion releaseLatest = new ComparableVersion(response.getString("tag_name"));
-		ComparableVersion versionActual = new ComparableVersion(String.valueOf(VERSION));
+		ComparableVersion releaseLatest = new ComparableVersion(NEXT_AVAILABLE);
+		ComparableVersion versionActual = new ComparableVersion(VERSION);
 
 		if (releaseLatest.compareTo(versionActual) == 1) {
+			
+			UPDATE = true;
 
 			String link = "https://github.com/Symphonic3/MonieO/releases/tag/" + releaseLatest;
 
@@ -148,7 +155,7 @@ public class Monieo {
 				int res = JOptionPane.showOptionDialog(null,
 						new MessageWithLink(
 								"New update available. Press 'OK' to automatically download, or download and use version "
-										+ releaseLatest + " from github:" + "\n <a href=\"" + link + "\">Click here</a>"),
+										+ releaseLatest + " from github:" + "\n <a href=#\"" + link + "\"></a>"),
 						"New update available!", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, null, null);
 
 				if (res == 0) {
@@ -605,7 +612,7 @@ public class Monieo {
 					
 					for (int i = 0; i < 60; i++) {
 						
-						if (curr.transactions.length == 0) {
+						if (curr.transactions.length == 1) {
 							
 							txCount++;
 							lowestT = BigDecimal.ZERO;

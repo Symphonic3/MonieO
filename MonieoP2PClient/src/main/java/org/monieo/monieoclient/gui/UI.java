@@ -1,6 +1,7 @@
  package org.monieo.monieoclient.gui;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
@@ -15,12 +16,12 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -28,17 +29,17 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -52,6 +53,7 @@ import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -61,6 +63,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JTabbedPane;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 
 public class UI {
 	private JFrame frame;
@@ -261,6 +265,23 @@ public class UI {
 			}
 			
 		});
+		
+		BtnNEWADDRESS = new JButton("New address");
+		BtnNEWADDRESS.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
+				if (result!= null) {
+					
+					String resp = Monieo.INSTANCE.createWallet(result.toString());
+					
+					JOptionPane.showMessageDialog(frame, resp, "Info", JOptionPane.INFORMATION_MESSAGE);
+					
+					refresh(true, false);
+				}
+			}
+		});
+		BtnNEWADDRESS.setBounds(304, 417, 100, 23);
+		frame.getContentPane().add(BtnNEWADDRESS);
 		
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
@@ -635,24 +656,6 @@ public class UI {
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
 		
 		JButton btnNewButton = null;
-		btnNewButton = new JButton(new FlatSVGIcon("cog.svg"));
-		btnNewButton.setHorizontalAlignment(SwingConstants.CENTER);
-		btnNewButton.setVerticalAlignment(SwingConstants.CENTER);
-		btnNewButton.putClientProperty("JButton.buttonType", "roundRect");
-		btnNewButton.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				
-				dark = !dark;
-				
-				refresh(false, true);
-				
-			}
-			
-		});
-		
-		btnNewButton.setBounds(852, 2, 26, 26);
-		frame.getContentPane().add(btnNewButton);
 		
 		lblNewLabel_1 = new JTextField("Address count:");
 		lblNewLabel_1.setEditable(false);
@@ -703,29 +706,12 @@ public class UI {
 		scrollPane.setLayout(new ScrollPaneLayout());
 		frame.getContentPane().add(scrollPane);
 		
-		BtnNEWADDRESS = new JButton("New address");
-		BtnNEWADDRESS.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				Object result = JOptionPane.showInputDialog(frame, "Enter new address nickname:");
-				if (result!= null) {
-					
-					String resp = Monieo.INSTANCE.createWallet(result.toString());
-					
-					JOptionPane.showMessageDialog(frame, resp, "Info", JOptionPane.INFORMATION_MESSAGE);
-					
-					refresh(true, false);
-				}
-			}
-		});
-		BtnNEWADDRESS.setBounds(321, 417, 109, 23);
-		frame.getContentPane().add(BtnNEWADDRESS);
-		
 		lblToggleExperimentalMining = new JLabel("Mining:");
 		lblToggleExperimentalMining.setBounds(756, 414, 76, 29);
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
 		lblTotalBalancelabel = new JLabel("Total spendable balance:");
-		lblTotalBalancelabel.setBounds(440, 406, 231, 44);
+		lblTotalBalancelabel.setBounds(409, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
 		
 		//warning desync
@@ -747,11 +733,83 @@ public class UI {
 		
 		desyncDetected.setVisible(false);
 		
+		JMenuBar menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
+		
+		JMenu file = new JMenu("File");
+		menuBar.add(file);
+		
+		JMenu settings = new JMenu("Settings");
+		menuBar.add(settings);
+		
+		JMenu window = new JMenu("Window");
+		menuBar.add(window);
+		
+		JMenu help = new JMenu("Help");		
+		JMenuItem about = new JMenuItem("About");
+		about.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JLabel title = new JLabel("MonieO Client");
+				title.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
+
+				String link = "https://github.com/Symphonic3/MonieO";
+				
+				JOptionPane.showMessageDialog(frame,
+					new Object[] {
+						title,
+						(Monieo.UPDATE ? "v" + Monieo.VERSION + " (latest is v" + Monieo.NEXT_AVAILABLE + ")" : "v" + Monieo.VERSION),
+						" ",
+						new MessageWithLink("<a href=\"" + link + "\">" + link + "</a>"),
+					}, "About", JOptionPane.PLAIN_MESSAGE);
+				
+			}
+			
+		});
+		help.add(about);
+		help.add(new JSeparator());
+		JMenuItem discord = new JMenuItem("Chat");
+		discord.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				try {
+					Desktop.getDesktop().browse(URI.create("https://discord.gg/y2Hx9Ewn2V"));
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
+			}
+			
+		});
+		help.add(discord);
+		JMenuItem github = new JMenuItem("Github");
+		github.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				try {
+					Desktop.getDesktop().browse(URI.create("https://github.com/Symphonic3/MonieO"));
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
+			}
+			
+		});
+		help.add(github);
+		menuBar.add(help);
+		
 		frame.setResizable(false);
 		refresh(true, true);
 		frame.setVisible(true);
 		frame.setAlwaysOnTop(true);
 		frame.setAlwaysOnTop(false);
+
 		//frame.requestFocus();
 		
 	}

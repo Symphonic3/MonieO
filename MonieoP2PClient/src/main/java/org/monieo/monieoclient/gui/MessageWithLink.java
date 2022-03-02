@@ -1,6 +1,7 @@
 package org.monieo.monieoclient.gui;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -18,6 +19,7 @@ public class MessageWithLink extends JEditorPane {
 
 	public MessageWithLink(String htmlBody) {
 		super("text/html", "<html><body style=\"" + getStyle() + "\">" + htmlBody + "</body></html>");
+		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		addHyperlinkListener(new HyperlinkListener() {
 			public void hyperlinkUpdate(HyperlinkEvent e) {
 				if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
