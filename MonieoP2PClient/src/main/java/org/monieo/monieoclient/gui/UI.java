@@ -753,7 +753,7 @@ public class UI {
 		menuBar.add(file);
 		
 		JMenu settings = new JMenu("Settings");
-		toggleDarkMode = new JCheckBoxMenuItem("Dark mode");
+		toggleDarkMode = new JCheckBoxMenuItem("Dark Mode");
 		toggleDarkMode.addActionListener(new ActionListener() {
 			
 			@Override
