@@ -25,7 +25,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 	
 	MiningStatistics curr = null;
 	
-	public static final int HASHES_BEFORE_RECHECK = 1000;
+	public static final int HASHES_BEFORE_RECHECK = 250;
 	
 	public DefaultMinerImpl() {};
 	
