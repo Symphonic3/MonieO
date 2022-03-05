@@ -141,6 +141,7 @@ public class RandomX {
 		int i = RXJNI.randomxGetFlags();
 		
 		i |= RandomXFlags.RANDOMX_FLAG_FULL_MEM.v();
+		i |= RandomXFlags.RANDOMX_FLAG_JIT.v();
 		
 		return i;
 		
