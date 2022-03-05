@@ -20,13 +20,13 @@ public class RandomXJNI {
     	
     	if (!DLLS_LOADED) {
     		
-            File f = new File(Monieo.INSTANCE.workingFolder.getPath() + "/randomx-dll.dll");
+            File f = new File(Monieo.INSTANCE.workingFolder.getPath() + "/randomx.dll");
             File f2 = new File(Monieo.INSTANCE.workingFolder.getPath() + "/Dll1.dll");
             
             if (!f.exists()) {
             	
         		try {
-        			Files.copy(Monieo.class.getClassLoader().getResourceAsStream("randomx-dll.dll"), f.toPath());
+        			Files.copy(Monieo.class.getClassLoader().getResourceAsStream("randomx.dll"), f.toPath());
         		} catch (IOException e) {
         			e.printStackTrace();
         		}
