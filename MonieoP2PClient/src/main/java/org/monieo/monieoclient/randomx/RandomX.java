@@ -138,12 +138,12 @@ public class RandomX {
 	
 	public static int getFlags() {
 		
-		int i = RXJNI.randomxGetFlags();
+		int i = 0;
 		
 		i |= RandomXFlags.RANDOMX_FLAG_FULL_MEM.v();
-		i |= RandomXFlags.RANDOMX_FLAG_JIT.v();
+		//i |= RandomXFlags.RANDOMX_FLAG_JIT.v();
 		
-		return 0;
+		return i;
 		
 	}
 	
