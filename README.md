@@ -9,6 +9,16 @@ MonieO is an experimental cryptocurrency which aims to use a basic blockchain im
 
 If you are looking to try MonieO, you might want to look at the [Usage Guide](https://github.com/Symphonic3/MonieO/wiki/Usage-Guide) and the [Beginner Info](https://github.com/Symphonic3/MonieO/wiki/Beginner-Info)
 
+Specifications
+=========
+
+| Specification | Type |
+|---------------|------|
+| Proof Algorithm | RandomX PoW |
+| Block time | 1 minute |
+| Total (theoretical) supply | 10,500,000 MNO |
+| P2P network port | 21093 |
+
 Support the project
 =========
 
