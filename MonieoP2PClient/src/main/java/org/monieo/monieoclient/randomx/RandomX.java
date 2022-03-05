@@ -143,7 +143,7 @@ public class RandomX {
 		i |= RandomXFlags.RANDOMX_FLAG_FULL_MEM.v();
 		i |= RandomXFlags.RANDOMX_FLAG_JIT.v();
 		
-		return i;
+		return 0;
 		
 	}
 	
