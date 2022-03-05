@@ -55,6 +55,7 @@ import org.monieo.monieoclient.networking.ConnectionHandler;
 import org.monieo.monieoclient.networking.NetAdressHolder;
 import org.monieo.monieoclient.networking.NetworkPacket;
 import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
+import org.monieo.monieoclient.randomx.RandomX;
 import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
 
@@ -216,7 +217,7 @@ public class Monieo {
 	
 	public UI ui;
 	
-	File workingFolder;
+	public File workingFolder;
 	File nodesFile;
 	public File walletsFolder; 
 	public File blocksFolder; 
@@ -263,6 +264,9 @@ public class Monieo {
 		
 		workingFolder = new File(workingDirectory);
 		workingFolder.mkdirs();
+		
+		System.out.println("Test hash value: " + bytesToHex(RandomX.getRandomX().hash("tast")));
+		System.out.println("Expected test hash value: " + "1a45e9e76128c2c4b064727784094a62261bb8aef36f4ec102274ca9aa3f60f5");
 		
 		nodesFile = new File(workingFolder.getPath() + "/nodes.dat");
 		
@@ -372,7 +376,7 @@ public class Monieo {
 		
 		Block b = getHighestBlock();
 		
-		if (b == null || !b.validate() || !b.isReady() || !b.hasMetadata() || !b.hasWorkData()) {
+		if (b == null || !b.validate() || !b.isReady() || !b.hasMetadata()) {
 			
 			String warning = "Detected potential block data corruption or system clock desync.\n"
 					+ "Please backup the ENTIRE MonieO/wallets folder as to not lose your MonieO due to further corruption.\n"
@@ -975,6 +979,18 @@ public class Monieo {
 		}
 		
 		return null;
+		
+	}
+	
+	public static byte[] randomxRaw(String s) {
+		
+		return RandomX.getRandomX().hash(s);
+		
+	}
+	
+	public static String randomx(String s) {
+		
+		return bytesToHex(randomxRaw(s));
 		
 	}
 

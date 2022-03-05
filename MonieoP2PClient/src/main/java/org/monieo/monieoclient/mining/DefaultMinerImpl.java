@@ -13,6 +13,7 @@ import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
 import org.monieo.monieoclient.blockchain.Transaction;
+import org.monieo.monieoclient.randomx.RandomX;
 
 public class DefaultMinerImpl implements AbstractMiner{
 
@@ -24,7 +25,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 	
 	MiningStatistics curr = null;
 	
-	public static final int HASHES_BEFORE_RECHECK = 100000;
+	public static final int HASHES_BEFORE_RECHECK = 1000;
 	
 	public DefaultMinerImpl() {};
 	
@@ -72,6 +73,8 @@ public class DefaultMinerImpl implements AbstractMiner{
 			System.exit(1);
 		}
 		
+		int i = 0;
+		
 		while (true) {
 						if (stop) {
 				
@@ -80,7 +83,9 @@ public class DefaultMinerImpl implements AbstractMiner{
 				
 			}
 			
-			Block h = Monieo.INSTANCE.getHighestBlock();
+			System.out.println(i++ + " " + Monieo.randomx(String.valueOf(System.currentTimeMillis())));
+			
+			/*Block h = Monieo.INSTANCE.getHighestBlock();
 			if (h == null) continue;
 			long hei = h.header.height + 1;
 			
@@ -165,7 +170,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			}
 			
 			curr.hashes = curr.hashes.add(BigInteger.valueOf(HASHES_BEFORE_RECHECK));
-			supervisor.accept(curr);
+			supervisor.accept(curr);*/
 			
 		}
 		

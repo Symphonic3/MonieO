@@ -33,7 +33,9 @@ public class Block extends MonieoDataObject{
 		
 		Block r = Block.deserialize(Monieo.readFileData(f));
 		
-		if (r == null || !r.validate()) throw new IllegalStateException("Attempted to fetch a block from disk that is not valid!");
+		if (r == null) return null;
+		
+		if (!r.validate()) throw new IllegalStateException("Attempted to fetch a block from disk that is not valid!");
 		
 		return r;
 		
@@ -506,8 +508,10 @@ public class Block extends MonieoDataObject{
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			
+			if (!header.preHash.matches("[0-9a-f]+")) throw new IllegalStateException("Attempting to generate metadata for block with invalid prehash!");
 
-			File prevBlockMetaFile = getPrevious().getMetadata().blockmetafile;
+			File prevBlockMetaFile = new File(Monieo.INSTANCE.blockMetadataFolder.getPath() + "/" + header.preHash + ".blkmeta");
 			
 			//parse transactions
 			BigDecimal fees = BigDecimal.ZERO;

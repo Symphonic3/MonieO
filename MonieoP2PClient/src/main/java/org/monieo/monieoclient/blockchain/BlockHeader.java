@@ -64,13 +64,13 @@ public class BlockHeader{
 
 	public String hash() {
 		
-		return Monieo.sha256d(serialize());
+		return Monieo.randomx(serialize());
 		
 	}
 	
 	public byte[] rawHash() {
 		
-		return Monieo.sha256dRaw(serialize());
+		return Monieo.randomxRaw(serialize());
 		
 	}
 	
