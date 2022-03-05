@@ -1,5 +1,7 @@
 package org.monieo.monieoclient.randomx;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.monieo.monieoclient.Monieo;
 
 public class RandomX {
@@ -81,11 +83,25 @@ public class RandomX {
 		
 	}
 	
+	AtomicBoolean locked = new AtomicBoolean(false);
+	
 	public byte[] hash(String data) {
 		
 		String dn = Monieo.sha256d(data);
 		
-		return RXJNI.randomxCalculateHash(vmPtr, dn, dn.length());
+		while (locked.get()) {
+			
+			//TODO fix this and allow threads to have their own vm instances while using a shared dataset
+			
+		}
+		
+		locked.set(true);
+		
+		byte[] f = RXJNI.randomxCalculateHash(vmPtr, dn, dn.length());
+		
+		locked.set(false);
+		
+		return f;
 		
 	}
 	
@@ -138,10 +154,9 @@ public class RandomX {
 	
 	public static int getFlags() {
 		
-		int i = 0;
+		int i = RXJNI.randomxGetFlags();
 		
 		i |= RandomXFlags.RANDOMX_FLAG_FULL_MEM.v();
-		//i |= RandomXFlags.RANDOMX_FLAG_JIT.v();
 		
 		return i;
 		

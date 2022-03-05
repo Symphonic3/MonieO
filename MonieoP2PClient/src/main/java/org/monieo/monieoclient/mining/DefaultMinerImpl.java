@@ -64,17 +64,6 @@ public class DefaultMinerImpl implements AbstractMiner{
 	@Override
 	public void run() {
 		
-		MessageDigest digest = null;
-		
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		int i = 0;
-		
 		while (true) {
 						if (stop) {
 				
@@ -82,10 +71,8 @@ public class DefaultMinerImpl implements AbstractMiner{
 				return;
 				
 			}
-			
-			System.out.println(i++ + " " + Monieo.randomx(String.valueOf(System.currentTimeMillis())));
-			
-			/*Block h = Monieo.INSTANCE.getHighestBlock();
+
+			Block h = Monieo.INSTANCE.getHighestBlock();
 			if (h == null) continue;
 			long hei = h.header.height + 1;
 			
@@ -170,7 +157,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 			}
 			
 			curr.hashes = curr.hashes.add(BigInteger.valueOf(HASHES_BEFORE_RECHECK));
-			supervisor.accept(curr);*/
+			supervisor.accept(curr);
 			
 		}
 		

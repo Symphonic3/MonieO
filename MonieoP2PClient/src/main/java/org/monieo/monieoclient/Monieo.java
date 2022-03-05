@@ -265,8 +265,8 @@ public class Monieo {
 		workingFolder = new File(workingDirectory);
 		workingFolder.mkdirs();
 		
-		System.out.println("Test hash value: " + bytesToHex(RandomX.getRandomX().hash("tast")));
-		System.out.println("Expected test hash value: " + "1a45e9e76128c2c4b064727784094a62261bb8aef36f4ec102274ca9aa3f60f5");
+		System.out.println("Test    : " + bytesToHex(RandomX.getRandomX().hash("tast")));
+		System.out.println("Expected: " + "6b08ba542fe59ffad744d12866fde82ba2a1397cd5408e3531ec37cd5f1011c1");
 		
 		nodesFile = new File(workingFolder.getPath() + "/nodes.dat");
 		
@@ -428,7 +428,7 @@ public class Monieo {
 				
 				for (int i = 0; i < 10; i++) { //hardcoded to 10 now because we removed CONFIRMATIONS
 					
-					if (b.equals(g)) {
+					if (b == null || b.equals(g)) {
 						
 						break;
 						
