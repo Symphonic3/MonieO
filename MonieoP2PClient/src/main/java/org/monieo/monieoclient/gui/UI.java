@@ -81,6 +81,7 @@ public class UI {
 	
 	public JTable table;
 	public JTable table2;
+	public JTable txTable;
 	
 	public JList<String> list;
 	public JButton btnChangeWalName;
@@ -140,6 +141,10 @@ public class UI {
     public static final String[] NETWORK_COLUMN_NAMES = {"Node",
             "Direction",
             "Connected since"};
+    
+    public static final String[] TX_COLUMN_NAMES = {"Source",
+            "Destination",
+            "Amount", "Fee"};
     
     private JScrollPane scrollPane_1;
     private JTextField textField_3;
@@ -309,6 +314,22 @@ public class UI {
 		scrollPane_1 = new JScrollPane();
 		tabbedPane.add("Funds Summary", scrollPane_1);
 		
+		txTable = new JTable();
+		txTable.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		txTable.setAutoCreateRowSorter(true);
+		txTable.getTableHeader().setReorderingAllowed(false);
+		JScrollPane ads = new JScrollPane();
+		tabbedPane.add("Outgoing Transactions", ads);
+		ads.setViewportView(txTable);
+		txTable.setModel(new DefaultTableModel(null, TX_COLUMN_NAMES) {
+			
+			@Override
+		    public boolean isCellEditable(int row, int column) {
+				return false;
+		    }
+		            
+		});
+		
 		table = new JTable();
 		table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		table.setAutoCreateRowSorter(true);
@@ -401,43 +422,7 @@ public class UI {
 		addressLabel.setOpaque(false); //this is the same as a JLabel
 		
 				addressLabel.setBounds(144, 10, 496, 29);
-				
-				addressLabel.addMouseListener(new MouseAdapter() {
-					
-					 @Override
-					 public void mouseClicked(MouseEvent e) {
-						StringSelection ss = new StringSelection(addressLabel.getText());
-						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
-						
-						JDialog jd = new JDialog();
-						jd.setSize(50, 15);
-						jd.setLocation(e.getLocationOnScreen());
-						jd.getContentPane().add(new JLabel("Copied!"));
-						jd.setUndecorated(true);
-						((JPanel)jd.getContentPane()).setBorder(BorderFactory.createLineBorder(Color.BLACK));
-						jd.setFocusable(false);
-						jd.setFocusableWindowState(false);
-						
-						jd.setModalityType(ModalityType.MODELESS);
 
-						jd.setVisible(true);
-						
-						new Timer().schedule(new TimerTask() {
-							
-							@Override
-							public void run() {
-								
-								jd.setVisible(false);
-								jd.dispose();
-								
-							}
-							
-						}, 1000);
-						
-					 }
-					
-				});
-				
 				panelTransaction = new JPanel();
 				panelTransaction.setOpaque(false);
 				panelTransaction.setBounds(10, 130, 663, 225);
@@ -1181,6 +1166,15 @@ public class UI {
 		comboBox.addItem(new FeeEstimate(Monieo.INSTANCE.getEstimatedHighestFee(), FeeEstimateType.LARGEST));
 		
 		totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
+		
+		DefaultTableModel txmodel = (DefaultTableModel) txTable.getModel();
+		txmodel.setRowCount(0);
+		
+		for (Transaction t : Monieo.INSTANCE.txp.getTrackedTx()) {
+			
+			txmodel.addRow(new Object[] {t.d.from, t.d.to, t.d.amount.toPlainString(), t.d.fee.toPlainString()});
+			
+		}
 		
 		DefaultTableModel model2 = (DefaultTableModel) table2.getModel();
 		model2.setRowCount(0);

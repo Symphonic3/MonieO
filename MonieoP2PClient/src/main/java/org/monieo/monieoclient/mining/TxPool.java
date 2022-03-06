@@ -7,10 +7,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+import java.util.function.Predicate;
+
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Block;
@@ -20,6 +23,7 @@ import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.blockchain.WalletData;
 import org.monieo.monieoclient.networking.NetworkPacket;
 import org.monieo.monieoclient.networking.Node;
+import org.monieo.monieoclient.wallet.Wallet;
 import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
 
 public class TxPool {
@@ -49,9 +53,96 @@ public class TxPool {
 		
 	}
 	
-	public void sort() {
+	public void trackTx(Transaction t) {
+		
+		List<String> track = new ArrayList<String>(Arrays.asList(Monieo.readFileData(Monieo.INSTANCE.trackTx).split("\n")));
+		track.add(t.hash());
+		
+		try (FileWriter fw = new FileWriter(Monieo.INSTANCE.trackTx, false)) {
 
-		//TODO remove transactions past a week or so
+			fw.write(String.join("\n", track));
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public List<Transaction> getTrackedTx() {
+		
+		List<Transaction> ret = new ArrayList<Transaction>();
+		
+		List<String> track = new ArrayList<String>(Arrays.asList(Monieo.readFileData(Monieo.INSTANCE.trackTx).split("\n")));
+
+		for (Transaction t : transactions) {
+			
+			if (track.contains(t.hash())) {
+				
+				ret.add(t);
+				
+			}
+			
+		}
+		
+		try (FileWriter fw = new FileWriter(Monieo.INSTANCE.trackTx, false)) {
+			
+			for (Transaction t : ret) {
+				
+				fw.append(t.hash() + "\n");
+				
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return ret;
+		
+	}
+	
+	private boolean shouldBeInPool(Transaction t) {
+		
+		Block old = Monieo.INSTANCE.getHighestBlock();
+		
+		for (int i = 0; i < Monieo.CONFIRMATIONS_IGNORE; i++) {
+			
+			Block to = old.getPrevious();
+			
+			if (Monieo.genesis().equals(to)) {
+				
+				old = to;
+				break;
+				
+			} else if (to == null) {
+				
+				break;
+				
+			}
+			
+			old = to;
+			
+		}
+		
+		BlockMetadata m = old.getMetadata();
+		
+		if (m.getWalletData(t.getSource()).nonce.compareTo(t.d.nonce) == 1) {
+			
+			return false;
+			
+		} else return true;
+		
+	}
+	
+	public void sort() {
+		
+		transactions.removeIf(new Predicate<Transaction>() {
+
+			@Override
+			public boolean test(Transaction t) {
+				return !shouldBeInPool(t);
+			}
+			
+		});
 		
 		transactions.sort(new Comparator<Transaction>() {
 
@@ -72,7 +163,7 @@ public class TxPool {
 		//so that the first transaction's fee is prioritized. However, if we do this, we need to check the context
 		//with which we request the transaction so that a transaction already in a block with a high fee does not
 		//affect sorting of transactions from the same source with a lower fee.
-		//TODO i'm sure there is a simple solution to this dilemma but i'm too tired to find it right now
+		//i'm sure there is a simple solution to this dilemma, someone can fix it later
 		
 		transactions.sort(new Comparator<Transaction>() {
 
@@ -240,17 +331,31 @@ public class TxPool {
 	public void add(Transaction t) {
 		
 		if (t == null || !t.validate()) throw new RuntimeException("Attempted to add invalid/null transaction to txpool!");
-		
+
 		if (transactions.contains(t)) return;
-		
+
+		if (!shouldBeInPool(t)) return;
+
 		int size = t.serialize().getBytes().length;
-		
+
 		if (size > MAX_TRANSACTION_SIZE) return;
 
 		//completely optional. find a way to reward this with the protocol.
 		Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
-		
+
 		transactions.add(t);
+		
+		for (Wallet w : Monieo.INSTANCE.myWallets) {
+			
+			if (w.getAsString().equals(t.getSource())) {
+				
+				trackTx(t);
+				Monieo.INSTANCE.ui.refresh(false, false);
+				break;
+				
+			}
+			
+		}
 		
 		sort();
 		

@@ -236,6 +236,7 @@ public class Monieo {
 	public File blkhighest;
 	
 	public File txlistFolder;
+	public File trackTx;
 	
 	public File settingsFile;
 	public Settings settings;
@@ -293,6 +294,13 @@ public class Monieo {
 		settingsFile = new File(workingFolder.getPath() + "/settings.yml");
 		try {
 			settingsFile.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		trackTx = new File(workingFolder.getPath() + "/tracktx.dat");
+		try {
+			trackTx.createNewFile();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
