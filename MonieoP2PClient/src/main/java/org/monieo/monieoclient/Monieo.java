@@ -399,7 +399,7 @@ public class Monieo {
 		txlistFolder = new File(workingFolder.getPath() + "/txlist");
 		txlistFolder.mkdir();
 		
-		feeEstimate = new File(workingFolder.getParent() + "/feeestim.dat");
+		feeEstimate = new File(workingFolder.getPath() + "/feeestim.dat");
 		
 		if (!feeEstimate.exists()) {
 			
