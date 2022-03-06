@@ -7,9 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.SplashScreen;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -47,6 +49,7 @@ import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
 import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.gui.MessageWithLink;
+import org.monieo.monieoclient.gui.Settings;
 import org.monieo.monieoclient.gui.UI;
 import org.monieo.monieoclient.mining.AbstractMiner;
 import org.monieo.monieoclient.mining.DefaultMinerImpl;
@@ -58,6 +61,8 @@ import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
 import org.monieo.monieoclient.randomx.RandomX;
 import org.monieo.monieoclient.networking.Node;
 import org.monieo.monieoclient.wallet.Wallet;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 public class Monieo {
 	
@@ -78,6 +83,8 @@ public class Monieo {
 	public static Monieo INSTANCE;
 	
 	public static final BigInteger MAXIMUM_HASH_VALUE = BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE);
+	
+	public static final int SYSTEM_LOGICAL_THREADS = Runtime.getRuntime().availableProcessors();
 	
 	public static SplashScreen ss;
 	public static Graphics2D ssg;
@@ -230,6 +237,24 @@ public class Monieo {
 	
 	public File txlistFolder;
 	
+	public File settingsFile;
+	public Settings settings;
+	Yaml yamlSettings;
+	
+	public void saveSettings() {
+		
+		try (FileWriter fw = new FileWriter(settingsFile)) {
+			
+			fw.write(yamlSettings.dump(settings));
+			
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
 	List<Socket> connections = new ArrayList<Socket>();
 	public List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
 	
@@ -264,6 +289,24 @@ public class Monieo {
 		
 		workingFolder = new File(workingDirectory);
 		workingFolder.mkdirs();
+		
+		settingsFile = new File(workingFolder.getPath() + "/settings.yml");
+		try {
+			settingsFile.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		yamlSettings = new Yaml(new Constructor(Settings.class));
+		
+		try (InputStream in = new FileInputStream(settingsFile)) {
+
+			settings = yamlSettings.load(in);
+			if (settings == null) settings = new Settings();
+
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		
 		System.out.println("Test    : " + bytesToHex(RandomX.getRandomX().hash("tast")));
 		System.out.println("Expected: " + "6b08ba542fe59ffad744d12866fde82ba2a1397cd5408e3531ec37cd5f1011c1");

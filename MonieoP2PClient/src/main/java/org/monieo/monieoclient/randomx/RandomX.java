@@ -1,5 +1,7 @@
 package org.monieo.monieoclient.randomx;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.monieo.monieoclient.Monieo;
@@ -66,8 +68,40 @@ public class RandomX {
     	}
     	
     	long dIC = RXJNI.randomxDatasetItemCount();
+    	long ea = dIC/Monieo.SYSTEM_LOGICAL_THREADS;
+    	long acc = 0;
     	
-    	RXJNI.randomxInitDataset(datasetPtr, cachePtr, 0, dIC);
+    	List<Thread> threads = new ArrayList<Thread>();
+    	
+    	for (int i = 0; i < Monieo.SYSTEM_LOGICAL_THREADS; i++) {
+    		
+    		long k = acc;
+    		acc += ea;
+    		
+    		Thread t = new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+		        	
+		        	RXJNI.randomxInitDataset(datasetPtr, cachePtr, k, ea);
+					
+				}
+				
+			});
+			
+			t.start();
+			threads.add(t);
+    		
+    	}
+    	
+    	RXJNI.randomxInitDataset(datasetPtr, cachePtr, acc, dIC-acc);
+    	
+    	for (Thread t : threads)
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
     	
     	RXJNI.randomxReleaseCache(cachePtr);
     	cachePtr = RandomXJNI.NULLPTR;

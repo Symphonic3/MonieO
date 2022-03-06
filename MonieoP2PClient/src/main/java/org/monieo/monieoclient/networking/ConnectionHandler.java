@@ -1,6 +1,7 @@
 package org.monieo.monieoclient.networking;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.function.Predicate;
@@ -20,6 +21,12 @@ public class ConnectionHandler implements Runnable{
 		try {
 			serverSocket = new ServerSocket(Monieo.PORT);
 		} catch (IOException e1) {
+			if (e1 instanceof BindException) {
+				
+				System.out.println("You cannot have two instances of MonieO running simultaneously!");
+				System.exit(0);
+				
+			}
 			e1.printStackTrace();
 		}
 		

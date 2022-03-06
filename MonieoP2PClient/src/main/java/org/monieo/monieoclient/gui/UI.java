@@ -1,16 +1,20 @@
  package org.monieo.monieoclient.gui;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -18,6 +22,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,6 +38,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
@@ -105,9 +111,9 @@ public class UI {
 	
 	JTextField lblTotalBalancelabel_1;
 	
-	JLabel totAvailableFundsDisplay;
-	JLabel totPendingFundsDisplay;
-	JLabel totFundsDisplay;
+	JTextField totAvailableFundsDisplay;
+	JTextField totPendingFundsDisplay;
+	JTextField totFundsDisplay;
 	public JLabel totConnectedNodesDisplay;
 	
 	JCheckBoxMenuItem toggleDarkMode;
@@ -119,6 +125,8 @@ public class UI {
 	public boolean mining;
 	JTextArea miningstats;
 	public boolean miningWindowOpen = false;
+	
+	public boolean settingsWindowOpen = false;
 	
 	public boolean modeToggleStatus;
 	private JLabel lblNewLabel_4;
@@ -173,7 +181,7 @@ public class UI {
 				JDialog jd = new JDialog(frame);
 				
 				jd.setTitle("Mining v" + Monieo.VERSION);
-				jd.setBounds(150, 150, 242, 350);
+				jd.setBounds(150, 150, 240, 350);
 				jd.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				jd.setResizable(false);
 				
@@ -332,29 +340,42 @@ public class UI {
 		            
 		});
 		
-		JLabel lblTotalAvailableFunds = new JLabel("Total spendable funds:");
+		JLabel lblTotalAvailableFunds = new JLabel("Available funds:");
 		lblTotalAvailableFunds.setBounds(10, 10, 133, 29);
 		panel_1.add(lblTotalAvailableFunds);
 		
-		totAvailableFundsDisplay = new JLabel("0");
+		JLabel plus = new JLabel("+");
+		//plus.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		plus.setBounds(182, 34, 10, 10);
+		panel_1.add(plus);
+		
+		totAvailableFundsDisplay = new JTextField("0");
+		totAvailableFundsDisplay.setEditable(false);
 		totAvailableFundsDisplay.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		totAvailableFundsDisplay.setBounds(144, 10, 331, 29);
 		panel_1.add(totAvailableFundsDisplay);
 		
-		JLabel lblNewLabel_2 = new JLabel("Total pending funds:");
+		JLabel lblNewLabel_2 = new JLabel("Pending funds:");
 		lblNewLabel_2.setBounds(10, 40, 133, 29);
 		panel_1.add(lblNewLabel_2);
 		
-		totPendingFundsDisplay = new JLabel("0");
+		totPendingFundsDisplay = new JTextField("0");
+		totPendingFundsDisplay.setEditable(false);
 		totPendingFundsDisplay.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		totPendingFundsDisplay.setBounds(144, 40, 331, 29);
 		panel_1.add(totPendingFundsDisplay);
 		
-		JLabel lblTotalFunds = new JLabel("Total funds:");
+		JLabel eq = new JLabel("=");
+		//eq.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		eq.setBounds(182, 64, 10, 10);
+		panel_1.add(eq);
+		
+		JLabel lblTotalFunds = new JLabel("Total balance:");
 		lblTotalFunds.setBounds(10, 70, 133, 29);
 		panel_1.add(lblTotalFunds);
 		
-		totFundsDisplay = new JLabel("0");
+		totFundsDisplay = new JTextField("0");
+		totFundsDisplay.setEditable(false);
 		totFundsDisplay.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		totFundsDisplay.setBounds(144, 70, 331, 29);
 		panel_1.add(totFundsDisplay);
@@ -670,8 +691,6 @@ public class UI {
 
 		frame.getContentPane().add(TgBtnTOGGLEMINING);
 		
-		JButton btnNewButton = null;
-		
 		lblNewLabel_1 = new JLabel("Address count:");
 		lblNewLabel_1.setBounds(208, 411, 109, 34);
 		frame.getContentPane().add(lblNewLabel_1);
@@ -723,7 +742,7 @@ public class UI {
 		lblToggleExperimentalMining.setBounds(756, 414, 76, 29);
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
-		lblTotalBalancelabel = new JLabel("Total spendable balance:");
+		lblTotalBalancelabel = new JLabel("Total available balance:");
 		lblTotalBalancelabel.setBounds(409, 406, 231, 44);
 		frame.getContentPane().add(lblTotalBalancelabel);
 		
@@ -778,11 +797,15 @@ public class UI {
 		
 		JMenu settings = new JMenu("Settings");
 		toggleDarkMode = new JCheckBoxMenuItem("Dark Mode");
+		toggleDarkMode.setState(Monieo.INSTANCE.settings.darkMode);
 		toggleDarkMode.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
+				Monieo.INSTANCE.settings.darkMode = toggleDarkMode.getState();
+				Monieo.INSTANCE.saveSettings();
+				
 				refresh(false, true);
 				
 			}
@@ -795,7 +818,79 @@ public class UI {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				
+				if (settingsWindowOpen) return;
+				
+				JDialog jd = new JDialog(frame);
+				
+				jd.setTitle("Settings v" + Monieo.VERSION);
+				jd.setBounds(150, 150, 250+17, 85+45);
+				jd.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				jd.setResizable(false);
+				
+				jd.getContentPane().setLayout(null);
+				
+				JCheckBox mOC = new JCheckBox("Minimize on close");
+				mOC.setBounds(10, 10, 230, 15);
+				mOC.setSelected(Monieo.INSTANCE.settings.minimizeOnClose);
+				mOC.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						Monieo.INSTANCE.settings.minimizeOnClose = mOC.isSelected();
+						Monieo.INSTANCE.saveSettings();
+						
+					}
+					
+				});
+				jd.getContentPane().add(mOC);
+				
+				JCheckBox hOC = new JCheckBox("Hide hints");
+				hOC.setBounds(10, 35, 230, 15);
+				hOC.setSelected(Monieo.INSTANCE.settings.disableHints);
+				hOC.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						Monieo.INSTANCE.settings.disableHints = hOC.isSelected();
+						Monieo.INSTANCE.saveSettings();
+						
+					}
+					
+				});
+				jd.getContentPane().add(hOC);
+				
+				JButton close = new JButton("Done");
+				close.setBounds(10, 60, 230, 20);
+				close.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						settingsWindowOpen = false;
+						jd.dispose();
+						
+					}
+					
+				});
+				jd.getContentPane().add(close);
+				
+				settingsWindowOpen = true;
+				
+				jd.addWindowListener(new WindowAdapter()
+				{
+					@Override
+					public void windowClosing(WindowEvent e)
+					{
+						settingsWindowOpen = false;
+					}
+					
+				});
+				
+				jd.setVisible(true);
+				
 				
 			}
 		});
@@ -893,16 +988,167 @@ public class UI {
 		frame.setVisible(true);
 		frame.setAlwaysOnTop(true);
 		frame.setAlwaysOnTop(false);
+		
+		for (Component c : getAllComponents(frame)) {
+			
+			if (c instanceof JTextField) {
+				
+				JTextField cr = (JTextField)c;
+				
+				cr.addMouseListener(new MouseListener() {
+					
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						
+						JPopupMenu p = new JPopupMenu();
+						
+						if (e.getButton() != 3) return;
+						
+						if (!cr.isEnabled()) return;
+						
+						if (cr.isEditable()) {
+							
+							JMenuItem pst = new JMenuItem("Paste");
+							pst.addActionListener(new ActionListener() {
+								
+								@Override
+								public void actionPerformed(ActionEvent e) {
+									
+									cr.paste();
+									
+								}
+								
+							});
+							p.add(pst);				
+							
+							
+						} else {
+							
+							JMenuItem cp = new JMenuItem("Copy");
+							cp.addActionListener(new ActionListener() {
+								
+								@Override
+								public void actionPerformed(ActionEvent e) {
+									
+									cr.selectAll();
+									cr.copy();
+									
+								}
+								
+							});
+							p.add(cp);
+							
+						}
+						
+						p.show(cr, cr.getMousePosition().x, cr.getMousePosition().y);
+						
+					}
 
+					@Override
+					public void mousePressed(MouseEvent e) {}
+					@Override
+					public void mouseReleased(MouseEvent e) {}
+					@Override
+					public void mouseEntered(MouseEvent e) {}
+					@Override
+					public void mouseExited(MouseEvent e) {}
+					
+				});
+				
+			} else if (c instanceof JTable) {
+				
+				JTable cr = (JTable)c;
+				
+				cr.addMouseListener(new MouseListener() {
+					
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						
+						JPopupMenu p = new JPopupMenu();
+						
+						if (e.getButton() != 3) return;
+						
+						if (!cr.isEnabled()) return;
+						
+						JMenuItem cp = new JMenuItem("Copy");
+						cp.addActionListener(new ActionListener() {
+							
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								
+								String s = "";
+								int clc = table.getColumnCount();
+								for (int i = 0; i < clc; i++) {
+									
+									s = s + table.getColumnName(i) + " | ";
+									
+								}
+								
+								s = s.substring(0, s.length()-3);
+								
+								int[] rw = table.getSelectedRows();
+								
+								for (int i = 0; i < rw.length; i++) {
+									
+									s = s + "\n";
+									
+									for (int k = 0; k < table.getColumnCount(); k++) {
+										
+										s = s + table.getValueAt(rw[i], k) + " | ";
+										
+									}
+									
+									s = s.substring(0, s.length()-3);
+									
+								}
+								
+								StringSelection ss = new StringSelection(s);
+								Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
+								
+							}
+							
+						});
+						p.add(cp);
+						
+						p.show(cr, cr.getMousePosition().x, cr.getMousePosition().y);
+						
+					}
+
+					@Override
+					public void mousePressed(MouseEvent e) {}
+					@Override
+					public void mouseReleased(MouseEvent e) {}
+					@Override
+					public void mouseEntered(MouseEvent e) {}
+					@Override
+					public void mouseExited(MouseEvent e) {}
+					
+				});
+				
+			}
+			
+		}
+		
 		//frame.requestFocus();
 		
+	}
+	
+	public static List<Component> getAllComponents(final Container c) {
+	    Component[] comps = c.getComponents();
+	    List<Component> compList = new ArrayList<Component>();
+	    for (Component comp : comps) {
+	        compList.add(comp);
+	        if (comp instanceof Container)
+	            compList.addAll(getAllComponents((Container) comp));
+	    }
+	    return compList;
 	}
 	
 	public void refresh(boolean updlist, boolean changeColor) {
 		
 		if (changeColor) {
 			
-			if (!toggleDarkMode.getState()) {
+			if (!Monieo.INSTANCE.settings.darkMode) {
 				
 				FlatLightLaf.setup();
 				SwingUtilities.updateComponentTreeUI(frame);
@@ -916,6 +1162,9 @@ public class UI {
 				
 			}
 
+			totAvailableFundsDisplay.setBorder(null);
+			totPendingFundsDisplay.setBorder(null);
+			totFundsDisplay.setBorder(null);
 			lblTotalBalancelabel_1.setBorder(null);
 			INDIVbalanceLabel.setBorder(null); //remove the border
 			nickLabel.setBorder(null); //remove the border
