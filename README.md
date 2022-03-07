@@ -12,7 +12,7 @@ If you are looking to try MonieO, you might want to look at the [Usage Guide](ht
 Compatibility
 =========
 
-MonieO was originally designed to be as portable as possible but we have decided to use RandomX for PoW which requires system-specific binairies. Due to this, MonieO currently supports only Windows on the 64bit (x86-64) architecture. If you want to run MonieO on a different system, compile the required RandomX binairies you need for your system yourself, or [open an issue](https://github.com/Symphonic3/MonieO/issues/new/choose) and we will attempt to make the binairies available.
+MonieO was originally designed to be as portable as possible but we have decided to use RandomX for PoW which requires system-specific binaries. Due to this, MonieO currently supports only Windows on the 64bit (x86-64) architecture. If you want to run MonieO on a different system, compile the required RandomX binaries you need for your system yourself, or [open an issue](https://github.com/Symphonic3/MonieO/issues/new/choose) and we will attempt to make the binaries available.
 
 Specifications
 =========
