@@ -1067,6 +1067,35 @@ public class Monieo {
 		
 	}
 	
+	public static String sha256(String s) {
+		
+		return bytesToHex(sha256Raw(s));
+		
+	}
+	
+	public static byte[] sha256Raw(String s) {
+		
+		MessageDigest digest = null;
+		
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		return sha256Raw(s, digest);
+		
+	}
+	
+	public static byte[] sha256Raw(String s, MessageDigest d) {
+		
+		d.reset();
+		
+		return d.digest(s.getBytes(StandardCharsets.UTF_8));
+		
+	}
+	
 	public static byte[] sha256dRaw(String s, MessageDigest d) {
 		
 		d.reset();

@@ -58,6 +58,7 @@ import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.gui.FeeEstimate.FeeEstimateType;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.networking.Node;
+import org.monieo.monieoclient.randomx.RandomX;
 import org.monieo.monieoclient.wallet.Wallet;
 
 import com.formdev.flatlaf.FlatClientProperties;
@@ -881,6 +882,123 @@ public class UI {
 		});
 		settings.add(options);
 		menuBar.add(settings);
+		
+		JMenu tools = new JMenu("Tools");
+		JMenuItem hm = new JMenuItem("Hash (RandomX)");
+		hm.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JDialog in = new JDialog(frame, "Enter data to hash (RandomX)");
+				in.setSize(355, 199);
+				in.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				in.setResizable(false);
+				
+				JTextArea inT = new JTextArea();
+				inT.setLineWrap(true);
+				inT.setBounds(10, 10, 320, 110);
+				in.add(inT);
+				
+				JButton b = new JButton("Hash (RandomX)");
+				b.setBounds(10, 130, 320, 20);
+				b.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						inT.setText(Monieo.randomx(inT.getText()));
+						
+					}
+					
+				});
+				in.add(b);
+				
+				in.getContentPane().setLayout(null);
+				
+				in.setVisible(true);
+				
+			}
+			
+		});
+		JMenuItem hs = new JMenuItem("Hash (SHA256 single)");
+		hs.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JDialog in = new JDialog(frame, "Enter data to hash (SHA256 single)");
+				in.setSize(355, 199);
+				in.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				in.setResizable(false);
+				
+				JTextArea inT = new JTextArea();
+				inT.setLineWrap(true);
+				inT.setBounds(10, 10, 320, 110);
+				in.add(inT);
+				
+				JButton b = new JButton("Hash (SHA256 single)");
+				b.setBounds(10, 130, 320, 20);
+				b.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						inT.setText(Monieo.sha256(inT.getText()));
+						
+					}
+					
+				});
+				in.add(b);
+				
+				in.getContentPane().setLayout(null);
+				
+				in.setVisible(true);
+				
+			}
+			
+		});
+		JMenuItem hd = new JMenuItem("Hash (SHA256d)");
+		hd.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JDialog in = new JDialog(frame, "Enter data to hash (SHA256d)");
+				in.setSize(355, 199);
+				in.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				in.setResizable(false);
+				
+				JTextArea inT = new JTextArea();
+				inT.setLineWrap(true);
+				inT.setBounds(10, 10, 320, 110);
+				in.add(inT);
+				
+				JButton b = new JButton("Hash (SHA256d)");
+				b.setBounds(10, 130, 320, 20);
+				b.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						inT.setText(Monieo.sha256d(inT.getText()));
+						
+					}
+					
+				});
+				in.add(b);
+				
+				in.getContentPane().setLayout(null);
+				
+				in.setVisible(true);
+				
+			}
+			
+		});
+		tools.add(hm);
+		tools.add(hs);
+		tools.add(hd);
+		menuBar.add(tools);
 		
 		JMenu window = new JMenu("Window");
 		JMenuItem showOverview = new JMenuItem("Show Overview");
