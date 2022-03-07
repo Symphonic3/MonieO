@@ -96,6 +96,8 @@ public class TxPool {
 			e.printStackTrace();
 		}
 		
+		ret.retainAll(get(-1, Monieo.INSTANCE.getHighestBlock()));
+		
 		return ret;
 		
 	}
