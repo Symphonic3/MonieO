@@ -34,12 +34,13 @@ public class ConnectionHandler implements Runnable{
 			
 			try {
 				
-				if (full()) continue;
+				if (full()) continue; //TODO test elimination with new system
 				
 				Socket clientSocket = serverSocket.accept();
 				
 				String inet = clientSocket.getInetAddress().getHostAddress();
 				
+				//TODO test banning with new system
 				if (Monieo.INSTANCE.knownNodes.contains(Monieo.INSTANCE.fetchByAdress(inet)) && !Monieo.INSTANCE.getValidNodesRightNow().contains(inet)) {
 					
 					System.out.println("bue");
@@ -48,13 +49,13 @@ public class ConnectionHandler implements Runnable{
 					
 				}
 				
-				for (int k = 0; k < Monieo.INSTANCE.nodes.size(); k++) {
+				for (int k = 0; k < Monieo.INSTANCE.nodes.size(); k++) { //TODO we shouldn't need to do this because we should use new node scoring ln 37 above
 					
 					Node n = Monieo.INSTANCE.nodes.get(k);
 					
 					if (n.getAdress().equalsIgnoreCase(inet)) {
 						
-						n.disconnect();
+						n.disconnect(false);
 						k--;
 						
 					}
