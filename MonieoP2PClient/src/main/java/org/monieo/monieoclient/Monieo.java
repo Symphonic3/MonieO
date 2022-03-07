@@ -86,7 +86,7 @@ public class Monieo {
 	
 	public static final int SYSTEM_LOGICAL_THREADS = Runtime.getRuntime().availableProcessors();
 	
-	public static final String GENESIS_HASH = genesis().hash();
+	public static String GENESIS_HASH;
 	
 	public static SplashScreen ss;
 	public static Graphics2D ssg;
@@ -292,6 +292,8 @@ public class Monieo {
 		
 		workingFolder = new File(workingDirectory);
 		workingFolder.mkdirs();
+		
+		GENESIS_HASH = genesis().hash();
 		
 		settingsFile = new File(workingFolder.getPath() + "/settings.yml");
 		try {
@@ -744,6 +746,8 @@ public class Monieo {
 		if (d == null) return BigDecimal.ZERO;
 		
 		String[] fs = d.split("\n");
+		
+		if (fs.length < 3) return BigDecimal.ZERO;
 		
 		return new BigDecimal(fs[i]);
 		
