@@ -54,8 +54,9 @@ import org.monieo.monieoclient.gui.UI;
 import org.monieo.monieoclient.mining.AbstractMiner;
 import org.monieo.monieoclient.mining.DefaultMinerImpl;
 import org.monieo.monieoclient.mining.TxPool;
+import org.monieo.monieoclient.networking.Bucket;
 import org.monieo.monieoclient.networking.ConnectionHandler;
-import org.monieo.monieoclient.networking.NetAdressHolder;
+import org.monieo.monieoclient.networking.NetAddressManager;
 import org.monieo.monieoclient.networking.NetworkPacket;
 import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
 import org.monieo.monieoclient.randomx.RandomX;
@@ -227,7 +228,6 @@ public class Monieo {
 	public UI ui;
 	
 	public File workingFolder;
-	File nodesFile;
 	public File walletsFolder; 
 	public File blocksFolder; 
 	public File blocksExtraDataFolder;
@@ -259,13 +259,14 @@ public class Monieo {
 	}
 	
 	List<Socket> connections = new ArrayList<Socket>();
-	public List<NetAdressHolder> knownNodes = new ArrayList<NetAdressHolder>();
 	
 	public List<Wallet> myWallets = new ArrayList<Wallet>();
 	
 	public Vector<Node> nodes = new Vector<Node>();
 	
 	public TxPool txp;
+	
+	public NetAddressManager nam;
 	
 	public ConnectionHandler ch;
 	
@@ -323,25 +324,7 @@ public class Monieo {
 		System.out.println("Test    : " + bytesToHex(RandomX.getRandomX().hash("tast")));
 		System.out.println("Expected: " + "6b08ba542fe59ffad744d12866fde82ba2a1397cd5408e3531ec37cd5f1011c1");
 		
-		nodesFile = new File(workingFolder.getPath() + "/nodes.dat");
-		
-		try {
-			nodesFile.createNewFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		try (Scanner c = new Scanner(nodesFile)) {
-			
-			while (c.hasNextLine()) {
-				
-				knownNodes.add(NetAdressHolder.deserialize(c.nextLine()));
-				
-			}
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		nam = new NetAddressManager();
 		
 		walletsFolder = new File(workingFolder.getPath() + "/wallets");
 		walletsFolder.mkdir();
@@ -500,7 +483,7 @@ public class Monieo {
 					
 					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME) {
 						
-						n.disconnect();
+						n.disconnect(true); //disconnecting via refusing to respond is the only way to peacefully disconnect
 						i--;
 						continue;
 						
@@ -515,33 +498,19 @@ public class Monieo {
 					
 				}
 				
-				List<String> rn = getValidNodesRightNow();
-				
-				int ind = 0;
-				
 				for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
 					
-					whilea: while (rn.size() > ind) {
+					String s = nam.getPossibleAddressOutbound();
+					
+					System.out.println("attempting to connect to a node!");
+					if (ch.connect(s)) {
 						
-						//System.out.println("ASd1");
+						//this is not put here because we should wait for proper handshaking before doing this
+						//nam.successfullyConnectedOrDisconnected(s);
 						
-						for (int k = 0; k < nodes.size(); k++) {
-							
-							Node n = nodes.get(k);
-							
-							if (n.getAdress().equalsIgnoreCase(rn.get(ind))) {
-								
-								ind++;
-								continue whilea;
-								
-							}
-							
-						}
+					} else {
 						
-						System.out.println("attempting to connect to a node!");
-						ch.connect(rn.get(ind));
-						ind++;
-						break whilea;
+						nam.couldNotConnectToNode(s);
 						
 					}
 					
@@ -863,78 +832,6 @@ public class Monieo {
 		
 	}
 	
-	public List<String> getValidNodesRightNow() {
-		
-		pruneKnownNodes();
-		
-		List<String> ad = new ArrayList<String>();
-		
-		for (NetAdressHolder nah : knownNodes) {
-			
-			if (!nah.isBanned()) ad.add(nah.adress);
-			
-		}
-		
-		Collections.shuffle(ad);
-		
-		if (ad.size() > 1000) ad.subList(1000, ad.size()).clear();
-		
-		return ad;
-		
-	}
-	
-	public NetAdressHolder fetchByAdress(String address) {
-		
-		for (NetAdressHolder nah : knownNodes) {
-			
-			if (nah.adress.equalsIgnoreCase(address)) {
-				
-				return nah;
-				
-			}
-			
-		}
-		
-		return null;
-		
-	}
-	
-	public void attemptRememberNode(String address) {
-		
-		pruneKnownNodes();
-		
-		if (fetchByAdress(address) != null) return;
-		
-		NetAdressHolder n = new NetAdressHolder(address, Long.MAX_VALUE, 0);
-		
-		knownNodes.add(n);
-		
-		saveKnownNodes();
-		
-	}
-	
-	public void saveKnownNodes() {
-
-		try (FileWriter c = new FileWriter(nodesFile, false)) {
-			
-			for (NetAdressHolder nah : knownNodes) {
-				
-				c.append(nah.serialize() + "\n");
-				
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
-	
-	public void pruneKnownNodes() {
-		
-		knownNodes.removeIf(t -> t.isExpired());
-		
-	}
-	
 	public static KeyPair generateKeyPair() {
 		try {
 			KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
@@ -1070,6 +967,25 @@ public class Monieo {
 	public static String sha256(String s) {
 		
 		return bytesToHex(sha256Raw(s));
+		
+	}
+	
+	public static byte[] sha256dRawInRawOut(byte[] in) {
+		
+		MessageDigest digest = null;
+		
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		byte[] n = digest.digest(in);
+		
+		digest.reset();
+		
+		return digest.digest(n);
 		
 	}
 	

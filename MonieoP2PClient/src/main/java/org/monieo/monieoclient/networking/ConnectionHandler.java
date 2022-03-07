@@ -34,7 +34,7 @@ public class ConnectionHandler implements Runnable{
 			
 			try {
 				
-				if (Monieo.INSTANCE.nodes.size() >= Monieo.MAX_CONNECTIONS) continue;
+				if (full()) continue;
 				
 				Socket clientSocket = serverSocket.accept();
 				
@@ -71,7 +71,13 @@ public class ConnectionHandler implements Runnable{
 		
 	}
 	
-	public void connect(String inet) {
+	public boolean full() {
+		
+		return Monieo.INSTANCE.nodes.size() >= Monieo.MAX_CONNECTIONS;
+		
+	}
+	
+	public boolean connect(String inet) {
 		
 		/*for (Node n : Monieo.INSTANCE.nodes) {
 			
@@ -82,7 +88,13 @@ public class ConnectionHandler implements Runnable{
 		try {
 			Socket s = new Socket(inet, Monieo.PORT);
 			nodeDo(s, false);
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			
+			return false;
+			
+		}
+		
+		return true;
 		
 	}
 	

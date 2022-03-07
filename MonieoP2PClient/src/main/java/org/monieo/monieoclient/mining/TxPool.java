@@ -69,11 +69,11 @@ public class TxPool {
 	}
 	
 	public List<Transaction> getTrackedTx() {
-		
+
 		List<Transaction> ret = new ArrayList<Transaction>();
 		
 		List<String> track = new ArrayList<String>(Arrays.asList(Monieo.readFileData(Monieo.INSTANCE.trackTx).split("\n")));
-
+		
 		for (Transaction t : transactions) {
 			
 			if (track.contains(t.hash())) {
@@ -277,6 +277,7 @@ public class TxPool {
 	}
 	
 	//this is another example of a terrible algorithm! but it works!
+	//TODO this algorithm takes a horrendous amount of time to run. we need to minimize how much this runs by using a constant miner that listens to when it should restart
 	public List<AbstractTransaction> get(int maxsize, Block bl) {
 		
 		List<AbstractTransaction> lt = get();

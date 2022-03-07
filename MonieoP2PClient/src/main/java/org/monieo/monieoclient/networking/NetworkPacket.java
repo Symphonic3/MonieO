@@ -14,7 +14,6 @@ public class NetworkPacket {
 		ACK_VER,
 		REQUEST_BLOCKS_AFTER,
 		REQUEST_SINGLE_BLOCK, //potentially unnessecary
-		REQUEST_NODES,
 		SEND_TRANSACTION,
 		SEND_BLOCK,
 		SEND_ADDR

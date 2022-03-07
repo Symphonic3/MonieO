@@ -47,6 +47,8 @@ import javax.swing.ScrollPaneLayout;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -83,6 +85,7 @@ public class UI {
 	public JTable table;
 	public JTable table2;
 	public JTable txTable;
+	public JScrollPane ads;
 	
 	public JList<String> list;
 	public JButton btnChangeWalName;
@@ -151,6 +154,37 @@ public class UI {
     private JTextField textField_3;
 	
 	public UI() {
+	}
+	
+	public void finalizeTransaction(Transaction newTransaction) {
+		
+		String res = JOptionPane.showInputDialog(frame, 
+				"WARNING: YOU ARE ABOUT TO SEND A MONIEO TRANSACTION.\nTHIS ACTION IS IRREVERSIBLE AND CANNOT BE UNDONE.\n\n"
+				+ "To: " + newTransaction.d.to
+				+ "\nAmount: " + newTransaction.d.amount.toPlainString() + " MNO"
+				+ "\nFee: " + newTransaction.d.fee.toPlainString() + " MNO"
+				+ "\n\nPlease type \"confirm\" below to confirm.", "Confirmation", 2);
+		
+		if (res == null) return;
+		
+		if (res.equals("confirm")) {
+			
+			Monieo.INSTANCE.txp.add(newTransaction);
+			
+			textField.setText(null);
+			textField_1.setText(null);
+			textField_2.setText(null);
+			
+			JOptionPane.showMessageDialog(frame, "Transaction sent!");
+			
+			refresh(false, false);
+			
+			return;
+			
+		}
+		
+		notifyInvalid();
+		
 	}
 
 	
@@ -310,6 +344,27 @@ public class UI {
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBounds(10, 130, 663, 225);
+		tabbedPane.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				
+				if (tabbedPane.getSelectedComponent().equals(ads)) {
+
+					DefaultTableModel txmodel = (DefaultTableModel) txTable.getModel();
+					txmodel.setRowCount(0);
+					
+					for (Transaction t : Monieo.INSTANCE.txp.getTrackedTx()) {
+						
+						txmodel.addRow(new Object[] {t.d.from, t.d.to, t.d.amount.toPlainString(), t.d.fee.toPlainString()});
+						
+					}
+					
+				}
+				
+			}
+			
+		});
 		panel_1.add(tabbedPane);
 		
 		scrollPane_1 = new JScrollPane();
@@ -319,7 +374,7 @@ public class UI {
 		txTable.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		txTable.setAutoCreateRowSorter(true);
 		txTable.getTableHeader().setReorderingAllowed(false);
-		JScrollPane ads = new JScrollPane();
+		ads = new JScrollPane();
 		tabbedPane.add("Outgoing Transactions", ads);
 		ads.setViewportView(txTable);
 		txTable.setModel(new DefaultTableModel(null, TX_COLUMN_NAMES) {
@@ -459,32 +514,35 @@ public class UI {
 								
 							}
 							
-							String res = JOptionPane.showInputDialog(frame, 
-									"WARNING: YOU ARE ABOUT TO SEND A MONIEO TRANSACTION.\nTHIS ACTION IS IRREVERSIBLE AND CANNOT BE UNDONE.\n\n"
-									+ "To: " + newTransaction.d.to
-									+ "\nAmount: " + newTransaction.d.amount.toPlainString() + " MNO"
-									+ "\nFee: " + newTransaction.d.fee.toPlainString() + " MNO"
-									+ "\n\nPlease type \"confirm\" below to confirm.", "Confirmation", 2);
+							boolean fullIssue = false;
 							
-							if (res == null) return;
+							BigDecimal am = BlockMetadata.getSpendableBalance(Monieo.INSTANCE.getHighestBlock().getMetadata().getWalletData(newTransaction.getSource()).pf).subtract(newTransaction.getAmount());
 							
-							if (res.equals("confirm")) {
+							for (Transaction t : Monieo.INSTANCE.txp.getTrackedTx()) {
 								
-								Monieo.INSTANCE.txp.add(newTransaction);
-								
-								textField.setText(null);
-								textField_1.setText(null);
-								textField_2.setText(null);
-								
-								JOptionPane.showMessageDialog(frame, "Transaction sent!");
-								
-								refresh(false, false);
-								
-								return;
+								if (t.getSource().equals(newTransaction.getSource())) {
+									
+									am = am.subtract(t.getAmount().add(t.d.fee));
+									fullIssue = true;
+									
+								}
 								
 							}
 							
-							notifyInvalid();
+							if (am.compareTo(BigDecimal.ZERO) == -1) {
+								
+								String s = fullIssue ? "You have outstanding transaction(s) that depend on MonieO being spent by this transaction. "
+										+ "One or more of the transaction(s) will not be accepted by the network! "
+										: "You do not have enough MonieO to send this transaction! "
+										+ "It will not be accepted by the network. ";
+								
+								s = s + "\n\nPlease confirm that you wish to send this tranaction! This can be a potentially dangerous action.";
+								
+								int r = JOptionPane.showConfirmDialog(frame, s, "Error", 0, JOptionPane.WARNING_MESSAGE);
+								
+								if (r == 0) finalizeTransaction(newTransaction);
+								
+							} else finalizeTransaction(newTransaction);
 							
 						} catch (Exception e2) {
 							e2.printStackTrace();
@@ -1287,15 +1345,6 @@ public class UI {
 		
 		totConnectedNodesDisplay.setText(String.valueOf(Monieo.INSTANCE.nodes.size()));
 		
-		DefaultTableModel txmodel = (DefaultTableModel) txTable.getModel();
-		txmodel.setRowCount(0);
-		
-		for (Transaction t : Monieo.INSTANCE.txp.getTrackedTx()) {
-			
-			txmodel.addRow(new Object[] {t.d.from, t.d.to, t.d.amount.toPlainString(), t.d.fee.toPlainString()});
-			
-		}
-		
 		DefaultTableModel model2 = (DefaultTableModel) table2.getModel();
 		model2.setRowCount(0);
 		
@@ -1307,7 +1356,7 @@ public class UI {
 
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		model.setRowCount(0);
-
+		
 		long ds = Monieo.INSTANCE.desyncAmount();
 		
 		if (ds != -1) {

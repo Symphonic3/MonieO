@@ -96,11 +96,11 @@ public class Node implements Runnable{
 			
 		} catch (IOException e) {
 
-			System.out.println("DC BECAUSE OF SOCKET RETRIEVE EXCEPTION!");
+			System.out.println("D/C BECAUSE OF SOCKET RETRIEVE EXCEPTION!");
 			
 			//TODO remove this
 			e.printStackTrace();
-			disconnect();			
+			disconnect(false);			
 
 			return;
 			
@@ -142,8 +142,13 @@ public class Node implements Runnable{
 		
 	}
 	
-	public void disconnect() {
+	public void disconnect(boolean peacefully) {
 		
+		if (!remoteAcknowledgedLocal || !localAcknowledgedRemote) {
+			
+			Monieo.INSTANCE.nam.couldNotConnectToNode(getAdress());
+			
+		} else if (peacefully) Monieo.INSTANCE.nam.successfullyConnectedOrDisconnected(getAdress());
 		try {
 			socket.close();
 		} catch (IOException e1) {
@@ -157,9 +162,9 @@ public class Node implements Runnable{
 	
 	public void infraction() {
 		
-		System.out.println("DC BECAUSE OF INFRACTION!");
-		Monieo.INSTANCE.fetchByAdress(getAdress()).ban();
-		disconnect();
+		System.out.println("D/C BECAUSE OF INFRACTION!");
+		Monieo.INSTANCE.nam.ban(getAdress());
+		disconnect(false);
 		
 	}
 	
@@ -263,11 +268,11 @@ public class Node implements Runnable{
 		} catch (Exception e) {
 			
 			//possibly infraction here?
-			System.out.println("DC BECAUSE OF EXCEPTION!");
+			System.out.println("D/C BECAUSE OF EXCEPTION!");
 			
 			//TODO remove this
 			e.printStackTrace();
-			disconnect();			
+			disconnect(false);
 
 			return;
 			
@@ -310,7 +315,7 @@ public class Node implements Runnable{
 				
 				if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
 					
-					Monieo.INSTANCE.attemptRememberNode(getAdress());
+					Monieo.INSTANCE.nam.successfullyConnectedOrDisconnected(getAdress());
 					
 					for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
 						
@@ -427,22 +432,6 @@ public class Node implements Runnable{
 						
 					});
 					
-				} else if (nc.cmd == NetworkPacketType.REQUEST_NODES) {
-					
-					List<String> s = Monieo.INSTANCE.getValidNodesRightNow();
-					
-					String k = "";
-					
-					for (String a : s) {
-						
-						k = a + " ";
-						
-					}
-					
-					k = k.substring(0, k.length() - 1);
-					
-					queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, k));
-					
 				} else if (nc.cmd == NetworkPacketType.SEND_TRANSACTION) {
 
 					Transaction t = Transaction.deserialize(nc.data);
@@ -462,6 +451,7 @@ public class Node implements Runnable{
 				} else if (nc.cmd == NetworkPacketType.SEND_ADDR) {
 					
 					//TODO send_addr I/O
+					//send when we connect successfully to a peer
 					
 				}
 				
