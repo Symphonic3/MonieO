@@ -1036,6 +1036,7 @@ public class UI {
 				
 				JLabel title = new JLabel("MonieO Client");
 				title.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
+				JLabel copyR = new JLabel("© 2022 ‘The MonieO developers’");
 
 				String link = "https://github.com/Symphonic3/MonieO";
 				
@@ -1044,6 +1045,7 @@ public class UI {
 						title,
 						(Monieo.UPDATE ? "v" + Monieo.VERSION + " (latest is v" + Monieo.NEXT_AVAILABLE + ")" : "v" + Monieo.VERSION),
 						" ",
+						copyR,
 						new MessageWithLink("<a href=\"" + link + "\">" + link + "</a>"),
 					}, "About", JOptionPane.PLAIN_MESSAGE);
 				
