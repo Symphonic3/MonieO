@@ -346,11 +346,6 @@ public class Node implements Runnable{
 								
 								if (kill) return;
 								
-								if (!b.hash().equals(wantedHashP[i])) {
-									hashes.add(b.hash());
-									
-								} else break;
-								
 								if (b.equals(g)) {
 																
 									if (wantedHashP.length != i) {
@@ -363,6 +358,11 @@ public class Node implements Runnable{
 									} else break;
 									
 								}
+								
+								if (!b.header.preHash.equals(wantedHashP[i])) {
+									hashes.add(b.header.preHash);
+									
+								} else break;
 								
 								b = b.getPrevious();
 								
@@ -404,17 +404,17 @@ public class Node implements Runnable{
 
 								if (kill) return;
 								
-								if (b.hash().equals(wantedHash)) {
-									
-									t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
-									break;
-									
-								}
-								
 								if (b.equals(g)) {
 									
 									//don't have block, sorry
 									return;
+									
+								}
+								
+								if (b.header.preHash.equals(wantedHash)) {
+									
+									t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.getPrevious().serialize()));
+									break;
 									
 								}
 								

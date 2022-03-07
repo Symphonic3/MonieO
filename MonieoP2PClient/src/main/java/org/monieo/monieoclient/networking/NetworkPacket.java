@@ -85,12 +85,12 @@ public class NetworkPacket {
 		
 		outer: while (true) {
 			
-			for (int i = 0; i < step; i++) {
+			for (int i = 0; i < (step-1); i++) {
 				
 				b = b.getPrevious();
 				if (b == null) {
 					
-					hashes.add(Monieo.genesis().hash());
+					hashes.add(Monieo.GENESIS_HASH);
 					break outer;
 					
 				}
@@ -99,7 +99,7 @@ public class NetworkPacket {
 			
 			step *= 2;
 			
-			hashes.add(b.hash());
+			if (b.getPrevious() != null) hashes.add(b.header.preHash);
 			
 		}
 		

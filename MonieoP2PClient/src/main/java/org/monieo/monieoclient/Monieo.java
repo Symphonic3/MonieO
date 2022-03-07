@@ -86,6 +86,8 @@ public class Monieo {
 	
 	public static final int SYSTEM_LOGICAL_THREADS = Runtime.getRuntime().availableProcessors();
 	
+	public static final String GENESIS_HASH = genesis().hash();
+	
 	public static SplashScreen ss;
 	public static Graphics2D ssg;
 	
@@ -477,7 +479,7 @@ public class Monieo {
 				Block b = getHighestBlock();
 				Block g = genesis();
 				
-				for (int i = 0; i < 10; i++) { //hardcoded to 10 now because we removed CONFIRMATIONS
+				for (int i = 0; i < (10-1); i++) { //hardcoded to 10 now because we removed CONFIRMATIONS
 					
 					if (b == null || b.equals(g)) {
 						
@@ -485,9 +487,10 @@ public class Monieo {
 						
 					}
 					
-					b = b.getPrevious();
-					
 				}
+
+				Block nb = b.getPrevious();
+				String hash = (nb == null ? GENESIS_HASH : b.header.preHash);
 				
 				for (int i = 0; i < nodes.size(); i++) {
 
@@ -506,7 +509,7 @@ public class Monieo {
 					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
 					
 					//functions as a keepalive, for now
-					n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, b.hash()));
+					n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, hash));
 					
 				}
 				
