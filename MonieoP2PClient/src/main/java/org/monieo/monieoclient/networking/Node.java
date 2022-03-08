@@ -256,7 +256,7 @@ public class Node implements Runnable{
 
 				if (s == null || s.equals("")) continue;
 				
-				System.out.println("recieved data!");
+				//System.out.println("recieved data!");
 				
 				nc = NetworkPacket.deserialize(s);
 
@@ -290,10 +290,10 @@ public class Node implements Runnable{
 	
 	public boolean handle(NetworkPacket nc) {
 		
-		System.out.println("rec'd network command!" + nc.cmd);
+		/*System.out.println("rec'd network command!" + nc.cmd);
 		System.out.println("==BEGIN NETWORK COMMAND==");
 		System.out.println(nc.data);
-		System.out.println("==END NETWORK COMMAND==");
+		System.out.println("==END NETWORK COMMAND==");*/
 		
 		try {
 			
