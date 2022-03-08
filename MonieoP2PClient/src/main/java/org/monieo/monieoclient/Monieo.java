@@ -502,7 +502,7 @@ public class Monieo {
 					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
 					
 					//functions as a keepalive, for now
-					n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, hash));
+					if (!n.busy) n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, hash));
 					
 				}
 				

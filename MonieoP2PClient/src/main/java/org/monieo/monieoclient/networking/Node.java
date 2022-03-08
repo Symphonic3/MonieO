@@ -38,6 +38,8 @@ public class Node implements Runnable{
 	public final long timeConnected;
 	private long timeRecieved = Long.MIN_VALUE;
 	
+	public volatile boolean busy = false;
+	
 	PrintWriter pw;
 	BufferedReader br;
 	
@@ -64,6 +66,8 @@ public class Node implements Runnable{
 				
 				if (!queue.isEmpty()) {
 					
+					busy = true;
+					
 					for (Consumer<Node> a : queue) {
 						
 						if (n.kill) return;
@@ -72,9 +76,11 @@ public class Node implements Runnable{
 						a.accept(n);
 						
 					}
-					
+						
 					queue.clear();
 					
+					busy = false;
+
 				}
 				
 			}
