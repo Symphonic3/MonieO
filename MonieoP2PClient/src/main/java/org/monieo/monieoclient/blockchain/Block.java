@@ -446,7 +446,7 @@ public class Block extends MonieoDataObject{
 		
 		BigDecimal defaultAmount = BigDecimal.valueOf(5);
 		
-		int halvings = (int)(h/1051200);
+		int halvings = (int)(h/2102400);
 		
 		for (int i = 0; i < halvings; i++) {
 			
