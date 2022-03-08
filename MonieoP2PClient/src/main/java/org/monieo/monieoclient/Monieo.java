@@ -693,7 +693,7 @@ public class Monieo {
 						e.printStackTrace();
 					}
 					
-					if (ui != null) ui.refresh(false, false);
+					if (ui != null && ui.fullInit) ui.refresh(false, false);
 					
 				}
 				

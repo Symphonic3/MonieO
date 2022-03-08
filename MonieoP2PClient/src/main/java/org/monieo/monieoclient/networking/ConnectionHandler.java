@@ -124,7 +124,7 @@ public class ConnectionHandler implements Runnable{
 		
 		Monieo.INSTANCE.nodes.add(n);
 		
-		if (Monieo.INSTANCE.ui != null) Monieo.INSTANCE.ui.refresh(false, false);
+		if (Monieo.INSTANCE.ui != null && Monieo.INSTANCE.ui.fullInit) Monieo.INSTANCE.ui.refresh(false, false);
 		
 		new Thread(n).start();
 		

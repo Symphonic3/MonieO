@@ -80,6 +80,8 @@ import javax.swing.JMenuItem;
 public class UI {
 	private JFrame frame;
 	
+	public volatile boolean fullInit = false;
+	
 	private String[] walletNicks;
 	
 	public JTable table;
@@ -1295,6 +1297,8 @@ public class UI {
 			}
 			
 		}
+		
+		fullInit = true;
 		
 		//frame.requestFocus();
 		

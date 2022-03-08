@@ -157,7 +157,7 @@ public class Node implements Runnable{
 			e1.printStackTrace();
 		}
 		Monieo.INSTANCE.nodes.remove(this);
-		if (Monieo.INSTANCE.ui != null) Monieo.INSTANCE.ui.refresh(false, false);
+		if (Monieo.INSTANCE.ui != null && Monieo.INSTANCE.ui.fullInit) Monieo.INSTANCE.ui.refresh(false, false);
 		kill = true;
 		
 	}
