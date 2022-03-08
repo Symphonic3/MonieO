@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import org.monieo.monieoclient.Monieo;
@@ -30,7 +31,7 @@ public class Node implements Runnable{
 	
 	private boolean kill = false;
 	
-	public Vector<Consumer<Node>> queue = new Vector<Consumer<Node>>();
+	public ConcurrentLinkedQueue<Consumer<Node>> queue = new ConcurrentLinkedQueue<Consumer<Node>>();
 	
 	private boolean server;
 	
@@ -72,9 +73,9 @@ public class Node implements Runnable{
 						
 					}
 					
+					queue.clear();
+					
 				}
-				
-				queue.clear();
 				
 			}
 			
@@ -171,7 +172,7 @@ public class Node implements Runnable{
 	
 	public void queueAction(Consumer<Node> a) {
 		
-		if (queue.size() > 0) queue.insertElementAt(a, 0); else queue.add(a);
+		queue.add(a);
 		
 	}
 	
