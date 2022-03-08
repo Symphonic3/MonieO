@@ -361,7 +361,7 @@ public class Node implements Runnable{
 								
 								if (b.equals(g)) {
 																
-									if (wantedHashP.length != i) {
+									if (wantedHashP.length != i+1) {
 										
 										hashes.clear();
 										i++;
