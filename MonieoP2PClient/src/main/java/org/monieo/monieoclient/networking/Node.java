@@ -366,6 +366,7 @@ public class Node implements Runnable{
 										hashes.clear();
 										i++;
 										b = Monieo.INSTANCE.getHighestBlock();
+										hashes.add(Monieo.INSTANCE.getHighestBlockHash());
 										continue;
 										
 									} else break;
