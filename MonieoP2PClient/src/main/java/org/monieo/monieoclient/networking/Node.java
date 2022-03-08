@@ -353,6 +353,7 @@ public class Node implements Runnable{
 							List<String> hashes = new ArrayList<String>();
 							
 							Block b = Monieo.INSTANCE.getHighestBlock();
+							hashes.add(Monieo.INSTANCE.getHighestBlockHash());
 							Block g = Monieo.genesis();
 							
 							while(true) {
@@ -361,7 +362,7 @@ public class Node implements Runnable{
 								
 								if (b.equals(g)) {
 																
-									if (wantedHashP.length != i+1) {
+									if (wantedHashP.length > i+1) {
 										
 										hashes.clear();
 										i++;
