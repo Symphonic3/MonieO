@@ -514,6 +514,12 @@ public class Monieo {
 					
 					String s = nam.getPossibleAddressOutbound();
 					
+					for (Node n : nodes) {
+						
+						if (n.getAdress().equals(s)) continue;
+						
+					}
+					
 					System.out.println("attempting to connect to a node!");
 					if (ch.connect(s)) {
 						
