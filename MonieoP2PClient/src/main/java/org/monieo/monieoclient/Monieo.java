@@ -470,8 +470,6 @@ public class Monieo {
 					at++;
 					
 				}
-				
-				int amntns = 0;
 
 				Block b = getHighestBlock();
 				Block g = genesis();
@@ -501,8 +499,6 @@ public class Monieo {
 						
 					}
 					
-					if (!n.isServer()) amntns++;
-					
 					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
 					
 					//functions as a keepalive, for now
@@ -510,13 +506,13 @@ public class Monieo {
 					
 				}
 				
-				for (int i = 0; i < MAX_OUTGOING_CONNECTIONS-amntns; i++) {
+				if (nodes.size() < MAX_OUTGOING_CONNECTIONS) {
 					
 					String s = nam.getPossibleAddressOutbound();
 					
 					for (Node n : nodes) {
 						
-						if (n.getAdress().equals(s)) continue;
+						if (n.getAdress().equals(s)) return;
 						
 					}
 					
