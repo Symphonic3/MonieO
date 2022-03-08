@@ -67,6 +67,7 @@ public class Node implements Runnable{
 						
 						if (n.kill) return;
 						
+						System.out.println("sendy");
 						a.accept(n);
 						
 					}
