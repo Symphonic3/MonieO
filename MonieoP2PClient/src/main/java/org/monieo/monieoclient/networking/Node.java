@@ -380,6 +380,9 @@ public class Node implements Runnable{
 								b = b.getPrevious();
 								
 							}
+							
+							hashes.add(b.hash());
+							
 							Collections.reverse(hashes);
 							
 							for (String s : hashes) {
@@ -403,7 +406,7 @@ public class Node implements Runnable{
 					//obviously there are better ways to do this, but this netcommand
 					//might be removed anyways.
 					
-					queueAction(new Consumer<Node>() {
+					/*queueAction(new Consumer<Node>() {
 
 						@Override
 						public void accept(Node t) {
@@ -438,7 +441,7 @@ public class Node implements Runnable{
 							
 						}
 						
-					});
+					});*/
 					
 				} else if (nc.cmd == NetworkPacketType.SEND_TRANSACTION) {
 
