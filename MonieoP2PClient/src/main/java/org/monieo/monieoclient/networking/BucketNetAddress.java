@@ -9,11 +9,13 @@ public class BucketNetAddress {
 	
 	public String adress;
 	public long timePlaced;
+	public boolean tried;
 	
-	public BucketNetAddress(String a, long timePlaced) {
+	public BucketNetAddress(String a, long timePlaced, boolean tried) {
 		
 		this.adress = a;
 		this.timePlaced = timePlaced;
+		this.tried = tried;
 		
 	}
 	
@@ -88,11 +90,26 @@ public class BucketNetAddress {
 			
 			byte curr = hash[byteN];
 			
-			ret += curr & (int)(Math.pow(2, i % byteN));
+			ret += curr & (int)(Math.pow(2, i - (byteN*8)));
 			
 		}
 		
 		return ret;
+		
+	}
+	
+	
+	public Bucket getBucket(NetAddressManager nam) {
+		
+		if (tried) {
+			
+			return nam.triedBuckets.get(getTriedBucket());
+			
+		} else {
+			
+			return nam.newBuckets.get(getNewBucket());
+			
+		}
 		
 	}
 	

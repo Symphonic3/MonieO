@@ -175,7 +175,11 @@ public class UI {
 			textField_1.setText(null);
 			textField_2.setText(null);
 			
-			JOptionPane.showMessageDialog(frame, "Transaction sent!");
+			JOptionPane.showMessageDialog(frame, "Transaction submitted to the network! Depending on network traffic and the fee the transaction might be processed in any amount of time or not at all."
+					+ "\n\nNote:\n\n- If your transaction is not confirmed, it will remain valid until you make another transaction from the same address."
+					+ "\n- You should not make another transaction from this address until this transaction is confirmed unless you are attempting to cancel this transaction."
+					+ "\n- Your balance will not be updated until the transaction is accepted by the network."
+					+ "\n- You can see any recent outstanding unconfirmed transactions in Overview>Outgoing Transactions.");
 			
 			refresh(false, false);
 			
@@ -538,7 +542,7 @@ public class UI {
 								
 								s = s + "\n\nPlease confirm that you wish to send this tranaction! This can be a potentially dangerous action.";
 								
-								int r = JOptionPane.showConfirmDialog(frame, s, "Error", 0, JOptionPane.WARNING_MESSAGE);
+								int r = JOptionPane.showConfirmDialog(frame, s, "Unsafe Transaction!", 0, JOptionPane.WARNING_MESSAGE);
 								
 								if (r == 0) finalizeTransaction(newTransaction);
 								
@@ -665,22 +669,22 @@ public class UI {
 									}
 								});
 								
-								btnDelWal = new JButton("Delete selected wallet");
+								/*btnDelWal = new JButton("Delete selected wallet");
 								btnDelWal.setEnabled(false);
 								btnDelWal.setBounds(480, 97, 160, 29);
 								panel.add(btnDelWal);
 								btnDelWal.addActionListener(new ActionListener() {
 									public void actionPerformed(ActionEvent e) {
-										/*(Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
+										(Wallet walletInQuestion = Monieo.INSTANCE.getWalletByNick(list.getSelectedValue());
 										if (list.getSelectedValue() != null) {
 											String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
 											if (confirmation.equals(walletInQuestion.nickname)) {
 												Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
 												refresh(true);
 											}
-										}*/
+										}
 									}
-								});
+								});*/
 								
 								label_1 = new JLabel("Selected address:");
 								label_1.setBounds(10, 10, 106, 29);

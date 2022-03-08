@@ -191,8 +191,20 @@ public class Monieo {
 
 		}
 		
-		new Monieo();
+		new Monieo(arrayContains(args, "--skipconnect"));
 
+	}
+	
+	public static <T> boolean arrayContains(T[] array, T item) {
+		
+		for (int i = 0; i < array.length; i++) {
+			
+			if (array[i].equals(item)) return true;
+			
+		}
+		
+		return false;
+		
 	}
 	
 	public static String getHTML(String url) {
@@ -272,7 +284,7 @@ public class Monieo {
 	
 	public AbstractMiner miner;
 	
-	public Monieo() {
+	public Monieo(boolean l) {
 		
 		INSTANCE = this;
 		
@@ -443,7 +455,7 @@ public class Monieo {
 				//attempt to load blockchain before starting UI application
 				if (ss != null) {
 					
-					if (desyncAmount() == -1 || at >= 1) { //try once
+					if (desyncAmount() == -1 || at >= (l ? 0 : 0)) { //try once //TODO reinstate the 2nd number to 1
 						
 						ss.close();
 						ss = null;

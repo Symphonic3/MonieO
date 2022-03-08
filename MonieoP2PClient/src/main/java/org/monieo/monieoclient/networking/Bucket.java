@@ -16,7 +16,7 @@ public class Bucket {
 	
 	File f;
 	
-	public Bucket(File f) {
+	public Bucket(File f, boolean tried) {
 		
 		this.f = f;
 		
@@ -32,7 +32,7 @@ public class Bucket {
 
 				String[] spl = s.split(" ");
 				
-				addresses[i] = new BucketNetAddress(spl[0], Long.valueOf(spl[1]));
+				addresses[i] = new BucketNetAddress(spl[0], Long.valueOf(spl[1]), tried);
 				empty = false;
 				
 				i++;
@@ -53,7 +53,7 @@ public class Bucket {
 			
 			for (BucketNetAddress address : addresses) {
 				
-				fw.append(address.serializeForBucket() + "\n");
+				if (address == null) fw.append("\n"); else fw.append(address.serializeForBucket() + "\n");
 				
 			}
 			

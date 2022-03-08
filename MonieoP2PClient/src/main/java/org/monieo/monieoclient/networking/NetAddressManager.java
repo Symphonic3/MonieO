@@ -1,12 +1,13 @@
 package org.monieo.monieoclient.networking;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
 
@@ -38,8 +39,8 @@ public class NetAddressManager {
 		File nfolder = new File(Monieo.INSTANCE.workingFolder.getPath() + "/nodes/new");
 		File tfolder = new File(Monieo.INSTANCE.workingFolder.getPath() + "/nodes/tried");
 		
-		init(nfolder, newBuckets, NEW_SIZE_REAL);
-		init(tfolder, triedBuckets, TRIED_SIZE_REAL);
+		init(nfolder, newBuckets, NEW_SIZE_REAL, false);
+		init(tfolder, triedBuckets, TRIED_SIZE_REAL, true);
 		
 		bansFile = new File(Monieo.INSTANCE.workingFolder.getPath() + "bannednodes.dat");
 		try {
@@ -68,7 +69,7 @@ public class NetAddressManager {
 		
 	}
 	
-	private void init(File parent, List<Bucket> b, int amount) {
+	private void init(File parent, List<Bucket> b, int amount, boolean tried) {
 		
 		parent.mkdirs();
 		
@@ -82,7 +83,7 @@ public class NetAddressManager {
 					e.printStackTrace();
 				}
 			
-			b.add(new Bucket(curr));
+			b.add(new Bucket(curr, tried));
 			
 		}
 		
@@ -104,7 +105,7 @@ public class NetAddressManager {
 				//decide if this check should even be here
 				if (!n.isServer()) {
 					
-					BucketNetAddress dummy = new BucketNetAddress(n.getAdress(), -1);
+					BucketNetAddress dummy = new BucketNetAddress(n.getAdress(), -1, true);
 					
 					disallowed.add(dummy.getTriedBucket());
 					
@@ -145,46 +146,119 @@ public class NetAddressManager {
 	
 	public void ban(String add) {
 		
+		bans.removeIf(new Predicate<BannedNetAddress>() {
+
+			@Override
+			public boolean test(BannedNetAddress t) {
+				return t.adress.equals(add);
+			}
+			
+		});
 		
+		BannedNetAddress an = new BannedNetAddress(add, -1);
+		an.ban();
 		
 	}
 	
 	public boolean isBanned(String add) {
 		
+		for (BannedNetAddress n : bans) {
+			
+			if (n.adress.equals(add)) {
+				
+				return n.isBanned();
+				
+			}
+			
+		}
+		
 		return false;
 		
 	}
 	
-	public void moveToNewTable(String add) {
+	public void gotNew(String add) {
 		
+		BucketNetAddress dummy = new BucketNetAddress(add, System.currentTimeMillis(), true);
 		
+		Bucket b = dummy.getBucket(this);
+		
+		if (b.addresses[dummy.getBucketPosition()].adress.equals(add)) return;
+		dummy.tried = false;
+		if (b.addresses[dummy.getBucketPosition()].adress.equals(add)) return;
+		
+		b.addresses[dummy.getBucketPosition()] = dummy;
+		
+		saveBuckets();
 		
 	}
 	
-	public void moveToTriedTable(String add) {
+	public void switchAction(String add, boolean triedOriginally) {
 		
+		remove(add, triedOriginally);
 		
-	}
-	
-	public void addToNewTable(String add) {
+		BucketNetAddress dummy = new BucketNetAddress(add, System.currentTimeMillis(), !triedOriginally);
 		
+		Bucket b = dummy.getBucket(this);
 		
+		BucketNetAddress t = b.addresses[dummy.getBucketPosition()];
+		
+		if (t != null && t.adress.equals(add)) return;
+		
+		b.addresses[dummy.getBucketPosition()] = dummy;
+		
+		saveBuckets();
 		
 	}
 	
 	public void successfullyConnectedOrDisconnected(String add) {
 		
-		//TODO all
+		switchAction(add, false);
 		
 	}
 	
 	public void couldNotConnectToNode(String add) {
 		
-		
+		switchAction(add, true);
 		
 	}
 	
-	public void forceSaveAll() {
+	private void remove(String add, boolean triedTable) {
+		
+		BucketNetAddress dummy = new BucketNetAddress(add, -1, triedTable);
+		
+		Bucket b = dummy.getBucket(this);
+		
+		BucketNetAddress t = b.addresses[dummy.getBucketPosition()];
+		
+		if (t != null && t.adress.equals(add)) {
+			
+			b.addresses[dummy.getBucketPosition()] = null;
+			
+		}
+		
+	}
+	
+	public void saveBans() {
+		
+		try (FileWriter fw = new FileWriter(bansFile)) {
+			
+			for (BannedNetAddress n : bans) {
+				
+				if (n.isBanned()) {
+					
+					fw.append(n.adress + " " + n.banExpiry);
+					
+				}
+				
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void saveBuckets() {
 		
 		for (Bucket b : newBuckets) {
 			

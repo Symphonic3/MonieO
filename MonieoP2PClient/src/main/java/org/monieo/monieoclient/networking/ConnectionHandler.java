@@ -34,14 +34,10 @@ public class ConnectionHandler implements Runnable{
 			
 			try {
 				
-				if (full()) continue; //TODO test elimination with new system
-				
 				Socket clientSocket = serverSocket.accept();
+				String add =clientSocket.getInetAddress().getHostAddress();
 				
-				String inet = clientSocket.getInetAddress().getHostAddress();
-				
-				//TODO test banning with new system
-				if (Monieo.INSTANCE.knownNodes.contains(Monieo.INSTANCE.fetchByAdress(inet)) && !Monieo.INSTANCE.getValidNodesRightNow().contains(inet)) {
+				if (Monieo.INSTANCE.nam.isBanned(add)) {
 					
 					System.out.println("bue");
 					clientSocket.close();
@@ -49,14 +45,31 @@ public class ConnectionHandler implements Runnable{
 					
 				}
 				
-				for (int k = 0; k < Monieo.INSTANCE.nodes.size(); k++) { //TODO we shouldn't need to do this because we should use new node scoring ln 37 above
+				if (full()) {
 					
-					Node n = Monieo.INSTANCE.nodes.get(k);
+					String e = Monieo.INSTANCE.nam.whoToEvict(add);
 					
-					if (n.getAdress().equalsIgnoreCase(inet)) {
+					if (e == null) {
 						
-						n.disconnect(false);
-						k--;
+						System.out.println("bue2");
+						clientSocket.close();
+						continue;
+						
+					} else {
+						
+						//TODO ad
+						/*for (int k = 0; k < Monieo.INSTANCE.nodes.size(); k++) {
+							
+							Node n = Monieo.INSTANCE.nodes.get(k);
+							
+							if (n.getAdress().equalsIgnoreCase(inet)) {
+								
+								n.disconnect(false);
+								k--;
+								
+							}
+							
+						}*/
 						
 					}
 					
