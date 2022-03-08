@@ -2,6 +2,7 @@ package org.monieo.monieoclient.networking;
 
 import java.io.IOException;
 import java.net.BindException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.function.Predicate;
@@ -100,7 +101,8 @@ public class ConnectionHandler implements Runnable{
 		}*/
 		
 		try {
-			Socket s = new Socket(inet, Monieo.PORT);
+			Socket s = new Socket();
+			s.connect(new InetSocketAddress(inet, Monieo.PORT), 2500);
 			nodeDo(s, false);
 		} catch (IOException e) {
 			
