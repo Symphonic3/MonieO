@@ -60,7 +60,6 @@ import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.gui.FeeEstimate.FeeEstimateType;
 import org.monieo.monieoclient.mining.AbstractMiner.MiningStatistics;
 import org.monieo.monieoclient.networking.Node;
-import org.monieo.monieoclient.randomx.RandomX;
 import org.monieo.monieoclient.wallet.Wallet;
 
 import com.formdev.flatlaf.FlatClientProperties;

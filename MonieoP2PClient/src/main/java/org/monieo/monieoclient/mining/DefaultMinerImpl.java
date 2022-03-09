@@ -2,8 +2,6 @@ package org.monieo.monieoclient.mining;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -12,8 +10,6 @@ import org.monieo.monieoclient.blockchain.AbstractTransaction;
 import org.monieo.monieoclient.blockchain.Block;
 import org.monieo.monieoclient.blockchain.BlockHeader;
 import org.monieo.monieoclient.blockchain.CoinbaseTransaction;
-import org.monieo.monieoclient.blockchain.Transaction;
-import org.monieo.monieoclient.randomx.RandomX;
 
 public class DefaultMinerImpl implements AbstractMiner{
 

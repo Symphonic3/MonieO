@@ -59,8 +59,8 @@ import org.monieo.monieoclient.networking.ConnectionHandler;
 import org.monieo.monieoclient.networking.NetAddressManager;
 import org.monieo.monieoclient.networking.NetworkPacket;
 import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
-import org.monieo.monieoclient.randomx.RandomX;
 import org.monieo.monieoclient.networking.Node;
+import org.monieo.monieoclient.randomx.RandomXManager;
 import org.monieo.monieoclient.wallet.Wallet;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -306,6 +306,11 @@ public class Monieo {
 		workingFolder = new File(workingDirectory);
 		workingFolder.mkdirs();
 		
+		RandomXManager.setRandomX();
+		
+		System.out.println("Test    : " + randomx("tast"));
+		System.out.println("Expected: " + "6b08ba542fe59ffad744d12866fde82ba2a1397cd5408e3531ec37cd5f1011c1");
+		
 		GENESIS_HASH = genesis().hash();
 		
 		settingsFile = new File(workingFolder.getPath() + "/settings.yml");
@@ -332,9 +337,6 @@ public class Monieo {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		
-		System.out.println("Test    : " + bytesToHex(RandomX.getRandomX().hash("tast")));
-		System.out.println("Expected: " + "6b08ba542fe59ffad744d12866fde82ba2a1397cd5408e3531ec37cd5f1011c1");
 		
 		nam = new NetAddressManager();
 		
@@ -953,7 +955,7 @@ public class Monieo {
 	
 	public static byte[] randomxRaw(String s) {
 		
-		return RandomX.getRandomX().hash(s);
+		return RandomXManager.getManager().getRandomX().hash(s);
 		
 	}
 	

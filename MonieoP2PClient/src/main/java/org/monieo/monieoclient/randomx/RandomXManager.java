@@ -1,14 +1,16 @@
 package org.monieo.monieoclient.randomx;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
 
-public class RandomX {
+public class RandomXManager {
 
-	enum RandomXFlags {
+	public enum RandomXFlags {
 		
 		  RANDOMX_FLAG_DEFAULT(0),
 		  RANDOMX_FLAG_LARGE_PAGES(1),
@@ -36,16 +38,17 @@ public class RandomX {
 	
 	public static final String KEY = "MonieO.";
 	
-	private static RandomX INSTANCE = null;
-	private static final RandomXJNI RXJNI = new RandomXJNI();
+	private static RandomXManager INSTANCE = null;
+	public static final RandomXJNI RXJNI = new RandomXJNI();
 	
 	int flags;
 	
-	long datasetPtr = RandomXJNI.NULLPTR;
-	long cachePtr = RandomXJNI.NULLPTR;
-	long vmPtr = RandomXJNI.NULLPTR;
+	private long datasetPtr = RandomXJNI.NULLPTR;
+	private long cachePtr = RandomXJNI.NULLPTR;
 	
-	private RandomX(int f, String key) {
+	public HashMap<Long, RandomXInstance> rx = new HashMap<Long, RandomXInstance>();
+	
+	private RandomXManager(int f, String key) {
 		
 		flags = f;
     	
@@ -106,60 +109,92 @@ public class RandomX {
     	RXJNI.randomxReleaseCache(cachePtr);
     	cachePtr = RandomXJNI.NULLPTR;
     	
-    	vmPtr = RXJNI.randomxCreateVmWithDataset(flags, datasetPtr);
-    	if (vmPtr == RandomXJNI.NULLPTR) {
-    		
-    		System.out.println("Could not create RandomX virtual machine!");
-    		
-    	}
-    	
     	System.out.println("RandomX Initialized!");
 		
 	}
 	
-	AtomicBoolean locked = new AtomicBoolean(false);
+	public static RandomXManager getManager() {
+		
+		return INSTANCE;
+		
+	}
 	
-	public byte[] hash(String data) {
+	public RandomXInstance getRandomX() {
 		
-		String dn = Monieo.sha256d(data);
+		long tid = Thread.currentThread().getId();
 		
-		while (locked.get()) {
-			
-			//TODO fix this and allow threads to have their own vm instances while using a shared dataset
+		if (!rx.containsKey(tid)) {
+		
+			clean();
+			long vmPtr = RXJNI.randomxCreateVmWithDataset(flags, datasetPtr);
+	    	if (vmPtr == RandomXJNI.NULLPTR) {
+	    		
+	    		throw new RuntimeException("Could not create RandomX virtual machine!");
+	    		
+	    	}
+			rx.put(tid, new RandomXInstance(vmPtr));
 			
 		}
+
+		return rx.get(tid);
 		
-		locked.set(true);
+	}
+	
+	public void clean() {
 		
-		byte[] f = RXJNI.randomxCalculateHash(vmPtr, dn, dn.length());
-		
-		locked.set(false);
-		
-		return f;
+		rx.keySet().removeIf(new Predicate<Long>() {
+
+			@Override
+			public boolean test(Long l) {
+				
+				ThreadGroup t = Thread.currentThread().getThreadGroup();
+				
+				while (true) {
+					
+					ThreadGroup n = t.getParent();
+					
+					if (n != null) {
+						
+						t = n;
+						
+					} else break;
+					
+				}
+				
+				Thread[] ret = new Thread[256];
+				int am = t.enumerate(ret);
+				
+				for (int i = 0; i < am; i++) {
+					
+					Thread tr = ret[i];
+					
+					long id = tr.getId();
+					
+					if (id == l) return false;
+					
+				}
+				
+				return true;
+
+			}
+			
+		});
 		
 	}
 	
 	public void close() {
 		
 		if (cachePtr != RandomXJNI.NULLPTR) RXJNI.randomxReleaseCache(cachePtr);
-		if (vmPtr != RandomXJNI.NULLPTR) RXJNI.randomxDestroyVm(vmPtr);
-		if (datasetPtr != RandomXJNI.NULLPTR) RXJNI.randomxReleaseDataset(datasetPtr);
 		
-		INSTANCE = null;
-		
-	}
-	
-	public static RandomX getRandomX() {
-		
-    	//while (true) {}
-		
-		if (INSTANCE == null) {
+		for (Long i : rx.keySet()) {
 			
-			INSTANCE = new RandomX(getFlags(), KEY);
+			rx.get(i).release();
 			
 		}
 		
-		return INSTANCE;
+		if (datasetPtr != RandomXJNI.NULLPTR) RXJNI.randomxReleaseDataset(datasetPtr);
+		
+		INSTANCE = null;
 		
 	}
 	
@@ -167,10 +202,10 @@ public class RandomX {
 		
 		int f = computeFlags(add);
 		
-		if (INSTANCE.flags != f) {
+		if (INSTANCE == null || INSTANCE.flags != f) {
 			
 			if (INSTANCE != null) INSTANCE.close();
-			INSTANCE = new RandomX(f, KEY);
+			INSTANCE = new RandomXManager(f, KEY);
 			
 		}
 		
