@@ -21,7 +21,7 @@ Specifications
 |---------------|------|
 | Proof Algorithm | RandomX PoW |
 | Block time | 1 minute |
-| Total (theoretical) supply | 10,500,000 MNO |
+| Total (theoretical) supply | 21,000,000 MNO |
 | P2P network port | 21093 |
 
 Support the project
