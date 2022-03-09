@@ -3,7 +3,6 @@ package org.monieo.monieoclient.randomx;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;

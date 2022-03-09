@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.function.Consumer;
 
-import org.monieo.monieoclient.Monieo;
-
 public interface AbstractMiner extends Runnable {
 	
 	public void begin(Consumer<MiningStatistics> supervisor);

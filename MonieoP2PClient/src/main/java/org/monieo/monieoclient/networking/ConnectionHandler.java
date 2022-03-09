@@ -5,11 +5,7 @@ import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.function.Predicate;
-
 import org.monieo.monieoclient.Monieo;
-import org.monieo.monieoclient.blockchain.AbstractTransaction;
-import org.monieo.monieoclient.blockchain.Transaction;
 import org.monieo.monieoclient.networking.NetworkPacket.NetworkPacketType;
 
 public class ConnectionHandler implements Runnable{

@@ -135,6 +135,7 @@ public class TxPool {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void sort() {
 		
 		transactions.removeIf(new Predicate<Transaction>() {
