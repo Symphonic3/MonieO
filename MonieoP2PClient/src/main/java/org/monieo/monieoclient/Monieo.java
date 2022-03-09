@@ -304,7 +304,7 @@ public class Monieo {
 		workingFolder = new File(workingDirectory);
 		workingFolder.mkdirs();
 		
-		RandomXManager.setRandomX();
+		RandomXManager.setRandomX(RandomXManager.getFlags());
 		
 		System.out.println("Test    : " + randomx("tast"));
 		System.out.println("Expected: " + "6b08ba542fe59ffad744d12866fde82ba2a1397cd5408e3531ec37cd5f1011c1");

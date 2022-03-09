@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
+import org.monieo.monieoclient.mining.AbstractMiner.MiningSettings;
+import org.monieo.monieoclient.randomx.RandomXManager.RandomXFlags;
 
 public class RandomXManager {
 
@@ -19,7 +21,7 @@ public class RandomXManager {
 		  RANDOMX_FLAG_SECURE(16),
 		  RANDOMX_FLAG_ARGON2_SSSE3(32),
 		  RANDOMX_FLAG_ARGON2_AVX2(64),
-		  RANDOMX_FLAG_ARGON2(96);
+		  /*RANDOMX_FLAG_ARGON2(96)*/;
 
 		private final int value;
 		  
@@ -114,6 +116,8 @@ public class RandomXManager {
 	
 	public static RandomXManager getManager() {
 		
+		while (INSTANCE == null) {};
+		
 		return INSTANCE;
 		
 	}
@@ -197,9 +201,9 @@ public class RandomXManager {
 		
 	}
 	
-	public static void setRandomX(RandomXFlags... add) {
+	public static void setRandomX(int a) {
 		
-		int f = computeFlags(add);
+		int f = a;
 		
 		if (INSTANCE == null || INSTANCE.flags != f) {
 			
@@ -210,9 +214,9 @@ public class RandomXManager {
 		
 	}
 	
-	public static int computeFlags(RandomXFlags... add) {
+	public static int flagsToInt(RandomXFlags... add) {
 		
-		int i = getFlags();
+		int i = 0;
 		
 		for (RandomXFlags f : add) i |= f.v();
 
@@ -220,13 +224,53 @@ public class RandomXManager {
 		
 	}
 	
+	public static List<RandomXFlags> intToFlags(int f) {
+		
+		List<RandomXFlags> set = new ArrayList<RandomXFlags>();
+		
+		//this is not very good
+		for (RandomXFlags fl : RandomXFlags.values()) {
+			
+			if ((f & fl.v()) == fl.v()) set.add(fl);
+			
+		}
+		
+		return set;
+		
+	}
+	
+	private static int INITIAL_FLAGS = -1;
+	
 	public static int getFlags() {
 		
-		int i = RXJNI.randomxGetFlags();
+		if (INITIAL_FLAGS == -1) {
+			
+			INITIAL_FLAGS = RXJNI.randomxGetFlags();
+			
+			INITIAL_FLAGS |= RandomXFlags.RANDOMX_FLAG_FULL_MEM.v();
+			//INITIAL_FLAGS |= RandomXFlags.RANDOMX_FLAG_LARGE_PAGES.v();
+			
+		}
+
+		return INITIAL_FLAGS;
 		
-		i |= RandomXFlags.RANDOMX_FLAG_FULL_MEM.v();
+	}
+	
+	public static MiningSettings msettings = MiningSettings.of(Monieo.SYSTEM_LOGICAL_THREADS, intToFlags(getFlags()).toArray(new RandomXFlags[intToFlags(getFlags()).size()]));
+	
+	public static void applySettings() {
 		
-		return i;
+		int s = getFlags();
+		
+		s &= ~RandomXFlags.RANDOMX_FLAG_ARGON2_AVX2.v();
+		s &= ~RandomXFlags.RANDOMX_FLAG_ARGON2_SSSE3.v();
+		s &= ~RandomXFlags.RANDOMX_FLAG_LARGE_PAGES.v();
+		s &= ~RandomXFlags.RANDOMX_FLAG_FULL_MEM.v();
+		s &= ~RandomXFlags.RANDOMX_FLAG_HARD_AES.v();
+		
+		s += msettings.toFlags();
+		
+		setRandomX(s);
 		
 	}
 	
