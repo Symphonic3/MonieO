@@ -321,13 +321,17 @@ public class Node implements Runnable{
 				
 				if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
 					
+					busy = true;
+					
 					Monieo.INSTANCE.nam.successfullyConnectedOrDisconnected(getAdress());
 					
 					String addr = String.join("\n", Monieo.INSTANCE.nam.get1000Addresses());
 					
 					queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, addr));
 					
-					for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
+					List<AbstractTransaction> g = Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock());
+
+					for (AbstractTransaction t : g) {
 						
 						if (kill) return true;
 						
@@ -336,6 +340,8 @@ public class Node implements Runnable{
 					}
 					
 					queueNetworkPacket(NetworkPacket.generateSyncPacket());
+					
+					busy = false;
 					
 				}
 				
