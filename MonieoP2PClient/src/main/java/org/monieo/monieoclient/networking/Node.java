@@ -37,7 +37,7 @@ public class Node implements Runnable{
 	private boolean server;
 	
 	public final long timeConnected;
-	private long timeRecieved = Long.MIN_VALUE;
+	private volatile long timeRecieved = Long.MIN_VALUE;
 	
 	PrintWriter pw;
 	BufferedReader br;
