@@ -250,7 +250,7 @@ public class Node implements Runnable{
 
 				if (s == null || s.equals("")) continue;
 				
-				//System.out.println("recieved data!");
+				System.out.println("recieved data!");
 				
 				nc = NetworkPacket.deserialize(s);
 
