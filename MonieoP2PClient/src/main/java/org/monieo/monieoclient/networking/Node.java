@@ -237,6 +237,7 @@ public class Node implements Runnable{
 				String s = "";
 				String t;
 				
+				System.out.println("reading");
 				inner: while ((t = br.readLine()) != null) {
 
 					if (kill) return;
