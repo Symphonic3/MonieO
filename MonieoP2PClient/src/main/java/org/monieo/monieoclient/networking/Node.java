@@ -30,7 +30,7 @@ public class Node implements Runnable{
 	public static String TERM = "EOM";
 	
 	private volatile boolean kill = false;
-	public volatile boolean doNotDisconnectPeer = true;
+	public volatile boolean doNotDisconnectPeer = false;
 	
 	public LinkedBlockingQueue<Consumer<Node>> queue = new LinkedBlockingQueue<Consumer<Node>>();
 	
@@ -38,6 +38,8 @@ public class Node implements Runnable{
 	
 	public final long timeConnected;
 	private volatile long timeRecieved = Long.MIN_VALUE;
+	
+	volatile boolean ibd = false;
 	
 	PrintWriter pw;
 	BufferedReader br;
@@ -333,9 +335,18 @@ public class Node implements Runnable{
 					}
 
 					System.out.println("qsync");
-					queueNetworkPacket(NetworkPacket.generateSyncPacket());
 					
-					doNotDisconnectPeer = false;
+					queueAction(new Consumer<Node>() {
+
+						@Override
+						public void accept(Node t) {
+							
+							t.sendNetworkPacket(NetworkPacket.generateSyncPacket());
+							
+						}
+						
+						
+					});
 					
 				}
 				
@@ -351,6 +362,15 @@ public class Node implements Runnable{
 						public void accept(Node t) {
 							
 							String[] wantedHashP = nc.data.split(" ");
+							
+							if (wantedHashP.length > 1 && !ibd) {
+																
+								//IBD
+								
+								doNotDisconnectPeer = true;
+								ibd = true;
+								
+							}
 							
 							int i = 0;
 							
@@ -399,6 +419,8 @@ public class Node implements Runnable{
 										Block.getByHash(s).serialize()));
 								
 							}
+							
+							if (ibd) doNotDisconnectPeer = false;
 							
 						}
 						
