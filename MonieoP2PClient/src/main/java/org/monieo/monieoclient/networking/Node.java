@@ -30,6 +30,7 @@ public class Node implements Runnable{
 	public static String TERM = "EOM";
 	
 	private volatile boolean kill = false;
+	public volatile boolean doNotDisconnectPeer = true;
 	
 	public LinkedBlockingQueue<Consumer<Node>> queue = new LinkedBlockingQueue<Consumer<Node>>();
 	
@@ -37,8 +38,6 @@ public class Node implements Runnable{
 	
 	public final long timeConnected;
 	private long timeRecieved = Long.MIN_VALUE;
-	
-	public volatile boolean busy = false;
 	
 	PrintWriter pw;
 	BufferedReader br;
@@ -68,18 +67,7 @@ public class Node implements Runnable{
 					
 					Consumer<Node> cn = queue.take();
 					
-					boolean me = false;
-					
-					if (!busy) {
-						
-						busy = true;
-						me = true;
-						
-					}
-					
 					cn.accept(n);
-					
-					if (me) busy = false;
 					
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -327,8 +315,6 @@ public class Node implements Runnable{
 				
 				if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
 					
-					busy = true;
-					
 					Monieo.INSTANCE.nam.successfullyConnectedOrDisconnected(getAdress());
 					
 					String addr = String.join("\n", Monieo.INSTANCE.nam.get1000Addresses());
@@ -349,13 +335,15 @@ public class Node implements Runnable{
 					System.out.println("qsync");
 					queueNetworkPacket(NetworkPacket.generateSyncPacket());
 					
-					busy = false;
+					doNotDisconnectPeer = false;
 					
 				}
 				
 			} else if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
 				
-				if (nc.cmd == NetworkPacketType.REQUEST_BLOCKS_AFTER) {
+				if (nc.cmd == NetworkPacketType.REQUEST_BLOCKS_AFTER || nc.cmd == NetworkPacketType.KEEPALIVE) {
+					
+					if (doNotDisconnectPeer && nc.cmd == NetworkPacketType.KEEPALIVE) return true;
 					
 					queueAction(new Consumer<Node>() {
 

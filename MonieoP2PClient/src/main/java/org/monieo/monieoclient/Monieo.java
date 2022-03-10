@@ -492,7 +492,7 @@ public class Monieo {
 
 					Node n = nodes.get(i);
 					
-					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME && !n.busy) {
+					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME && !n.doNotDisconnectPeer) {
 						
 						System.out.println("Disconnected peacefully");
 						n.disconnect(true); //disconnecting via refusing to respond is the only way to peacefully disconnect
@@ -504,7 +504,7 @@ public class Monieo {
 					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
 					
 					//functions as a keepalive, for now
-					if (!n.busy) n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.REQUEST_BLOCKS_AFTER, hash));
+					if (!n.doNotDisconnectPeer) n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.KEEPALIVE, hash));
 					
 				}
 				
