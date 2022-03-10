@@ -335,18 +335,7 @@ public class Node implements Runnable{
 					}
 
 					System.out.println("qsync");
-					
-					queueAction(new Consumer<Node>() {
-
-						@Override
-						public void accept(Node t) {
-							
-							t.sendNetworkPacket(NetworkPacket.generateSyncPacket());
-							
-						}
-						
-						
-					});
+					queueNetworkPacket(NetworkPacket.generateSyncPacket());
 					
 				}
 				
@@ -366,6 +355,8 @@ public class Node implements Runnable{
 							if (wantedHashP.length > 1 && !ibd) {
 																
 								//IBD
+								
+								System.out.println("IBD");
 								
 								doNotDisconnectPeer = true;
 								ibd = true;
