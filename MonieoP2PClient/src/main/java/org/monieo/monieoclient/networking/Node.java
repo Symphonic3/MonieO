@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -323,6 +324,10 @@ public class Node implements Runnable{
 					
 					Monieo.INSTANCE.nam.successfullyConnectedOrDisconnected(getAdress());
 					
+					String addr = String.join("\n", Monieo.INSTANCE.nam.get1000Addresses());
+					
+					queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, addr));
+					
 					for (AbstractTransaction t : Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock())) {
 						
 						if (kill) return true;
@@ -461,8 +466,35 @@ public class Node implements Runnable{
 					
 				} else if (nc.cmd == NetworkPacketType.SEND_ADDR) {
 					
-					//TODO send_addr I/O
-					//send when we connect successfully to a peer
+					String[] addr = nc.data.split("\n");
+					
+					if (addr.length > 25000) return false; //TODO this
+					
+					for (String s : addr) {
+						
+						String[] bs = s.split("\\.");
+						
+						if (bs.length != 4) return false;
+						
+						byte[] b = new byte[4];
+						
+						for (int i = 0; i < bs.length; i++) {
+							
+							b[i] = Integer.valueOf(bs[i]).byteValue();
+					
+						}
+						
+						try {
+							
+							InetAddress.getByAddress(b);
+							
+						} catch (Exception e) {
+							return false;
+						}
+						
+						Monieo.INSTANCE.nam.gotNew(s);
+						
+					}
 					
 				}
 				

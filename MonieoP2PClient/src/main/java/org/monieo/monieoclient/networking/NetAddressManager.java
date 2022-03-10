@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -86,6 +87,54 @@ public class NetAddressManager {
 			b.add(new Bucket(curr, tried));
 			
 		}
+		
+	}
+	
+	public List<String> get1000Addresses() {
+		
+		List<String> ret = new ArrayList<String>();
+		
+		List<Bucket> possible = new ArrayList<Bucket>();
+		
+		for (int i = 0; i < triedBuckets.size(); i++) {
+			
+			Bucket b = triedBuckets.get(i);
+			
+			if (!b.isEmpty()) possible.add(b);
+			
+		}
+		
+		for (int i = 0; i < newBuckets.size(); i++) {
+			
+			Bucket b = newBuckets.get(i);
+			
+			if (!b.isEmpty()) possible.add(b);
+			
+		}
+		
+		Collections.shuffle(possible);
+		
+		ou: for (Bucket b : possible) {
+			
+			for (int i = 0; i < 64; i++) {
+				
+				BucketNetAddress c = b.addresses[i];
+				
+				if (c != null) {
+					
+					if (ret.size() < 1000) {
+						
+						ret.add(c.adress);
+						
+					} else break ou;
+					
+				}
+				
+			}
+			
+		}
+		
+		return ret;
 		
 	}
 	

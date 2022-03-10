@@ -39,7 +39,7 @@ public class RandomXManager {
 	
 	public static final String KEY = "MonieO.";
 	
-	private static RandomXManager INSTANCE = null;
+	private static volatile RandomXManager INSTANCE = null;
 	public static final RandomXJNI RXJNI = new RandomXJNI();
 	
 	int flags;
@@ -256,7 +256,7 @@ public class RandomXManager {
 		
 	}
 	
-	public static MiningSettings msettings = MiningSettings.of(Monieo.SYSTEM_LOGICAL_THREADS, intToFlags(getFlags()).toArray(new RandomXFlags[intToFlags(getFlags()).size()]));
+	public static MiningSettings msettings = MiningSettings.of(Monieo.SYSTEM_LOGICAL_THREADS/2, intToFlags(getFlags()).toArray(new RandomXFlags[intToFlags(getFlags()).size()]));
 	
 	public static void applySettings() {
 		

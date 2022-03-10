@@ -455,7 +455,7 @@ public class Monieo {
 				//attempt to load blockchain before starting UI application
 				if (ss != null) {
 					
-					if (desyncAmount() == -1 || at >= (l ? 0 : 0)) { //try once //TODO reinstate the 2nd number to 1
+					if (desyncAmount() == -1 || at >= (l ? 0 : 1)) { //try once //TODO reinstate the 2nd number to 1
 						
 						ss.close();
 						ss = null;
@@ -485,6 +485,7 @@ public class Monieo {
 				}
 
 				Block nb = b.getPrevious();
+				
 				String hash = (nb == null ? GENESIS_HASH : b.header.preHash);
 				
 				for (int i = 0; i < nodes.size(); i++) {

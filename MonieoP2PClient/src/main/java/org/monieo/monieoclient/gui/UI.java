@@ -21,10 +21,12 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
@@ -143,12 +145,6 @@ public class UI {
 	public boolean modeToggleStatus;
 	private JLabel lblNewLabel_4;
 	
-	JCheckBox chckbxNewCheckBox;
-	JCheckBox chckbxNewCheckBox_1;
-	JCheckBox chckbxNewCheckBox_1_1;
-	JCheckBox chckbxAllocateMemoryIn;
-	JSpinner spinner;
-	
 	JComboBox<FeeEstimate> comboBox;
 	
     public static final String[] FUNDINFO_COLUMN_NAMES = {"Wallet name",
@@ -216,6 +212,17 @@ public class UI {
 		
 	}
 	
+	public JComboBox<String> mCBox = new JComboBox<String>();
+	public JButton mineButtonDo;
+	JCheckBox chckbxNewCheckBox;
+	JCheckBox chckbxNewCheckBox_1;
+	JCheckBox chckbxNewCheckBox_1_1;
+	JCheckBox chckbxAllocateMemoryIn;
+	JSpinner spinner;
+	JButton btnNewButton_1;
+	
+	Vector<JLabel> boxes = new Vector<JLabel>();
+	
 	 /**
 	  * @wbp.parser.entryPoint
 	  */
@@ -225,6 +232,115 @@ public class UI {
 		m = RandomXManager.msettings;
 		
 		FlatLightLaf.setup();
+
+		mineButtonDo = new JButton("Off");
+		mineButtonDo.setBounds(10, 122, 279, 23);
+		
+		btnNewButton_1 = new JButton("Restart RandomX");
+		btnNewButton_1.setBounds(115, 110, 125, 23);
+		btnNewButton_1.setEnabled(false);
+		btnNewButton_1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				btnNewButton_1.setText("Restarting RandomX...");
+				RandomXManager.msettings = m;
+				RandomXManager.applySettings();
+				btnNewButton_1.setText("Restart RandomX");
+				btnNewButton_1.setEnabled(false);
+				
+			}
+		});
+		
+		mCBox = new JComboBox<String>();
+		mCBox.setBounds(52, 89, 235, 22);
+
+		mineButtonDo.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				mining = !mining;
+				
+				String text;
+				String texta;
+				
+				if (mining) {
+					
+					chckbxAllocateMemoryIn.setEnabled(false);
+					chckbxNewCheckBox.setEnabled(false);
+					chckbxNewCheckBox_1.setEnabled(false);
+					chckbxNewCheckBox_1_1.setEnabled(false);
+					spinner.setEnabled(false);
+					btnNewButton_1.setEnabled(false);
+					
+					mineButtonDo.setText("Restarting RandomX...");
+					
+					Monieo.INSTANCE.miner.begin(new Consumer<MiningStatistics>() {
+						
+						@Override
+						public void accept(MiningStatistics t) {
+							
+							int th = 0;
+							
+							for (int i = 0; i < boxes.size(); i++) {
+								
+								int v = t.hashrates.get(i);
+								
+								boxes.get(i).setText(v + "h/s");
+								
+								th += v;
+								
+							}
+							
+							BigInteger i = Monieo.INSTANCE.getHighestBlock().calculateNextDifficulty();
+							
+							BigDecimal hs = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(new BigDecimal(i), 5, RoundingMode.HALF_UP);
+							
+							BigDecimal earn = new BigDecimal(th*60).divide(hs, 5, RoundingMode.HALF_UP).multiply(new BigDecimal(5));
+							
+							String txt = "Hashrate: " + th + "h/s"
+									+ "\nEstim. rate of earning: " + earn.toPlainString() + " MNO/min"
+									+ "\nBegan mining: " + TimeAgo.toDuration(System.currentTimeMillis()-t.beginTime)
+									+ "\nBlocks mined: " + t.blocks
+									+ "\nEstimated earnings: " + t.total.toPlainString() + " MNO";
+							
+							miningstats.setText(txt);
+							
+						}
+
+					}, m);
+					
+					text = "On";
+					texta = "Mining...";
+					
+				} else {
+					
+					Monieo.INSTANCE.miner.stop();
+					
+					chckbxAllocateMemoryIn.setEnabled(true);
+					chckbxNewCheckBox.setEnabled(true);
+					chckbxNewCheckBox_1.setEnabled(true);
+					chckbxNewCheckBox_1_1.setEnabled(true);
+					spinner.setEnabled(true);
+					
+					MiningStatistics statm = Monieo.INSTANCE.miner.getMiningStatistics();
+					
+					long dur = System.currentTimeMillis() - statm.beginTime;
+					
+					text = "Off";
+					texta = "Stopped";
+					
+				}
+				
+				lblNewLabel.setText(texta);
+				mineButtonDo.setText(text);
+				TgBtnTOGGLEMINING.setText(text);
+				
+			}
+			
+		});
 		
 		miningstats = new JTextArea("Mining statistics");
 		miningstats.setEditable(false);
@@ -236,12 +352,12 @@ public class UI {
 		frame = new JFrame();
 		frame.setIconImage(new FlatSVGIcon("icon.svg").getImage());
 		frame.setTitle("MonieO Client v" + Monieo.VERSION);
-		frame.setBounds(100, 100, 901, 485);
+		frame.setBounds(100, 100, 895, 485);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
 		TgBtnTOGGLEMINING = new JButton("Off");
-		TgBtnTOGGLEMINING.setBounds(799, 417, 76, 23);
+		TgBtnTOGGLEMINING.setBounds(798, 417, 76, 23);
 		TgBtnTOGGLEMINING.addActionListener(new ActionListener() {
 
 			@Override
@@ -279,26 +395,10 @@ public class UI {
 				JLabel lblNewLabel_1 = new JLabel("Wallet:");
 				lblNewLabel_1.setBounds(10, 93, 46, 14);
 				f.getContentPane().add(lblNewLabel_1);
-				
-				JComboBox comboBox = new JComboBox();
-				comboBox.setBounds(52, 89, 235, 22);
-				f.getContentPane().add(comboBox);
-				
-				String text;
-				
-				if (mining) {
-					
-					text = "On";
-					
-				} else {
-					
-					text = "Off";
-					
-				}
-				
-				JButton btnNewButton = new JButton(text);
-				btnNewButton.setBounds(10, 122, 279, 23);
-				f.getContentPane().add(btnNewButton);
+
+				f.getContentPane().add(mCBox);
+
+				f.getContentPane().add(mineButtonDo);
 				
 				f.getContentPane().add(miningstats);
 				
@@ -312,23 +412,7 @@ public class UI {
 				lblNewLabel_2.setBounds(5, 0, 46, 18);
 				panel.add(lblNewLabel_2);
 				
-				JButton btnNewButton_1 = new JButton("Restart RandomX");
-				btnNewButton_1.setBounds(115, 110, 125, 23);
 				panel.add(btnNewButton_1);
-				btnNewButton_1.setEnabled(false);
-				btnNewButton_1.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						
-						btnNewButton_1.setText("Restarting RandomX...");
-						RandomXManager.msettings = m;
-						RandomXManager.applySettings();
-						btnNewButton_1.setText("Restart RandomX");
-						btnNewButton_1.setEnabled(false);
-						
-					}
-				});
 				
 				chckbxNewCheckBox = new JCheckBox("Optimized Argon2");
 				chckbxNewCheckBox.setSelected(m.oArg2);
@@ -423,8 +507,6 @@ public class UI {
 				panel_1.setBounds(10, 156, 816, 271);
 				f.getContentPane().add(panel_1);
 				
-				List<JLabel> boxes = new ArrayList<JLabel>();
-				
 				for (int i = 0; i < m.getThreads(); i++) {
 					
 					JLabel j = new JLabel("0h/s");
@@ -480,86 +562,6 @@ public class UI {
 				});
 				panel.add(spinner);
 				
-				btnNewButton.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						
-						mining = !mining;
-						
-						String text;
-						String texta;
-						
-						if (mining) {
-							
-							chckbxAllocateMemoryIn.setEnabled(false);
-							chckbxNewCheckBox.setEnabled(false);
-							chckbxNewCheckBox_1.setEnabled(false);
-							chckbxNewCheckBox_1_1.setEnabled(false);
-							spinner.setEnabled(false);
-							btnNewButton_1.setEnabled(false);
-							
-							btnNewButton.setText("Restarting RandomX...");
-							
-							Monieo.INSTANCE.miner.begin(new Consumer<MiningStatistics>() {
-								
-								@Override
-								public void accept(MiningStatistics t) {
-									
-									int th = 0;
-									
-									for (int i = 0; i < boxes.size(); i++) {
-										
-										int v = t.hashrates.get(i);
-										
-										boxes.get(i).setText(v + "h/s");
-										
-										th += v;
-										
-									}
-									
-									String txt = "Hashrate: " + th + "h/s"
-											+ "\nEstim. Rate of earning: " + "do"
-											+ "\nBegan mining: " + TimeAgo.toDuration(System.currentTimeMillis()-t.beginTime)
-											+ "\nBlocks mined: " + t.blocks
-											+ "\nEstimated earnings: " + t.total.toPlainString();
-									
-									miningstats.setText(txt);
-									
-								}
-
-							}, m);
-							
-							text = "On";
-							texta = "Mining...";
-							
-						} else {
-							
-							Monieo.INSTANCE.miner.stop();
-							
-							chckbxAllocateMemoryIn.setEnabled(true);
-							chckbxNewCheckBox.setEnabled(true);
-							chckbxNewCheckBox_1.setEnabled(true);
-							chckbxNewCheckBox_1_1.setEnabled(true);
-							spinner.setEnabled(true);
-							
-							MiningStatistics statm = Monieo.INSTANCE.miner.getMiningStatistics();
-							
-							long dur = System.currentTimeMillis() - statm.beginTime;
-							
-							text = "Off";
-							texta = "Stopped";
-							
-						}
-						
-						lblNewLabel.setText(texta);
-						btnNewButton.setText(text);
-						TgBtnTOGGLEMINING.setText(text);
-						
-					}
-					
-				});
-				
 				miningWindowOpen = true;
 				
 				f.addWindowListener(new WindowAdapter()
@@ -571,6 +573,8 @@ public class UI {
 					}
 					
 				});
+				
+				SwingUtilities.updateComponentTreeUI(f);
 				
 				f.setVisible(true);
 				
@@ -999,7 +1003,7 @@ public class UI {
 		frame.getContentPane().add(lblNewLabel_1);
 		
 		JButton overviewBTN = new JButton("Overview");
-		overviewBTN.setBounds(10, 414, 176, 23);
+		overviewBTN.setBounds(9, 414, 188, 23);
 		overviewBTN.addActionListener(new ActionListener() {
 			
 			@Override
@@ -1036,13 +1040,13 @@ public class UI {
 		});
 		
 		scrollPane = new JScrollPane(list);
-		scrollPane.setBounds(10, 7, 176, 396);
+		scrollPane.setBounds(10, 7, 186, 396);
 		scrollPane.createVerticalScrollBar();
 		scrollPane.setLayout(new ScrollPaneLayout());
 		frame.getContentPane().add(scrollPane);
 		
 		lblToggleExperimentalMining = new JLabel("Mining:");
-		lblToggleExperimentalMining.setBounds(756, 414, 76, 29);
+		lblToggleExperimentalMining.setBounds(751, 414, 76, 29);
 		frame.getContentPane().add(lblToggleExperimentalMining);
 		
 		lblTotalBalancelabel = new JLabel("Total available balance:");
@@ -1134,6 +1138,7 @@ public class UI {
 				jd.getContentPane().setLayout(null);
 				
 				JCheckBox mOC = new JCheckBox("Minimize on close");
+				mOC.setEnabled(false);
 				mOC.setBounds(10, 10, 230, 15);
 				mOC.setSelected(Monieo.INSTANCE.settings.minimizeOnClose);
 				mOC.addActionListener(new ActionListener() {
@@ -1150,6 +1155,7 @@ public class UI {
 				jd.getContentPane().add(mOC);
 				
 				JCheckBox hOC = new JCheckBox("Hide hints");
+				hOC.setEnabled(false);
 				hOC.setBounds(10, 35, 230, 15);
 				hOC.setSelected(Monieo.INSTANCE.settings.disableHints);
 				hOC.addActionListener(new ActionListener() {
@@ -1215,7 +1221,7 @@ public class UI {
 				JTextArea inT = new JTextArea();
 				inT.setLineWrap(true);
 				inT.setBounds(10, 10, 320, 110);
-				in.add(inT);
+				in.getContentPane().add(inT);
 				
 				JButton b = new JButton("Hash (RandomX)");
 				b.setBounds(10, 130, 320, 20);
@@ -1229,7 +1235,7 @@ public class UI {
 					}
 					
 				});
-				in.add(b);
+				in.getContentPane().add(b);
 				
 				in.getContentPane().setLayout(null);
 				
@@ -1252,7 +1258,7 @@ public class UI {
 				JTextArea inT = new JTextArea();
 				inT.setLineWrap(true);
 				inT.setBounds(10, 10, 320, 110);
-				in.add(inT);
+				in.getContentPane().add(inT);
 				
 				JButton b = new JButton("Hash (SHA256 single)");
 				b.setBounds(10, 130, 320, 20);
@@ -1266,7 +1272,7 @@ public class UI {
 					}
 					
 				});
-				in.add(b);
+				in.getContentPane().add(b);
 				
 				in.getContentPane().setLayout(null);
 				
@@ -1289,7 +1295,7 @@ public class UI {
 				JTextArea inT = new JTextArea();
 				inT.setLineWrap(true);
 				inT.setBounds(10, 10, 320, 110);
-				in.add(inT);
+				in.getContentPane().add(inT);
 				
 				JButton b = new JButton("Hash (SHA256d)");
 				b.setBounds(10, 130, 320, 20);
@@ -1303,7 +1309,7 @@ public class UI {
 					}
 					
 				});
-				in.add(b);
+				in.getContentPane().add(b);
 				
 				in.getContentPane().setLayout(null);
 				
@@ -1641,7 +1647,9 @@ public class UI {
 				
 			}
 			list.setListData(walletNicks);
-			textField_3.setText(String.valueOf(walletNicks.length));
+			mCBox.removeAllItems();
+			
+			for (String s : walletNicks) mCBox.addItem(s);
 			
 		}
 		
@@ -1662,7 +1670,7 @@ public class UI {
 			
 			addressLabel.setText(w.getAsString());
 			nickLabel.setText(w.nickname);
-			INDIVbalanceLabel.setText(n.toPlainString());
+			INDIVbalanceLabel.setText(n.toPlainString() + " MNO");
 			
 			if (w.hasSK) {
 				
@@ -1708,10 +1716,10 @@ public class UI {
 		
 		total = spendable.add(unspendable);
 		
-		lblTotalBalancelabel_1.setText(spendable.toPlainString());
-		totAvailableFundsDisplay.setText(spendable.toPlainString());
-		totPendingFundsDisplay.setText(unspendable.toPlainString());
-		totFundsDisplay.setText(total.toPlainString());
+		lblTotalBalancelabel_1.setText(spendable.toPlainString() + " MNO");
+		totAvailableFundsDisplay.setText(spendable.toPlainString() + " MNO");
+		totPendingFundsDisplay.setText(unspendable.toPlainString() + " MNO");
+		totFundsDisplay.setText(total.toPlainString() + " MNO");
 		
 	}
 	

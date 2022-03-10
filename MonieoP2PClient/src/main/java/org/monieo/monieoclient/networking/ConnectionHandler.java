@@ -54,7 +54,7 @@ public class ConnectionHandler implements Runnable{
 						
 					} else {
 						
-						//TODO ad
+						//TODO add this
 						/*for (int k = 0; k < Monieo.INSTANCE.nodes.size(); k++) {
 							
 							Node n = Monieo.INSTANCE.nodes.get(k);

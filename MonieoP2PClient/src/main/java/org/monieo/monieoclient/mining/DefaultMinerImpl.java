@@ -101,6 +101,8 @@ public class DefaultMinerImpl implements AbstractMiner{
 			
 		}
 		
+		workers.clear();
+		
 	}
 
 	@Override
@@ -145,7 +147,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 
 		List<AbstractTransaction> tx = Monieo.INSTANCE.txp.get(1024*128, h); //128 is completely arbitrary. This should be optimized later.
 		
-		CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick("MININGWALLET").getAsString(), Block.getMaxCoinbase(hei));
+		CoinbaseTransaction ct = new CoinbaseTransaction(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, Monieo.INSTANCE.getWalletByNick((String)Monieo.INSTANCE.ui.mCBox.getSelectedItem()).getAsString(), Block.getMaxCoinbase(hei));
 		tx.add(ct);
 		
 		AbstractTransaction[] txr = tx.toArray(new AbstractTransaction[tx.size()]);

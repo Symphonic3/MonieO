@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.monieo</groupId>
 	<artifactId>MonieoP2PClient</artifactId>
-	<version>0.3</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 	<name>MonieoP2PClient</name>
 	<properties>
