@@ -492,8 +492,9 @@ public class Monieo {
 
 					Node n = nodes.get(i);
 					
-					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME) {
+					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME && !n.busy) {
 						
+						System.out.println("Disconnected peacefully");
 						n.disconnect(true); //disconnecting via refusing to respond is the only way to peacefully disconnect
 						i--;
 						continue;

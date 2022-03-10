@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import org.monieo.monieoclient.Monieo;
@@ -30,7 +31,7 @@ public class Node implements Runnable{
 	
 	private boolean kill = false;
 	
-	public ConcurrentLinkedQueue<Consumer<Node>> queue = new ConcurrentLinkedQueue<Consumer<Node>>();
+	public LinkedBlockingQueue<Consumer<Node>> queue = new LinkedBlockingQueue<Consumer<Node>>();
 	
 	private boolean server;
 	
@@ -63,22 +64,25 @@ public class Node implements Runnable{
 				
 				if (n.kill) return;
 				
-				if (!queue.isEmpty()) {
+				try {
 					
-					busy = true;
+					Consumer<Node> cn = queue.take();
 					
-					for (Consumer<Node> a : queue) {
+					boolean me = false;
+					
+					if (!busy) {
 						
-						if (n.kill) return;
-
-						a.accept(n);
+						busy = true;
+						me = true;
 						
 					}
-						
-					queue.clear();
 					
-					busy = false;
-
+					cn.accept(n);
+					
+					if (me) busy = false;
+					
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 				
 			}
@@ -207,6 +211,8 @@ public class Node implements Runnable{
 			@Override
 			public void accept(Node t) {
 				
+				System.out.println("sending queued packet: " + nc.cmd);
+				
 				sendNetworkPacket(nc);
 				
 			}
@@ -327,6 +333,7 @@ public class Node implements Runnable{
 					
 					String addr = String.join("\n", Monieo.INSTANCE.nam.get1000Addresses());
 					
+					System.out.println("qaddr");
 					queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_ADDR, addr));
 					
 					List<AbstractTransaction> g = Monieo.INSTANCE.txp.get(-1, Monieo.INSTANCE.getHighestBlock());
@@ -338,7 +345,8 @@ public class Node implements Runnable{
 						queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_TRANSACTION, t.serialize()));
 						
 					}
-					
+
+					System.out.println("qsync");
 					queueNetworkPacket(NetworkPacket.generateSyncPacket());
 					
 					busy = false;
