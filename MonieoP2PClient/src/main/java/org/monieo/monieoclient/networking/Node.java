@@ -344,12 +344,14 @@ public class Node implements Runnable{
 					
 					if (doNotDisconnectPeer && nc.cmd == NetworkPacketType.KEEPALIVE) return true;
 					
+					String[] wantedHashP = nc.data.split(" ");
+					
+					if (wantedHashP.length > 50) return false;
+					
 					queueAction(new Consumer<Node>() {
 
 						@Override
 						public void accept(Node t) {
-							
-							String[] wantedHashP = nc.data.split(" ");
 							
 							if (wantedHashP.length > 1 && !ibd) {
 																
