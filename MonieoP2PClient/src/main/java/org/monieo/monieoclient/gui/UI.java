@@ -288,6 +288,8 @@ public class UI {
 							
 							for (int i = 0; i < boxes.size(); i++) {
 								
+								if (t.hashrates.size() <= i) break;
+								
 								int v = t.hashrates.get(i);
 								
 								boxes.get(i).setText(v + "h/s");
