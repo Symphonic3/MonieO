@@ -29,7 +29,7 @@ public class Node implements Runnable{
 	
 	public static String TERM = "EOM";
 	
-	private boolean kill = false;
+	private volatile boolean kill = false;
 	
 	public LinkedBlockingQueue<Consumer<Node>> queue = new LinkedBlockingQueue<Consumer<Node>>();
 	
@@ -154,6 +154,7 @@ public class Node implements Runnable{
 	
 	public void disconnect(boolean peacefully) {
 		
+		kill = true;
 		if (!remoteAcknowledgedLocal || !localAcknowledgedRemote) {
 			
 			Monieo.INSTANCE.nam.couldNotConnectToNode(getAdress());
@@ -166,7 +167,6 @@ public class Node implements Runnable{
 		}
 		Monieo.INSTANCE.nodes.remove(this);
 		if (Monieo.INSTANCE.ui != null && Monieo.INSTANCE.ui.fullInit) Monieo.INSTANCE.ui.refresh(false, false);
-		kill = true;
 		
 	}
 	
