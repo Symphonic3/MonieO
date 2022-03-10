@@ -300,9 +300,9 @@ public class UI {
 							
 							BigInteger i = Monieo.INSTANCE.getHighestBlock().calculateNextDifficulty();
 							
-							BigDecimal hs = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(new BigDecimal(i), 5, RoundingMode.HALF_UP);
+							BigDecimal hs = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE).divide(new BigDecimal(i), 8, RoundingMode.HALF_UP);
 							
-							BigDecimal earn = new BigDecimal(th*60).divide(hs, 5, RoundingMode.HALF_UP).multiply(new BigDecimal(5));
+							BigDecimal earn = new BigDecimal(th*60).divide(hs, 8, RoundingMode.HALF_UP).multiply(new BigDecimal(5));
 							
 							String txt = "Hashrate: " + th + "h/s"
 									+ "\nEstim. rate of earning: " + earn.toPlainString() + " MNO/min"
