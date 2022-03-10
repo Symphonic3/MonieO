@@ -221,6 +221,8 @@ public class UI {
 	JSpinner spinner;
 	JButton btnNewButton_1;
 	
+	JLabel lblNewLabelMStatus;
+	
 	Vector<JLabel> boxes = new Vector<JLabel>();
 	
 	 /**
@@ -325,16 +327,12 @@ public class UI {
 					chckbxNewCheckBox_1_1.setEnabled(true);
 					spinner.setEnabled(true);
 					
-					MiningStatistics statm = Monieo.INSTANCE.miner.getMiningStatistics();
-					
-					long dur = System.currentTimeMillis() - statm.beginTime;
-					
 					text = "Off";
 					texta = "Stopped";
 					
 				}
 				
-				lblNewLabel.setText(texta);
+				lblNewLabelMStatus.setText(texta);
 				mineButtonDo.setText(text);
 				TgBtnTOGGLEMINING.setText(text);
 				
@@ -384,13 +382,13 @@ public class UI {
 					
 				}
 				
-				JLabel lblNewLabel = new JLabel(texta);
-				Font font = lblNewLabel.getFont();
+				lblNewLabelMStatus = new JLabel(texta);
+				Font font = lblNewLabelMStatus.getFont();
 				Font fontset = new Font(font.getName(), Font.BOLD, 44);
-				lblNewLabel.setFont(fontset);
+				lblNewLabelMStatus.setFont(fontset);
 				//lblNewLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
-				lblNewLabel.setBounds(10, 0, 240, 60);
-				f.getContentPane().add(lblNewLabel);
+				lblNewLabelMStatus.setBounds(10, 0, 240, 60);
+				f.getContentPane().add(lblNewLabelMStatus);
 				
 				JLabel lblNewLabel_1 = new JLabel("Wallet:");
 				lblNewLabel_1.setBounds(10, 93, 46, 14);
