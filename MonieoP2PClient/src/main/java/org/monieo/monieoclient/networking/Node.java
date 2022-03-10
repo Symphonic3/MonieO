@@ -25,7 +25,7 @@ public class Node implements Runnable{
 	
 	public boolean remoteAcknowledgedLocal = false;
 	public boolean localAcknowledgedRemote = false;
-	public static long MIN_RESPONSE_TIME = 10000; //10 seconds
+	public static long MIN_RESPONSE_TIME = 30000; //30 seconds
 	
 	public static String TERM = "EOM";
 	
@@ -231,8 +231,6 @@ public class Node implements Runnable{
 				if (kill) return;
 				
 				NetworkPacket nc = null;
-				
-				if (!br.ready()) continue;
 				
 				String s = "";
 				String t;
