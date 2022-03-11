@@ -3,6 +3,7 @@ package org.monieo.monieoclient.randomx;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import org.monieo.monieoclient.Monieo;
@@ -47,7 +48,7 @@ public class RandomXManager {
 	private long datasetPtr = RandomXJNI.NULLPTR;
 	private long cachePtr = RandomXJNI.NULLPTR;
 	
-	public HashMap<Long, RandomXInstance> rx = new HashMap<Long, RandomXInstance>();
+	public ConcurrentHashMap<Long, RandomXInstance> rx = new ConcurrentHashMap<Long, RandomXInstance>();
 	
 	private RandomXManager(int f, String key) {
 		

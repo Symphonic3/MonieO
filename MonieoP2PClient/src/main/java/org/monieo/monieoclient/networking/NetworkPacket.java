@@ -16,8 +16,7 @@ public class NetworkPacket {
 		REQUEST_SINGLE_BLOCK, //potentially unnessecary
 		SEND_TRANSACTION,
 		SEND_BLOCK,
-		SEND_ADDR,
-		KEEPALIVE
+		SEND_ADDR
 			
 	}
 	

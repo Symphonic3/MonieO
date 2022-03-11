@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -30,56 +33,20 @@ public class Node implements Runnable{
 	public static String TERM = "EOM";
 	
 	private volatile boolean kill = false;
-	public volatile boolean doNotDisconnectPeer = false;
-	
-	public LinkedBlockingQueue<Consumer<Node>> queue = new LinkedBlockingQueue<Consumer<Node>>();
 	
 	private boolean server;
 	
 	public final long timeConnected;
 	private volatile long timeRecieved = Long.MIN_VALUE;
 	
-	volatile boolean ibd = false;
-	
 	PrintWriter pw;
 	BufferedReader br;
 	
-	NodeWatcher nw;
-	
 	public long lastValidPacketTime;
 	
-	public class NodeWatcher implements Runnable {
-		
-		Node n;
-		
-		public NodeWatcher(Node n) {
-			
-			this.n = n;
-			
-		}
-
-		@Override
-		public void run() {
-			
-			while (true) {
-				
-				if (n.kill) return;
-				
-				try {
-					
-					Consumer<Node> cn = queue.take();
-					
-					cn.accept(n);
-					
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				
-			}
-			
-		}
-
-	}
+	ExecutorService worker;
+	public LinkedBlockingQueue<Consumer<Node>> queue = new LinkedBlockingQueue<Consumer<Node>>();
+	Thread sender;
 	
 	public Node(Socket s, boolean server) {
 		
@@ -104,11 +71,32 @@ public class Node implements Runnable{
 
 			return;
 			
-			
 		}
 		
-		nw = new NodeWatcher(this);
-		new Thread(nw).start();
+		worker = Executors.newSingleThreadExecutor();
+		sender = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				while (true) {
+					
+					if (kill) return;
+					
+					Consumer<Node> d = queue.poll();
+					
+					if (d != null ) {
+						
+						d.accept(Node.this);
+						
+					}
+					
+				}
+				
+			}
+			
+		});
+		sender.start();
 		
 	}
 	
@@ -168,7 +156,23 @@ public class Node implements Runnable{
 		
 	}
 	
-	public void queueAction(Consumer<Node> a) {
+	public void queueWorkAction(Consumer<Node> a) {
+		
+		worker.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				if (kill) return;
+				a.accept(Node.this);
+
+			}
+			
+		});
+		
+	}
+	
+	public void queueSendAction(Consumer<Node> a) {
 		
 		queue.add(a);
 		
@@ -196,14 +200,12 @@ public class Node implements Runnable{
 	
 	public void queueNetworkPacket(NetworkPacket nc) {
 		
-		queueAction(new Consumer<Node>() {
-
+		queueSendAction(new Consumer<Node>() {
+			
 			@Override
 			public void accept(Node t) {
 				
-				System.out.println("sending queued packet: " + nc.cmd);
-				
-				sendNetworkPacket(nc);
+				t.sendNetworkPacket(nc);
 				
 			}
 			
@@ -340,29 +342,16 @@ public class Node implements Runnable{
 				
 			} else if (remoteAcknowledgedLocal && localAcknowledgedRemote) {
 				
-				if (nc.cmd == NetworkPacketType.REQUEST_BLOCKS_AFTER || nc.cmd == NetworkPacketType.KEEPALIVE) {
-					
-					if (doNotDisconnectPeer && nc.cmd == NetworkPacketType.KEEPALIVE) return true;
+				if (nc.cmd == NetworkPacketType.REQUEST_BLOCKS_AFTER) {
 					
 					String[] wantedHashP = nc.data.split(" ");
 					
 					if (wantedHashP.length > 50) return false;
 					
-					queueAction(new Consumer<Node>() {
+					queueWorkAction(new Consumer<Node>() {
 
 						@Override
 						public void accept(Node t) {
-							
-							if (wantedHashP.length > 1 && !ibd) {
-																
-								//IBD
-								
-								System.out.println("IBD");
-								
-								doNotDisconnectPeer = true;
-								ibd = true;
-								
-							}
 							
 							int i = 0;
 							
@@ -403,16 +392,23 @@ public class Node implements Runnable{
 							
 							Collections.reverse(hashes);
 							
-							for (String s : hashes) {
+							queueSendAction(new Consumer<Node>() {
+
+								@Override
+								public void accept(Node t) {
+									
+									for (String s : hashes) {
+										
+										if (kill) return;
+										
+										t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
+												Block.getByHash(s).serialize()));
+										
+									}
+									
+								}
 								
-								if (kill) return;
-								
-								t.sendNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
-										Block.getByHash(s).serialize()));
-								
-							}
-							
-							if (ibd) doNotDisconnectPeer = false;
+							});
 							
 						}
 						

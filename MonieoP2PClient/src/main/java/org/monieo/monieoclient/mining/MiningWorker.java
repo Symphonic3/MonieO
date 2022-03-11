@@ -1,9 +1,10 @@
 package org.monieo.monieoclient.mining;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.monieo.monieoclient.blockchain.Block;
+import org.monieo.monieoclient.randomx.RandomXInstance;
+import org.monieo.monieoclient.randomx.RandomXManager;
 
 public class MiningWorker {
 
@@ -15,12 +16,14 @@ public class MiningWorker {
 	Block b;
 	
 	public MiningWorker(DefaultMinerImpl m) {
-		
+			
 		Runnable r = new Runnable() {
 			
 			public void run() {
 				
 				long start = System.currentTimeMillis();
+				
+				RandomXInstance rx = RandomXManager.getManager().getRandomX();
 				
 				while (true) {
 					
@@ -32,8 +35,9 @@ public class MiningWorker {
 					
 					for (int i = 0; i < DefaultMinerImpl.HASHES_BEFORE_RECHECK; i++) {
 						
-						if (new BigInteger(1, b.rawHash()).compareTo(b.header.diff) == -1) {
+						if (new BigInteger(1, rx.hash(b.header.serialize())).compareTo(b.header.diff) == -1) {
 							
+							System.out.println(b.hash());
 							m.acceptWork(b);
 							cont = false;
 							while (!cont) {};

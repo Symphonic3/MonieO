@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
@@ -122,58 +123,36 @@ public class Monieo {
 
 		String result = getHTML("https://api.github.com/repos/Symphonic3/MonieO/releases/latest");
 	    
-		if (result == null) throw new RuntimeException("Could not parse github API");
-
-		JSONObject response = new JSONObject(result);
-		
-		NEXT_AVAILABLE = response.getString("tag_name");
-
-		ComparableVersion releaseLatest = new ComparableVersion(NEXT_AVAILABLE);
-		ComparableVersion versionActual = new ComparableVersion(VERSION);
-
-		if (releaseLatest.compareTo(versionActual) == 1) {
+		if (result != null) {
 			
-			UPDATE = true;
-
-			String link = "https://github.com/Symphonic3/MonieO/releases/tag/" + releaseLatest;
-
-			JSONObject assetInfo = response.getJSONArray("assets").getJSONObject(0);
-			String downloadURL = assetInfo.getString("browser_download_url");
-			String fileName = assetInfo.getString("name");
-
-			String jarFol = null;
-			try {
-				jarFol = new File(Monieo.class.getProtectionDomain().getCodeSource().getLocation().toURI())
-						.getParent();
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-
-			File newJar = new File(jarFol + "/" + fileName);
+			JSONObject response = new JSONObject(result);
 			
-			if (newJar.exists()) {
+			NEXT_AVAILABLE = response.getString("tag_name");
+
+			ComparableVersion releaseLatest = new ComparableVersion(NEXT_AVAILABLE);
+			ComparableVersion versionActual = new ComparableVersion(VERSION);
+
+			if (releaseLatest.compareTo(versionActual) == 1) {
 				
+				UPDATE = true;
+
+				String link = "https://github.com/Symphonic3/MonieO/releases/tag/" + releaseLatest;
+
+				JSONObject assetInfo = response.getJSONArray("assets").getJSONObject(0);
+				String downloadURL = assetInfo.getString("browser_download_url");
+				String fileName = assetInfo.getString("name");
+
+				String jarFol = null;
 				try {
-					Runtime.getRuntime().exec("java -jar " + "\"" + newJar.getPath() + "\"" + " " + String.join(" ", args));
-				} catch (IOException e) {
+					jarFol = new File(Monieo.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+							.getParent();
+				} catch (URISyntaxException e) {
 					e.printStackTrace();
 				}
+
+				File newJar = new File(jarFol + "/" + fileName);
 				
-			} else {
-
-				int res = JOptionPane.showOptionDialog(null,
-						new MessageWithLink(
-								"New update available. Press 'OK' to automatically download, or download and use version "
-										+ releaseLatest + " from github:" + "\n <a href=#\"" + link + "\"></a>"),
-						"New update available!", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, null, null);
-
-				if (res == 0) {
-
-					try {
-						Files.copy(new URL(downloadURL).openStream(), newJar.toPath());
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
+				if (newJar.exists()) {
 					
 					try {
 						Runtime.getRuntime().exec("java -jar " + "\"" + newJar.getPath() + "\"" + " " + String.join(" ", args));
@@ -181,13 +160,37 @@ public class Monieo {
 						e.printStackTrace();
 					}
 					
+				} else {
+
+					int res = JOptionPane.showOptionDialog(null,
+							new MessageWithLink(
+									"New update available. Press 'OK' to automatically download, or download and use version "
+											+ releaseLatest + " from github:" + "\n <a href=#\"" + link + "\"></a>"),
+							"New update available!", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, null, null);
+
+					if (res == 0) {
+
+						try {
+							Files.copy(new URL(downloadURL).openStream(), newJar.toPath());
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+						
+						try {
+							Runtime.getRuntime().exec("java -jar " + "\"" + newJar.getPath() + "\"" + " " + String.join(" ", args));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						
+					}
+					
 				}
 				
+				System.exit(0);
+
 			}
 			
-			System.exit(0);
-
-		}
+		} else System.out.println("Could not access Github API!");
 		
 		new Monieo(arrayContains(args, "--skipconnect"));
 
@@ -455,7 +458,7 @@ public class Monieo {
 				//attempt to load blockchain before starting UI application
 				if (ss != null) {
 					
-					if (desyncAmount() == -1 || at >= (l ? 0 : 1)) { //try once //TODO reinstate the 2nd number to 1
+					if (desyncAmount() == -1 || at >= (l ? 0 : 1)) { //try once
 						
 						ss.close();
 						ss = null;
@@ -472,27 +475,36 @@ public class Monieo {
 				}
 
 				Block b = getHighestBlock();
-				Block g = genesis();
+				
+				List<Block> a = new ArrayList<Block>();
+				
+				a.add(b);
 				
 				for (int i = 0; i < (10-1); i++) { //hardcoded to 10 now because we removed CONFIRMATIONS
 					
-					if (b == null || b.equals(g)) {
+					String h = b.header.preHash;
+					if (h.equals(GENESIS_HASH)) break;
+					b = b.getPrevious();
+					
+					if (b == null) {
 						
 						break;
+						
+					} else {
+						
+						a.add(b);
 						
 					}
 					
 				}
 
-				Block nb = b.getPrevious();
-				
-				String hash = (nb == null ? GENESIS_HASH : b.header.preHash);
+				Collections.reverse(a);
 				
 				for (int i = 0; i < nodes.size(); i++) {
 
 					Node n = nodes.get(i);
 					
-					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME && !n.doNotDisconnectPeer) {
+					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME) {
 						
 						System.out.println("Disconnected peacefully");
 						n.disconnect(true); //disconnecting via refusing to respond is the only way to peacefully disconnect
@@ -504,7 +516,16 @@ public class Monieo {
 					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
 					
 					//functions as a keepalive, for now
-					if (!n.doNotDisconnectPeer) n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.KEEPALIVE, hash));
+					if (n.queue.isEmpty()) {
+						
+						for (Block se : a) {
+
+							n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
+									se.serialize()));
+							
+						}
+						
+					}
 					
 				}
 				
@@ -644,66 +665,66 @@ public class Monieo {
 				System.out.println("generating metadata " + b.hash());
 				b.generateMetadata();
 				
-				if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
+			} else return;
+			
+		}
+		
+		if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
+			
+			setHighestBlock(b);
+			
+			Block curr = b;
+			
+			BigDecimal lowestT = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE); //big number
+			BigDecimal highestT = BigDecimal.ZERO;
+			BigDecimal avT = BigDecimal.ZERO;
+			int txCount = 0;
+			
+			for (int i = 0; i < 60; i++) {
+				
+				if (curr.transactions.length == 1) {
 					
-					setHighestBlock(b);
+					txCount++;
+					lowestT = BigDecimal.ZERO;
+					avT = BigDecimal.ZERO;
+					break;
 					
-					Block curr = b;
+				} else for (AbstractTransaction t : curr.transactions) {
 					
-					BigDecimal lowestT = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE); //big number
-					BigDecimal highestT = BigDecimal.ZERO;
-					BigDecimal avT = BigDecimal.ZERO;
-					int txCount = 0;
-					
-					for (int i = 0; i < 60; i++) {
+					if (t instanceof Transaction) {
 						
-						if (curr.transactions.length == 1) {
-							
-							txCount++;
-							lowestT = BigDecimal.ZERO;
-							avT = BigDecimal.ZERO;
-							break;
-							
-						} else for (AbstractTransaction t : curr.transactions) {
-							
-							if (t instanceof Transaction) {
-								
-								Transaction tr = (Transaction)t;
-								
-								if (tr.d.fee.compareTo(lowestT) == -1) lowestT = tr.d.fee;
-								if (tr.d.fee.compareTo(highestT) == 1) highestT = tr.d.fee;
-								txCount++;
-								avT = avT.add(tr.d.fee);
-								
-							}
-							
-						}
+						Transaction tr = (Transaction)t;
 						
-						curr = curr.getPrevious();
-						
-						if (curr == null) break;
+						if (tr.d.fee.compareTo(lowestT) == -1) lowestT = tr.d.fee;
+						if (tr.d.fee.compareTo(highestT) == 1) highestT = tr.d.fee;
+						txCount++;
+						avT = avT.add(tr.d.fee);
 						
 					}
-					
-					avT = avT.divide(BigDecimal.valueOf(txCount), 8, RoundingMode.HALF_UP);
-					
-					try (FileWriter fw = new FileWriter(feeEstimate, false)) {
-						
-						fw.append(lowestT.toPlainString() + "\n" + avT.toPlainString() + "\n" + highestT.toPlainString());
-						
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					
-					if (ui != null && ui.fullInit) ui.refresh(false, false);
 					
 				}
 				
-				Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
+				curr = curr.getPrevious();
+				
+				if (curr == null) break;
 				
 			}
 			
+			avT = avT.divide(BigDecimal.valueOf(txCount), 8, RoundingMode.HALF_UP);
+			
+			try (FileWriter fw = new FileWriter(feeEstimate, false)) {
+				
+				fw.append(lowestT.toPlainString() + "\n" + avT.toPlainString() + "\n" + highestT.toPlainString());
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			if (ui != null && ui.fullInit) ui.refresh(false, false);
+			
 		}
+		
+		Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 		
 	}
 	

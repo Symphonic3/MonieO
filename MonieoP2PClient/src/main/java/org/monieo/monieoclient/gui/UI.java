@@ -263,6 +263,13 @@ public class UI {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
+				if (walletNicks.length == 0) {
+					
+					JOptionPane.showMessageDialog(frame, "You must select a valid wallet to begin mining!", "Error", JOptionPane.ERROR_MESSAGE);
+					return;
+					
+				}
+				
 				mining = !mining;
 				
 				String text;
