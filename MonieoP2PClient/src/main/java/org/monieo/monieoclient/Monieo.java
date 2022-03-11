@@ -478,14 +478,22 @@ public class Monieo {
 					if (ss != null) {
 						
 						if (desyncAmount() == -1 || at >= (l ? 0 : 1)) { //try once
-							
-							ss.close();
-							ss = null;
 
 							ui = new UI();
 							System.err.println("Initializing UI...");
 							ui.initialize();
 							System.err.println("...UI Initialized!");
+							
+							try {
+								
+								ss.close();
+								
+							} catch (IllegalStateException e) {
+								
+								
+							}
+							
+							ss = null;
 							
 						}
 						
