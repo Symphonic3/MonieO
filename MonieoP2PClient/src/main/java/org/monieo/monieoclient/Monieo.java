@@ -483,8 +483,14 @@ public class Monieo {
 				for (int i = 0; i < (10-1); i++) { //hardcoded to 10 now because we removed CONFIRMATIONS
 					
 					String h = b.header.preHash;
-					if (h.equals(GENESIS_HASH)) break;
 					b = b.getPrevious();
+					
+					if (h.equals(GENESIS_HASH)) {
+						
+						a.add(b);
+						break;
+						
+					}
 					
 					if (b == null) {
 						

@@ -337,6 +337,7 @@ public class Node implements Runnable{
 
 					System.out.println("qsync");
 					queueNetworkPacket(NetworkPacket.generateSyncPacket());
+					System.out.println("qsyncd");
 					
 				}
 				
