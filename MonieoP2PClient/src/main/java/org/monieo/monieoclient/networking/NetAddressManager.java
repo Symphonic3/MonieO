@@ -205,7 +205,9 @@ public class NetAddressManager {
 		});
 		
 		BannedNetAddress an = new BannedNetAddress(add, -1);
+		bans.add(an);
 		an.ban();
+		Monieo.INSTANCE.nam.saveBans();
 		
 	}
 	

@@ -22,8 +22,7 @@ public class BannedNetAddress {
 	
 	protected void ban() {
 		
-		banExpiry = System.currentTimeMillis() + 86400000; //24 hours
-		Monieo.INSTANCE.nam.saveBans();
+		banExpiry = System.currentTimeMillis() + 86400000; //24 hour
 		
 	}
 	
