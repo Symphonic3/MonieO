@@ -349,6 +349,7 @@ public class Node implements Runnable{
 					
 					if (wantedHashP.length > 50) return false;
 					
+					//TODO optmize this so that it doesn't take so long to populate list and it doesn't do all that if block obviously doesn't exist
 					queueWorkAction(new Consumer<Node>() {
 
 						@Override

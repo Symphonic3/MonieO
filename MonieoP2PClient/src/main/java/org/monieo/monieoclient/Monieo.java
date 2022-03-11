@@ -305,6 +305,23 @@ public class Monieo {
 		workingDirectory += "/MonieO";
 		
 		workingFolder = new File(workingDirectory);
+		
+		if (!workingFolder.exists()) {
+			
+			  Thread t = new Thread(new Runnable(){
+			        public void run(){
+			            JOptionPane.showMessageDialog(null, 
+			            		"Welcome to MonieO! Since this is the first time you are launching the application, \n"
+			            		+ "you will need to wait for your node to synchronize the blockchain. This may take quite a while. \n"
+			            		+ "The blockchain will need to be synchronized each time you open the application, but it will be quite quick \n"
+			            		+ "once you have completed the initial synchronization.\n\n"
+			            		+ "Press 'New Address' in the UI in order to begin recieving or mining MonieO!", "Welcome to MonieO!", JOptionPane.INFORMATION_MESSAGE);
+			        }
+			    });
+			  t.start();
+			
+		}
+		
 		workingFolder.mkdirs();
 		
 		RandomXManager.setRandomX(RandomXManager.getFlags());
@@ -455,108 +472,115 @@ public class Monieo {
 			@Override
 			public void run() {
 				
-				//attempt to load blockchain before starting UI application
-				if (ss != null) {
+				try {
 					
-					if (desyncAmount() == -1 || at >= (l ? 0 : 1)) { //try once
+					//attempt to load blockchain before starting UI application
+					if (ss != null) {
 						
-						ss.close();
-						ss = null;
+						if (desyncAmount() == -1 || at >= (l ? 0 : 1)) { //try once
+							
+							ss.close();
+							ss = null;
 
-						ui = new UI();
-						System.err.println("Initializing UI...");
-						ui.initialize();
-						System.err.println("...UI Initialized!");
+							ui = new UI();
+							System.err.println("Initializing UI...");
+							ui.initialize();
+							System.err.println("...UI Initialized!");
+							
+						}
+						
+						at++;
 						
 					}
-					
-					at++;
-					
-				}
 
-				Block b = getHighestBlock();
-				
-				List<Block> a = new ArrayList<Block>();
-				
-				a.add(b);
-				
-				for (int i = 0; i < (10-1); i++) { //hardcoded to 10 now because we removed CONFIRMATIONS
+					Block b = getHighestBlock();
 					
-					String h = b.header.preHash;
-					b = b.getPrevious();
+					List<Block> a = new ArrayList<Block>();
 					
-					if (h.equals(GENESIS_HASH)) {
+					a.add(b);
+					
+					for (int i = 0; i < (10-1); i++) { //hardcoded to 10 now because we removed CONFIRMATIONS
 						
-						a.add(b);
-						break;
+						String h = b.header.preHash;
+						b = b.getPrevious();
+						
+						if (h.equals(GENESIS_HASH)) {
+							
+							a.add(b);
+							break;
+							
+						}
+						
+						if (b == null) {
+							
+							break;
+							
+						} else {
+							
+							a.add(b);
+							
+						}
 						
 					}
-					
-					if (b == null) {
-						
-						break;
-						
-					} else {
-						
-						a.add(b);
-						
-					}
-					
-				}
 
-				Collections.reverse(a);
-				
-				for (int i = 0; i < nodes.size(); i++) {
+					Collections.reverse(a);
+					
+					for (int i = 0; i < nodes.size(); i++) {
 
-					Node n = nodes.get(i);
-					
-					if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME) {
+						Node n = nodes.get(i);
 						
-						System.out.println("Disconnected peacefully");
-						n.disconnect(true); //disconnecting via refusing to respond is the only way to peacefully disconnect
-						i--;
-						continue;
+						if (System.currentTimeMillis()-n.lastValidPacketTime > Node.MIN_RESPONSE_TIME) {
+							
+							System.out.println("Disconnected peacefully");
+							n.disconnect(true); //disconnecting via refusing to respond is the only way to peacefully disconnect
+							i--;
+							continue;
+							
+						}
 						
-					}
-					
-					if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
-					
-					//functions as a keepalive, for now
-					if (n.queue.isEmpty()) {
+						if (!n.localAcknowledgedRemote || !n.remoteAcknowledgedLocal) continue;
 						
-						for (Block se : a) {
+						//functions as a keepalive, for now
+						if (n.queue.isEmpty()) {
+							
+							for (Block se : a) {
 
-							n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
-									se.serialize()));
+								n.queueNetworkPacket(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, 
+										se.serialize()));
+								
+							}
 							
 						}
 						
 					}
 					
-				}
-				
-				if (nodes.size() < MAX_OUTGOING_CONNECTIONS) {
-					
-					String s = nam.getPossibleAddressOutbound();
-					
-					for (Node n : nodes) {
+					if (nodes.size() < MAX_OUTGOING_CONNECTIONS) {
 						
-						if (n.getAdress().equals(s)) return;
+						String s = nam.getPossibleAddressOutbound();
+						
+						for (Node n : nodes) {
+							
+							if (n.getAdress().equals(s)) return;
+							
+						}
+						
+						System.out.println("attempting to connect to a node!");
+						if (ch.connect(s)) {
+							
+							//this is not put here because we should wait for proper handshaking before doing this
+							//nam.successfullyConnectedOrDisconnected(s);
+							
+						} else {
+							
+							nam.couldNotConnectToNode(s);
+							
+						}
 						
 					}
 					
-					System.out.println("attempting to connect to a node!");
-					if (ch.connect(s)) {
-						
-						//this is not put here because we should wait for proper handshaking before doing this
-						//nam.successfullyConnectedOrDisconnected(s);
-						
-					} else {
-						
-						nam.couldNotConnectToNode(s);
-						
-					}
-					
+				} catch (Exception e) {
+					e.printStackTrace();
+					return;
 				}
 				
 			}
@@ -728,11 +752,11 @@ public class Monieo {
 					e.printStackTrace();
 				}
 				
+				if (desyncAmount() == -1) Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
+				
 				if (ui != null && ui.fullInit) ui.refresh(false, false);
 				
 			}
-			
-			Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 			
 		}
 		
