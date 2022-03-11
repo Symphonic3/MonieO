@@ -644,8 +644,6 @@ public class Monieo {
 		
 		File blockfile = new File(blocksFolder.getPath() + "/" + blockname + ".blk");
 		
-		boolean r = false;
-		
 		if (!blockfile.exists()) {
 			
 			try {
@@ -663,8 +661,7 @@ public class Monieo {
 			}
 			
 			if (b.isReady()) {
-				
-				r = true;
+
 				System.out.println("generating metadata " + b.hash());
 				b.generateMetadata();
 				
@@ -672,7 +669,7 @@ public class Monieo {
 			
 		}
 		
-		if (r || blockfile.exists()) {
+		if (b.hasMetadata()) {
 			
 			if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
 				
