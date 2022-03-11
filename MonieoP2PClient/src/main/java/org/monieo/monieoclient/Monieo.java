@@ -644,6 +644,8 @@ public class Monieo {
 		
 		File blockfile = new File(blocksFolder.getPath() + "/" + blockname + ".blk");
 		
+		boolean r = false;
+		
 		if (!blockfile.exists()) {
 			
 			try {
@@ -662,6 +664,7 @@ public class Monieo {
 			
 			if (b.isReady()) {
 				
+				r = true;
 				System.out.println("generating metadata " + b.hash());
 				b.generateMetadata();
 				
@@ -669,62 +672,66 @@ public class Monieo {
 			
 		}
 		
-		if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
+		if (r || blockfile.exists()) {
 			
-			setHighestBlock(b);
-			
-			Block curr = b;
-			
-			BigDecimal lowestT = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE); //big number
-			BigDecimal highestT = BigDecimal.ZERO;
-			BigDecimal avT = BigDecimal.ZERO;
-			int txCount = 0;
-			
-			for (int i = 0; i < 60; i++) {
+			if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
 				
-				if (curr.transactions.length == 1) {
+				setHighestBlock(b);
+				
+				Block curr = b;
+				
+				BigDecimal lowestT = new BigDecimal(Monieo.MAXIMUM_HASH_VALUE); //big number
+				BigDecimal highestT = BigDecimal.ZERO;
+				BigDecimal avT = BigDecimal.ZERO;
+				int txCount = 0;
+				
+				for (int i = 0; i < 60; i++) {
 					
-					txCount++;
-					lowestT = BigDecimal.ZERO;
-					avT = BigDecimal.ZERO;
-					break;
-					
-				} else for (AbstractTransaction t : curr.transactions) {
-					
-					if (t instanceof Transaction) {
+					if (curr.transactions.length == 1) {
 						
-						Transaction tr = (Transaction)t;
-						
-						if (tr.d.fee.compareTo(lowestT) == -1) lowestT = tr.d.fee;
-						if (tr.d.fee.compareTo(highestT) == 1) highestT = tr.d.fee;
 						txCount++;
-						avT = avT.add(tr.d.fee);
+						lowestT = BigDecimal.ZERO;
+						avT = BigDecimal.ZERO;
+						break;
+						
+					} else for (AbstractTransaction t : curr.transactions) {
+						
+						if (t instanceof Transaction) {
+							
+							Transaction tr = (Transaction)t;
+							
+							if (tr.d.fee.compareTo(lowestT) == -1) lowestT = tr.d.fee;
+							if (tr.d.fee.compareTo(highestT) == 1) highestT = tr.d.fee;
+							txCount++;
+							avT = avT.add(tr.d.fee);
+							
+						}
 						
 					}
 					
+					curr = curr.getPrevious();
+					
+					if (curr == null) break;
+					
 				}
 				
-				curr = curr.getPrevious();
+				avT = avT.divide(BigDecimal.valueOf(txCount), 8, RoundingMode.HALF_UP);
 				
-				if (curr == null) break;
+				try (FileWriter fw = new FileWriter(feeEstimate, false)) {
+					
+					fw.append(lowestT.toPlainString() + "\n" + avT.toPlainString() + "\n" + highestT.toPlainString());
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				if (ui != null && ui.fullInit) ui.refresh(false, false);
 				
 			}
 			
-			avT = avT.divide(BigDecimal.valueOf(txCount), 8, RoundingMode.HALF_UP);
-			
-			try (FileWriter fw = new FileWriter(feeEstimate, false)) {
-				
-				fw.append(lowestT.toPlainString() + "\n" + avT.toPlainString() + "\n" + highestT.toPlainString());
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			if (ui != null && ui.fullInit) ui.refresh(false, false);
+			Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 			
 		}
-		
-		Node.propagateAll(new NetworkPacket(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, NetworkPacketType.SEND_BLOCK, b.serialize()));
 		
 	}
 	

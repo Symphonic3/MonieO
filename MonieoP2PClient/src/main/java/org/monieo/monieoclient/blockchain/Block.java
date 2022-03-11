@@ -387,11 +387,11 @@ public class Block extends MonieoDataObject{
 			if (!Monieo.assertSupportedProtocol(new String[]{header.mn,header.pv})) return false;
 			
 			if (transactions.length == 0) return false;
-
+			
 			if (!merkle(transactions).equals(header.merkleRoot)) return false;
 
 			if (header == null) return false;
-
+			
 			if (new BigInteger(1, rawHash()).compareTo(header.diff) != -1) return false;
 
 			if (serialize().getBytes().length > 1024*256) return false; //256kb
