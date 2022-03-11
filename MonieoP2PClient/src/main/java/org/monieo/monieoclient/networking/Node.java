@@ -336,8 +336,18 @@ public class Node implements Runnable{
 					}
 
 					System.out.println("qsync");
-					queueNetworkPacket(NetworkPacket.generateSyncPacket());
-					System.out.println("qsyncd");
+					queueWorkAction(new Consumer<Node>() {
+
+						@Override
+						public void accept(Node t) {
+							
+							NetworkPacket p = NetworkPacket.generateSyncPacket();
+							
+							queueNetworkPacket(p);
+							
+						}
+						
+					});
 					
 				}
 				
