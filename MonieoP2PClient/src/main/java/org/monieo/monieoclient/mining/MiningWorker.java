@@ -8,7 +8,6 @@ import org.monieo.monieoclient.randomx.RandomXManager;
 
 public class MiningWorker {
 
-	public volatile boolean cont = false;
 	public Thread thread;
 	
 	public volatile int hashrate;
@@ -25,7 +24,7 @@ public class MiningWorker {
 				
 				RandomXInstance rx = RandomXManager.getManager().getRandomX();
 				
-				while (true) {
+				wh: while (true) {
 					
 					if (m.stop) return;
 					
@@ -39,8 +38,8 @@ public class MiningWorker {
 							
 							System.out.println(b.hash());
 							m.acceptWork(b);
-							cont = false;
-							while (!cont) {};
+							b = null;
+							continue wh;
 							
 						}
 						
@@ -64,7 +63,6 @@ public class MiningWorker {
 	public void setBlock(Block x) {
 		
 		b = x;
-		cont = true;
 		
 	}
 

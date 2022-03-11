@@ -172,7 +172,6 @@ public class DefaultMinerImpl implements AbstractMiner{
 		for (MiningWorker mw : workers) {
 			
 			mw.b = genBlock();
-			mw.cont = true;
 			
 		}
 		
