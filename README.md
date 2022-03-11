@@ -5,7 +5,7 @@ MonieO
 [![Wiki](https://img.shields.io/badge/wiki-work%20in%20progress-informational)](https://github.com/Symphonic3/MonieO/wiki)
 [![Discord](https://img.shields.io/discord/750151713473953832)](https://discord.gg/y2Hx9Ewn2V)
 
-MonieO is an experimental cryptocurrency which aims to use a basic blockchain implementation and protocol to be easy to learn and build upon for beginners and enthusiasts alike. MonieO aims to be a blockchain that is 100% functional and yet still easy to understand.
+MonieO is an experimental cryptocurrency which uses a simple yet functional blockchain implementation and protocol in order to easy to learn and build upon for beginners and enthusiasts alike.
 
 If you are looking to try MonieO, you might want to look at the [Usage Guide](https://github.com/Symphonic3/MonieO/wiki/Usage-Guide) and the [Beginner Info](https://github.com/Symphonic3/MonieO/wiki/Beginner-Info)
 
