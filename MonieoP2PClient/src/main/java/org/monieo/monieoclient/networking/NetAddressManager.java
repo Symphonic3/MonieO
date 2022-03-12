@@ -43,7 +43,7 @@ public class NetAddressManager {
 		init(nfolder, newBuckets, NEW_SIZE_REAL, false);
 		init(tfolder, triedBuckets, TRIED_SIZE_REAL, true);
 		
-		bansFile = new File(Monieo.INSTANCE.workingFolder.getPath() + "bannednodes.dat");
+		bansFile = new File(Monieo.INSTANCE.workingFolder.getPath() + "/bannednodes.dat");
 		try {
 			bansFile.createNewFile();
 		} catch (IOException e) {
@@ -57,6 +57,8 @@ public class NetAddressManager {
 				String s = c.nextLine();
 				
 				String[] spl = s.split(" ");
+				
+				if (spl.length == 0) continue;
 				
 				if (spl.length != 2) throw new IllegalStateException("Tried to handle banned entry with more than 2 fields!");
 				
@@ -297,7 +299,7 @@ public class NetAddressManager {
 				
 				if (n.isBanned()) {
 					
-					fw.append(n.adress + " " + n.banExpiry);
+					fw.append(n.adress + " " + n.banExpiry + "\n");
 					
 				}
 				
