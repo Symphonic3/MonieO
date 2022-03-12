@@ -51,6 +51,8 @@ public class DefaultMinerImpl implements AbstractMiner{
 			
 		}
 		
+		resetBlock();
+		
 		t = new Timer();
 		t.schedule(new TimerTask() {
 			
