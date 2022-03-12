@@ -47,7 +47,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 		
 		for (int i = 0; i < set.threads; i++) {
 			
-			workers.add(new MiningWorker(this));
+			workers.add(new MiningWorker(this, String.format("%03d", i)));
 			
 		}
 		
@@ -109,8 +109,8 @@ public class DefaultMinerImpl implements AbstractMiner{
 	public String getMiningName() {
 		return "DefaultCPUMiner";
 	}
-	
-	Block genBlock() {
+
+	public void resetBlock() {
 		
 		Block h = null;
 		
@@ -119,6 +119,8 @@ public class DefaultMinerImpl implements AbstractMiner{
 			h = Monieo.INSTANCE.getHighestBlock();
 			
 		};
+		
+		reference = h;
 
 		long hei = h.header.height + 1;
 		
@@ -154,7 +156,7 @@ public class DefaultMinerImpl implements AbstractMiner{
 		
 		Block b = new Block(new BlockHeader(Monieo.MAGIC_NUMBERS,
 				Monieo.PROTOCOL_VERSION,
-				Monieo.INSTANCE.getHighestBlockHash(),
+				h.hash(),
 				Block.merkle(txr),
 				nettime,
 				BigInteger.ZERO,
@@ -163,15 +165,12 @@ public class DefaultMinerImpl implements AbstractMiner{
 				diff), txr
 		);
 		
-		return b;
-		
-	}
-	
-	public void resetBlock() {
-		
 		for (MiningWorker mw : workers) {
 			
-			mw.b = genBlock();
+			mw.b = new Block(
+					new BlockHeader(Monieo.MAGIC_NUMBERS, Monieo.PROTOCOL_VERSION, b.header.preHash, b.header.merkleRoot, b.header.timestamp, 
+							b.header.nonce, b.header.amntTransactions, b.header.height, b.header.diff), 
+					b.transactions);
 			
 		}
 		

@@ -260,7 +260,7 @@ public class Block extends MonieoDataObject{
 			if (prev == null) return false;
 
 			if (header.height != prev.header.height+1) return false;
-
+			
 			if (!prev.calculateNextDifficulty().equals(header.diff)) return false;
 			
 			Block p = prev;

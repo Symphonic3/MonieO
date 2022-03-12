@@ -13,9 +13,14 @@ public class MiningWorker {
 	public volatile int hashrate;
 
 	Block b;
+	final String id;
 	
-	public MiningWorker(DefaultMinerImpl m) {
+	public MiningWorker(DefaultMinerImpl m, String id) {
 			
+		this.id = id;
+		
+		System.out.println(id);
+		
 		Runnable r = new Runnable() {
 			
 			public void run() {
@@ -23,6 +28,8 @@ public class MiningWorker {
 				long start = System.currentTimeMillis();
 				
 				RandomXInstance rx = RandomXManager.getManager().getRandomX();
+				
+				long nonce = 0;
 				
 				wh: while (true) {
 					
@@ -39,11 +46,12 @@ public class MiningWorker {
 							System.out.println(b.hash());
 							m.acceptWork(b);
 							b = null;
+							nonce = 0;
 							continue wh;
 							
 						}
 						
-						b.header.nonce = b.header.nonce.add(BigInteger.ONE);
+						b.header.nonce = new BigInteger(++nonce + id);
 						
 					}
 					

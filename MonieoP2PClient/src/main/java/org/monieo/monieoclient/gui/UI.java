@@ -530,7 +530,7 @@ public class UI {
 					jp.setLayout(new GridBagLayout());
 			        jp.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
 					jp.add(j);
-					jp.setBackground(new Color(66, 132, 255, 127));
+					jp.setBackground(new Color(66, 107, 170));
 					jp.setOpaque(true);
 					
 					panel_1.add(jp);
@@ -560,7 +560,7 @@ public class UI {
 							jp.setLayout(new GridBagLayout());
 					        jp.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
 							jp.add(j);
-							jp.setBackground(new Color(66, 132, 255, 127));
+							jp.setBackground(new Color(66, 107, 170));
 							jp.setOpaque(true);
 							
 							panel_1.add(jp);
@@ -1016,7 +1016,7 @@ public class UI {
 		frame.getContentPane().add(lblNewLabel_1);
 		
 		JButton overviewBTN = new JButton("Overview");
-		overviewBTN.setBounds(9, 414, 188, 23);
+		overviewBTN.setBounds(9, 412, 188, 23);
 		overviewBTN.addActionListener(new ActionListener() {
 			
 			@Override
@@ -1589,7 +1589,7 @@ public class UI {
 	
 	public void refreshActual(boolean updlist, boolean changeColor) {
 		
-if (changeColor) {
+		if (changeColor) {
 			
 			if (!Monieo.INSTANCE.settings.darkMode) {
 				
