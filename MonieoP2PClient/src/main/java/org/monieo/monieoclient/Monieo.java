@@ -98,7 +98,7 @@ public class Monieo {
 			if (args[i].equalsIgnoreCase("--add-address")) {
 				
 				String[] temp = NetAddressManager.HARDCODED_ADDRESSES;
-				NetAddressManager.HARDCODED_ADDRESSES = new String[NetAddressManager.HARDCODED_ADDRESSES.length];
+				NetAddressManager.HARDCODED_ADDRESSES = new String[NetAddressManager.HARDCODED_ADDRESSES.length+1];
 				
 				for (int k = 0; i < temp.length; k++) {
 					
