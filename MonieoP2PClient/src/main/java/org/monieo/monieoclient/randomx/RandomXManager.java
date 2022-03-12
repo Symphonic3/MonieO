@@ -165,7 +165,7 @@ public class RandomXManager {
 					
 				}
 				
-				Thread[] ret = new Thread[256];
+				Thread[] ret = new Thread[512];
 				int am = t.enumerate(ret);
 				
 				for (int i = 0; i < am; i++) {
