@@ -9,8 +9,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -42,11 +42,9 @@ public class Node implements Runnable{
 	BufferedReader br;
 	
 	public volatile long lastValidPacketTime;
-	
-	ExecutorService worker;
-	ForkJoinPool incomingHandler;
+
 	public LinkedBlockingQueue<Consumer<Node>> queue = new LinkedBlockingQueue<Consumer<Node>>();
-	Thread sender;
+	Timer sender;
 	
 	public Node(Socket s, boolean server) {
 		
@@ -72,32 +70,27 @@ public class Node implements Runnable{
 			return;
 			
 		}
+
+		sender = new Timer();
 		
-		worker = Executors.newSingleThreadExecutor();
-		incomingHandler = new ForkJoinPool();
-		sender = new Thread(new Runnable() {
+		sender.scheduleAtFixedRate(new TimerTask() {
 			
 			@Override
 			public void run() {
 				
-				while (true) {
+				if (kill) return;
+				
+				Consumer<Node> d = queue.poll();
+				
+				if (d != null) {
 					
-					if (kill) return;
-					
-					Consumer<Node> d = queue.poll();
-					
-					if (d != null ) {
-						
-						d.accept(Node.this);
-						
-					}
+					d.accept(Node.this);
 					
 				}
 				
 			}
 			
-		});
-		sender.start();
+		}, 0, 25);
 		
 	}
 	
@@ -134,19 +127,20 @@ public class Node implements Runnable{
 	public void disconnect(boolean peacefully) {
 		
 		kill = true;
-		if (!remoteAcknowledgedLocal || !localAcknowledgedRemote) {
-			
-			Monieo.INSTANCE.nam.couldNotConnectToNode(getAdress());
-			
-		} else if (peacefully) Monieo.INSTANCE.nam.successfullyConnectedOrDisconnected(getAdress());
+		
 		try {
 			socket.close();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		
-		incomingHandler.shutdown();
-		worker.shutdown();
+		if (!remoteAcknowledgedLocal || !localAcknowledgedRemote) {
+			
+			Monieo.INSTANCE.nam.couldNotConnectToNode(getAdress());
+			
+		} else if (peacefully) Monieo.INSTANCE.nam.successfullyConnectedOrDisconnected(getAdress());
+		
+		sender.cancel();
 		
 		Monieo.INSTANCE.nodes.remove(this);
 		if (Monieo.INSTANCE.ui != null && Monieo.INSTANCE.ui.fullInit) Monieo.INSTANCE.ui.refresh(false, false);
@@ -163,7 +157,7 @@ public class Node implements Runnable{
 	
 	public void queueWorkAction(Consumer<Node> a) {
 		
-		worker.execute(new Runnable() {
+		ForkJoinPool.commonPool().execute(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -256,11 +250,15 @@ public class Node implements Runnable{
 				
 				System.out.println("recieved data!");
 				
-				while (incomingHandler.getQueuedSubmissionCount() > incomingHandler.getParallelism()) {}
+				while (ForkJoinPool.commonPool().getQueuedSubmissionCount() > ForkJoinPool.getCommonPoolParallelism()) {
+					
+					Thread.sleep(25);
+					
+				}
 				
 				final NetworkPacket nc = NetworkPacket.deserialize(s);
 				
-				incomingHandler.submit(new Runnable() {
+				ForkJoinPool.commonPool().submit(new Runnable() {
 					
 					@Override
 					public void run() {
@@ -355,6 +353,8 @@ public class Node implements Runnable{
 						public void accept(Node t) {
 							
 							NetworkPacket p = NetworkPacket.generateSyncPacket();
+							
+							if (kill) return;
 							
 							queueNetworkPacket(p);
 							
