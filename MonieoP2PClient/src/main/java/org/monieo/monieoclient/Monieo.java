@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -97,16 +98,10 @@ public class Monieo {
 			
 			if (args[i].equalsIgnoreCase("--add-address")) {
 				
-				String[] temp = NetAddressManager.HARDCODED_ADDRESSES;
-				NetAddressManager.HARDCODED_ADDRESSES = new String[NetAddressManager.HARDCODED_ADDRESSES.length+1];
+				int len = NetAddressManager.HARDCODED_ADDRESSES.length;
+				NetAddressManager.HARDCODED_ADDRESSES = Arrays.copyOf(NetAddressManager.HARDCODED_ADDRESSES, len+1);
 				
-				for (int k = 0; i < temp.length; k++) {
-					
-					NetAddressManager.HARDCODED_ADDRESSES[k] = temp[k];
-					
-				}
-				
-				NetAddressManager.HARDCODED_ADDRESSES[temp.length] = args[i+1];
+				NetAddressManager.HARDCODED_ADDRESSES[len] = args[i+1];
 				
 			}
 			
