@@ -709,7 +709,9 @@ public class Monieo {
 		
 		if (b.hasMetadata()) {
 			
-			if (getHighestBlock() == null || b.getChainWork().compareTo(getHighestBlock().getChainWork()) == 1) {
+			Block h = getHighestBlock();
+			
+			if (h == null || b.getChainWork().compareTo(h.getChainWork()) == 1) {
 				
 				setHighestBlock(b);
 				
