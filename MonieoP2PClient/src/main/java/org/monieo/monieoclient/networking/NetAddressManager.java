@@ -28,7 +28,7 @@ public class NetAddressManager {
 	
 	File bansFile;
 	
-	public static final String[] HARDCODED_ADDRESSES =  {
+	public static String[] HARDCODED_ADDRESSES =  {
 		
 		"104.205.241.243",
 		"75.159.78.133"

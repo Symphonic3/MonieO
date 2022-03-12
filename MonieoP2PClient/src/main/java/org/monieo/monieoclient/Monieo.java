@@ -93,6 +93,25 @@ public class Monieo {
 	
 	public static void main(String[] args) {
 		
+		for (int i = 0; i < args.length; i++) {
+			
+			if (args[i].equalsIgnoreCase("--add-address")) {
+				
+				String[] temp = NetAddressManager.HARDCODED_ADDRESSES;
+				NetAddressManager.HARDCODED_ADDRESSES = new String[NetAddressManager.HARDCODED_ADDRESSES.length];
+				
+				for (int k = 0; i < temp.length; k++) {
+					
+					NetAddressManager.HARDCODED_ADDRESSES[k] = temp[k];
+					
+				}
+				
+				NetAddressManager.HARDCODED_ADDRESSES[temp.length] = args[i+1];
+				
+			}
+			
+		}
+		
 		ss = SplashScreen.getSplashScreen();
 		ssg = ss.createGraphics();
 		
