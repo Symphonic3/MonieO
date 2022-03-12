@@ -13,8 +13,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 import org.monieo.monieoclient.Monieo;
 import org.monieo.monieoclient.blockchain.AbstractTransaction;
@@ -42,9 +44,10 @@ public class Node implements Runnable{
 	PrintWriter pw;
 	BufferedReader br;
 	
-	public long lastValidPacketTime;
+	public volatile long lastValidPacketTime;
 	
 	ExecutorService worker;
+	ForkJoinPool incomingHandler;
 	public LinkedBlockingQueue<Consumer<Node>> queue = new LinkedBlockingQueue<Consumer<Node>>();
 	Thread sender;
 	
@@ -74,6 +77,7 @@ public class Node implements Runnable{
 		}
 		
 		worker = Executors.newSingleThreadExecutor();
+		incomingHandler = new ForkJoinPool();
 		sender = new Thread(new Runnable() {
 			
 			@Override
@@ -143,6 +147,10 @@ public class Node implements Runnable{
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+		
+		incomingHandler.shutdown();
+		worker.shutdown();
+		
 		Monieo.INSTANCE.nodes.remove(this);
 		if (Monieo.INSTANCE.ui != null && Monieo.INSTANCE.ui.fullInit) Monieo.INSTANCE.ui.refresh(false, false);
 		
@@ -232,8 +240,6 @@ public class Node implements Runnable{
 				
 				if (kill) return;
 				
-				NetworkPacket nc = null;
-				
 				String s = "";
 				String t;
 				
@@ -253,18 +259,28 @@ public class Node implements Runnable{
 				
 				System.out.println("recieved data!");
 				
-				nc = NetworkPacket.deserialize(s);
-
-				if (nc == null || !Monieo.assertSupportedProtocol(new String[] {nc.magicn, nc.ver}) || !handle(nc)) {
+				while (incomingHandler.getQueuedSubmissionCount() > incomingHandler.getParallelism()) {}
+				
+				final NetworkPacket nc = NetworkPacket.deserialize(s);
+				
+				incomingHandler.submit(new Runnable() {
 					
-					infraction();
-					continue;
+					@Override
+					public void run() {
+						
+						if (nc == null || !Monieo.assertSupportedProtocol(new String[] {nc.magicn, nc.ver}) || !handle(nc)) {
+							
+							infraction();
+							
+						} else {
+							
+							lastValidPacketTime = System.currentTimeMillis();
+							
+						}
+						
+					}
 					
-				} else {
-					
-					lastValidPacketTime = System.currentTimeMillis();
-					
-				}
+				});
 				
 			}
 			

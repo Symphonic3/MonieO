@@ -27,6 +27,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
@@ -145,6 +147,8 @@ public class UI {
 	public boolean modeToggleStatus;
 	private JLabel lblNewLabel_4;
 	
+	ExecutorService resfresher;
+	
 	JComboBox<FeeEstimate> comboBox;
 	
     public static final String[] FUNDINFO_COLUMN_NAMES = {"Wallet name",
@@ -190,7 +194,7 @@ public class UI {
 					+ "\n- Your balance will not be updated until the transaction is accepted by the network."
 					+ "\n- You can see any recent outstanding unconfirmed transactions in Overview>Outgoing Transactions.");
 			
-			refresh(false, false);
+			refreshActual(false, false);
 			
 			return;
 			
@@ -230,6 +234,8 @@ public class UI {
 	  */
 	@SuppressWarnings("serial")
 	public void initialize() {
+		
+		resfresher = Executors.newSingleThreadExecutor();
 		
 		m = RandomXManager.msettings;
 		
@@ -599,7 +605,7 @@ public class UI {
 					
 					JOptionPane.showMessageDialog(frame, resp, "Info", JOptionPane.INFORMATION_MESSAGE);
 					
-					refresh(true, false);
+					refreshActual(true, false);
 				}
 			}
 		});
@@ -929,7 +935,7 @@ public class UI {
 												File newWalletFolder = new File((oldWalletFolder.getParentFile().getPath() + "/" + newNick));
 												oldWalletFolder.renameTo(newWalletFolder);
 												Monieo.INSTANCE.getWalletByNick(selectedWal.nickname).nickname = newNick;
-												refresh(true, false);
+												refreshActual(true, false);
 											}
 										}
 									}
@@ -946,7 +952,7 @@ public class UI {
 											String confirmation = JOptionPane.showInputDialog(frame, "Enter wallet nickname name for \"" + list.getSelectedValue() + "\" to confirm deletion:");
 											if (confirmation.equals(walletInQuestion.nickname)) {
 												Monieo.INSTANCE.deleteWallet(Monieo.INSTANCE.getWalletByNick(list.getSelectedValue()));
-												refresh(true);
+												refreshActual(true);
 											}
 										}
 									}
@@ -976,7 +982,7 @@ public class UI {
 										
 										list.setSelectedValue(null, false);
 										tabbedPane.setSelectedIndex(0);
-										refresh(false, false);
+										refreshActual(false, false);
 										
 									 }
 									
@@ -1018,7 +1024,7 @@ public class UI {
 				
 				list.setSelectedValue(null, false);
 				
-				refresh(false, false);
+				refreshActual(false, false);
 				
 			 }
 			
@@ -1038,7 +1044,7 @@ public class UI {
 					textField_1.setText(null);
 					textField_2.setText(null);
 					
-					refresh(false, false);
+					refreshActual(false, false);
 					
 				}
 				
@@ -1120,7 +1126,7 @@ public class UI {
 				Monieo.INSTANCE.settings.darkMode = toggleDarkMode.getState();
 				Monieo.INSTANCE.saveSettings();
 				
-				refresh(false, true);
+				refreshActual(false, true);
 				
 			}
 			
@@ -1419,7 +1425,7 @@ public class UI {
 		menuBar.add(help);
 		
 		frame.setResizable(false);
-		refresh(true, true);
+		refreshActual(true, true);
 		frame.setVisible(true);
 		frame.setAlwaysOnTop(true);
 		frame.setAlwaysOnTop(false);
@@ -1581,9 +1587,9 @@ public class UI {
 	    return compList;
 	}
 	
-	public void refresh(boolean updlist, boolean changeColor) {
+	public void refreshActual(boolean updlist, boolean changeColor) {
 		
-		if (changeColor) {
+if (changeColor) {
 			
 			if (!Monieo.INSTANCE.settings.darkMode) {
 				
@@ -1727,6 +1733,21 @@ public class UI {
 		totAvailableFundsDisplay.setText(spendable.toPlainString() + " MNO");
 		totPendingFundsDisplay.setText(unspendable.toPlainString() + " MNO");
 		totFundsDisplay.setText(total.toPlainString() + " MNO");
+		
+	}
+	
+	public void refresh(boolean updlist, boolean changeColor) {
+		
+		resfresher.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				refreshActual(updlist, changeColor);
+				
+			}
+			
+		});
 		
 	}
 	

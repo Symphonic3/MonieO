@@ -91,6 +91,7 @@ public class Block extends MonieoDataObject{
 			
 		}
 		
+		chainWorkCache = work;
 		File f = getWorkFile();
 		
 		try (FileWriter fw = new FileWriter(f, false)) {
@@ -103,17 +104,25 @@ public class Block extends MonieoDataObject{
 		
 	}
 	
+	BigDecimal chainWorkCache = null;
+	
 	public BigDecimal getChainWork() {
 		
-		File f = getWorkFile();
-		
-		if (!f.exists()) {
+		if (chainWorkCache == null) {
 			
-			generateWorkData();
+			File f = getWorkFile();
+			
+			if (!f.exists()) {
+				
+				generateWorkData();
+				
+			}
+			
+			chainWorkCache = new BigDecimal(Monieo.readFileData(f));
 			
 		}
 		
-		return new BigDecimal(Monieo.readFileData(f));
+		return chainWorkCache;
 		
 	}
 	
@@ -155,6 +164,8 @@ public class Block extends MonieoDataObject{
 		
 		try {
 
+			s = s.trim();
+			
 			String[] data = s.split("\n");
 			
 			AbstractTransaction[] transactions = new AbstractTransaction[data.length-1];

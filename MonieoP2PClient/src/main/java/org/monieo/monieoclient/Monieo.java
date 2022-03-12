@@ -249,6 +249,7 @@ public class Monieo {
 	public File feeEstimate;
 	
 	public File blkhighest;
+	public volatile Block blkHighestA;
 	
 	public File txlistFolder;
 	public File trackTx;
@@ -474,6 +475,19 @@ public class Monieo {
 				
 				try {
 					
+					FileWriter fw;
+					
+					try {
+						
+						fw = new FileWriter(blkhighest, false);
+						fw.write(blkHighestA.hash());
+						fw.flush();
+						fw.close();
+						
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
 					//attempt to load blockchain before starting UI application
 					if (ss != null) {
 						
@@ -615,18 +629,7 @@ public class Monieo {
 	
 	public void setHighestBlock(Block b) {
 		
-		FileWriter fw;
-		
-		try {
-			
-			fw = new FileWriter(blkhighest, false);
-			fw.write(b.hash());
-			fw.flush();
-			fw.close();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		blkHighestA = b;
 		
 	}
 	
@@ -639,11 +642,13 @@ public class Monieo {
 	
 	public Block getHighestBlock() {
 		
-		String d = readFileData(new File(blocksFolder.getPath() + "/" + readFileData(blkhighest) + ".blk"));
+		if (blkHighestA == null) {
+			
+			blkHighestA = Block.deserialize(readFileData(new File(blocksFolder.getPath() + "/" + readFileData(blkhighest) + ".blk")));
+			
+		}
 		
-		if (d == null) return null;
-		
-		return Block.deserialize(d);
+		return blkHighestA;
 		
 	}
 
