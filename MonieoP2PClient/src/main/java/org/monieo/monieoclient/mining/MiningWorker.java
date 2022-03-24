@@ -43,10 +43,13 @@ public class MiningWorker {
 						
 						if (new BigInteger(1, rx.hash(b.header.serialize())).compareTo(b.header.diff) == -1) {
 							
-							System.out.println(b.hash());
-							m.acceptWork(b);
+							Block b2 = b;
+							
 							b = null;
 							nonce = 0;
+							
+							System.out.println(b2.hash());
+							m.acceptWork(b2);
 							continue wh;
 							
 						}

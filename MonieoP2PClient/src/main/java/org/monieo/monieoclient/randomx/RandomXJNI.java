@@ -18,8 +18,27 @@ public class RandomXJNI {
     	
     	if (!DLLS_LOADED) {
     		
-            File f = new File(Monieo.INSTANCE.workingFolder.getPath() + "/randomx.dll");
-            File f2 = new File(Monieo.INSTANCE.workingFolder.getPath() + "/Dll1.dll");
+    		boolean is64bit = false;
+    		if (System.getProperty("os.name").contains("Windows")) {
+    		    is64bit = (System.getenv("ProgramFiles(x86)") != null);
+    		} else {
+    		    is64bit = (System.getProperty("os.arch").indexOf("64") != -1);
+    		}
+    		
+    		File f;
+    		File f2;
+    		
+    		if (is64bit) {
+    			
+                f = new File(Monieo.INSTANCE.workingFolder.getPath() + "/randomx.dll");
+                f2 = new File(Monieo.INSTANCE.workingFolder.getPath() + "/Dll1.dll");
+    			
+    		} else {
+    			
+                f = new File(Monieo.INSTANCE.workingFolder.getPath() + "/randomx-ia32.dll");
+                f2 = new File(Monieo.INSTANCE.workingFolder.getPath() + "/Dll1-ia32.dll");
+    			
+    		}
             
             if (!f.exists()) {
             	
