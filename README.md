@@ -23,10 +23,3 @@ Specifications
 | Block time | 1 minute |
 | Total (theoretical) supply | 21,000,000 MNO |
 | P2P network port | 21093 |
-
-Support the project
-=========
-
-Lastly, if you would like to support development of the project, you can donate MonieO to this address (c5Dz6UZ4Pkpdrhe9d2uSFZCCaYfSK6X63x4esnc3gxUD):
-
-![Donate](https://img.shields.io/badge/donate%20mno-c5Dz6UZ4Pkpdrhe9d2uSFZCCaYfSK6X63x4esnc3gxUD-blue)
